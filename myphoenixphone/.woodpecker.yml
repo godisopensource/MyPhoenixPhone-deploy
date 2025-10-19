@@ -1,0 +1,61 @@
+steps:
+  - name: verify-no-internal-urls
+    image: alpine:3.20
+    commands:
+      - |
+        set -e
+        if grep -RInE 'repos\.tech\.orange|artifactory|gitlab\.tech\.orange' -n -- . ; then
+          echo "ERROR: Forbidden internal URLs found above."
+          exit 1
+        else
+          echo "OK: No forbidden internal URLs detected."
+        fi
+
+  - name: install
+    image: node:20-alpine
+    commands:
+      - corepack enable
+      - npm ci
+    depends_on: [ verify-no-internal-urls ]
+
+  - name: lint-backend
+    image: node:20-alpine
+    commands:
+      - npm run -w apps/backend lint -- --max-warnings=0
+    depends_on: [ install ]
+
+  - name: build-backend
+    image: node:20-alpine
+    commands:
+      - npm run -w apps/backend build
+    depends_on: [ install ]
+
+  - name: test-backend
+    image: node:20-alpine
+    commands:
+      - npm run -w apps/backend test -- --ci --reporters=default --runInBand
+    depends_on: [ build-backend ]
+
+  - name: lint-web
+    image: node:20-alpine
+    commands:
+      - npm run -w apps/web lint
+    depends_on: [ install ]
+
+  - name: build-web
+    image: node:20-alpine
+    commands:
+      - npm run -w apps/web build
+    depends_on: [ install ]
+
+  - name: lint-frontend
+    image: node:20-alpine
+    commands:
+      - npm run -w apps/frontend lint || echo "frontend lint not configured; skipping"
+    depends_on: [ install ]
+
+  - name: build-frontend
+    image: node:20-alpine
+    commands:
+      - npm run -w apps/frontend build
+    depends_on: [ install ]

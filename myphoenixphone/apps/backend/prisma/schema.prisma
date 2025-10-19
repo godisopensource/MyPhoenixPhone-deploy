@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Consent {
+  id           String    @id @default(uuid())
+  msisdn_hash  String
+  scopes       String[]
+  proof        Json
+  created_at   DateTime  @default(now())
+  revoked_at   DateTime?
+
+  @@index([msisdn_hash])
+}
+
+model EligibilitySignal {
+  id           String    @id @default(uuid())
+  msisdn_hash  String
+  sim_swapped_at DateTime?
+  reachable    Boolean?
+  updated_at   DateTime  @updatedAt
+
+  @@index([msisdn_hash])
+}
+
+model Interaction {
+  id           String    @id @default(uuid())
+  msisdn_hash  String
+  channel      String
+  template_id  String?
+  meta         Json?
+  created_at   DateTime  @default(now())
+
+  @@index([msisdn_hash])
+}

@@ -1,0 +1,50 @@
+stages:
+  - install
+  - lint
+  - build
+  - test
+
+variables:
+  NODE_ENV: test
+  NPM_CONFIG_FUND: 'false'
+  NPM_CONFIG_AUDIT: 'false'
+
+default:
+  image: node:20-alpine
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+      - apps/backend/node_modules/
+
+install:deps:
+  stage: install
+  script:
+    - npm ci
+  artifacts:
+    paths:
+      - node_modules/
+      - apps/backend/node_modules/
+    expire_in: 1 week
+
+lint:backend:
+  stage: lint
+  needs: ["install:deps"]
+  script:
+    - npm run -w apps/backend lint -- --max-warnings=0
+
+build:backend:
+  stage: build
+  needs: ["install:deps"]
+  script:
+    - npm run -w apps/backend build
+  artifacts:
+    paths:
+      - apps/backend/dist/
+    expire_in: 1 week
+
+test:backend:
+  stage: test
+  needs: ["build:backend"]
+  script:
+    - npm run -w apps/backend test -- --ci --reporters=default --runInBand
