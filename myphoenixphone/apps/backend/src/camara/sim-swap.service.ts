@@ -37,12 +37,16 @@ export type SimSwapResult = {
 export class SimSwapService {
   private readonly logger = new Logger(SimSwapService.name)
   private readonly baseUrl: string
+  private readonly isPlayground: boolean
   private readonly httpClient: AxiosInstance
   private readonly useRealApi: boolean
 
   constructor(private readonly oauth2Client: OAuth2ClientService) {
     this.baseUrl = process.env.CAMARA_BASE_URL || 'http://localhost:9091'
-    this.useRealApi = !!process.env.CAMARA_CLIENT_ID && !!process.env.CAMARA_CLIENT_SECRET
+  // Detect playground explicitly via CAMARA_ENV or fallback to baseUrl heuristic
+  const camaraEnv = process.env.CAMARA_ENV
+  this.isPlayground = camaraEnv === 'playground' || this.baseUrl.includes('playground')
+  this.useRealApi = !!process.env.CAMARA_CLIENT_ID && !!process.env.CAMARA_CLIENT_SECRET
     
     this.httpClient = axios.create({
       timeout: 15000,
@@ -87,7 +91,10 @@ export class SimSwapService {
   private async retrieveSimSwapDateFromApi(phoneNumber: string): Promise<SimSwapRetrieveDateResult> {
     try {
       const accessToken = await this.oauth2Client.getAccessToken()
-      const url = `${this.baseUrl}/sim-swap/v2/retrieve-date`
+      // Playground sandbox uses a different path (includes /api and different versioning)
+      const url = this.isPlayground
+        ? `${this.baseUrl}/api/sim-swap/v1/retrieve-date`
+        : `${this.baseUrl}/sim-swap/v2/retrieve-date`
 
       this.logger.debug(`Calling CAMARA SIM Swap API: ${url}`)
 
@@ -159,7 +166,10 @@ export class SimSwapService {
   private async checkSimSwapFromApi(phoneNumber: string, maxAge: number): Promise<SimSwapCheckResult> {
     try {
       const accessToken = await this.oauth2Client.getAccessToken()
-      const url = `${this.baseUrl}/sim-swap/v2/check`
+      // Use sandbox path when testing against playground
+      const url = this.isPlayground
+        ? `${this.baseUrl}/api/sim-swap/v1/check`
+        : `${this.baseUrl}/sim-swap/v2/check`
 
       this.logger.debug(`Calling CAMARA SIM Swap check API: ${url}`)
 

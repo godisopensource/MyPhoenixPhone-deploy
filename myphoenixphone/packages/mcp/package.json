@@ -1,0 +1,10 @@
+{
+  "name": "@myphoenixphone/mcp",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "bash -lc 'set -a; [ -f ../../apps/backend/.env ] && source ../../apps/backend/.env; ORANGE_CLIENT_ID=${ORANGE_CLIENT_ID:-$CAMARA_CLIENT_ID} ORANGE_CLIENT_SECRET=${ORANGE_CLIENT_SECRET:-$CAMARA_CLIENT_SECRET} node ../../../network-apis-mcp/index.js'",
+    "dev": "bash -lc 'set -a; [ -f ../../apps/backend/.env ] && source ../../apps/backend/.env; ORANGE_CLIENT_ID=${ORANGE_CLIENT_ID:-$CAMARA_CLIENT_ID} ORANGE_CLIENT_SECRET=${ORANGE_CLIENT_SECRET:-$CAMARA_CLIENT_SECRET} node ../../../network-apis-mcp/index.js'"
+  },
+  "dependencies": {}
+}

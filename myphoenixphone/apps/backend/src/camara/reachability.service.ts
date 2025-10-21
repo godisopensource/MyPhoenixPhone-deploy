@@ -36,12 +36,15 @@ export type ReachabilityResult = {
 export class ReachabilityService {
   private readonly logger = new Logger(ReachabilityService.name)
   private readonly baseUrl: string
+  private readonly isPlayground: boolean
   private readonly httpClient: AxiosInstance
   private readonly useRealApi: boolean
 
   constructor(private readonly oauth2Client: OAuth2ClientService) {
     this.baseUrl = process.env.CAMARA_BASE_URL || 'http://localhost:9091'
-    this.useRealApi = !!process.env.CAMARA_CLIENT_ID && !!process.env.CAMARA_CLIENT_SECRET
+  const camaraEnv = process.env.CAMARA_ENV
+  this.isPlayground = camaraEnv === 'playground' || this.baseUrl.includes('playground')
+  this.useRealApi = !!process.env.CAMARA_CLIENT_ID && !!process.env.CAMARA_CLIENT_SECRET
     
     this.httpClient = axios.create({
       timeout: 15000,
@@ -86,7 +89,10 @@ export class ReachabilityService {
   private async getReachabilityStatusFromApi(phoneNumber: string): Promise<ReachabilityStatusResponse> {
     try {
       const accessToken = await this.oauth2Client.getAccessToken()
-      const url = `${this.baseUrl}/device-reachability-status/v1/retrieve`
+      // Playground sandbox uses a different API path (includes /api and v0.6)
+      const url = this.isPlayground
+        ? `${this.baseUrl}/api/device-reachability-status/v0.6/retrieve`
+        : `${this.baseUrl}/device-reachability-status/v1/retrieve`
 
       this.logger.debug(`Calling CAMARA Reachability API: ${url}`)
 
