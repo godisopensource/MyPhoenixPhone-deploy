@@ -1,36 +1,43 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { OAuth2ClientService } from './oauth2-client.service'
-import axios from 'axios'
+import { Test, TestingModule } from '@nestjs/testing';
+import { OAuth2ClientService } from './oauth2-client.service';
+import axios from 'axios';
 
-jest.mock('axios')
-const mockedAxios = axios as jest.Mocked<typeof axios>
+jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('OAuth2ClientService', () => {
-  let service: OAuth2ClientService
+  let service: OAuth2ClientService;
+  let mockPost: jest.Mock;
 
   beforeEach(async () => {
     // Reset env vars
-    process.env.CAMARA_TOKEN_URL = 'https://api.orange.com/oauth/v3/token'
-    process.env.CAMARA_CLIENT_ID = 'test-client-id'
-    process.env.CAMARA_CLIENT_SECRET = 'test-client-secret'
+    process.env.CAMARA_TOKEN_URL = 'https://api.orange.com/oauth/v3/token';
+    process.env.CAMARA_CLIENT_ID = 'test-client-id';
+    process.env.CAMARA_CLIENT_SECRET = 'test-client-secret';
+
+    // Mock axios.create to return an object with post method
+    mockPost = jest.fn();
+    mockedAxios.create.mockReturnValue({
+      post: mockPost,
+    } as any);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [OAuth2ClientService],
-    }).compile()
+    }).compile();
 
-    service = module.get<OAuth2ClientService>(OAuth2ClientService)
-    
+    service = module.get<OAuth2ClientService>(OAuth2ClientService);
+
     // Clear token cache before each test
-    service.clearTokenCache()
-  })
+    service.clearTokenCache();
+  });
 
   afterEach(() => {
-    jest.clearAllMocks()
-  })
+    jest.clearAllMocks();
+  });
 
   it('should be defined', () => {
-    expect(service).toBeDefined()
-  })
+    expect(service).toBeDefined();
+  });
 
   describe('getAccessToken', () => {
     it('should request and cache a new token', async () => {
@@ -40,35 +47,38 @@ describe('OAuth2ClientService', () => {
           token_type: 'Bearer',
           expires_in: 3600,
         },
-      }
+      };
 
-      mockedAxios.create.mockReturnValue({
-        post: jest.fn().mockResolvedValue(mockResponse),
-      } as any)
+      mockPost.mockResolvedValue(mockResponse);
 
-      const token = await service.getAccessToken()
+      const token = await service.getAccessToken();
 
-      expect(token).toBe('mock-access-token')
-    })
+      expect(token).toBe('mock-access-token');
+      expect(mockPost).toHaveBeenCalledTimes(1);
+    });
 
     it('should throw error when OAuth2 config is missing', async () => {
-      delete process.env.CAMARA_TOKEN_URL
-      
+      delete process.env.CAMARA_TOKEN_URL;
+      delete process.env.CAMARA_CLIENT_ID;
+
       // Create new service instance with missing config
       const module = await Test.createTestingModule({
         providers: [OAuth2ClientService],
-      }).compile()
-      const serviceWithoutConfig = module.get<OAuth2ClientService>(OAuth2ClientService)
+      }).compile();
+      const serviceWithoutConfig =
+        module.get<OAuth2ClientService>(OAuth2ClientService);
 
-      await expect(serviceWithoutConfig.getAccessToken()).rejects.toThrow('Missing OAuth2 configuration')
-    })
-  })
+      await expect(serviceWithoutConfig.getAccessToken()).rejects.toThrow(
+        'Missing OAuth2 configuration',
+      );
+    });
+  });
 
   describe('clearTokenCache', () => {
     it('should clear cached token', () => {
-      service.clearTokenCache()
+      service.clearTokenCache();
       // No exception should be thrown
-      expect(true).toBe(true)
-    })
-  })
-})
+      expect(true).toBe(true);
+    });
+  });
+});

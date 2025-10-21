@@ -16,7 +16,10 @@ export class ConsentRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(
-    data: Omit<Consent, 'id' | 'created_at' | 'revoked_at'> & {
+    data: {
+      msisdn_hash: string;
+      scopes: string[];
+      proof: any;
       revoked_at?: Date | null;
     },
   ) {

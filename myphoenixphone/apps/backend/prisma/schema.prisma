@@ -20,7 +20,7 @@ model Consent {
 
 model EligibilitySignal {
   id           String    @id @default(uuid())
-  msisdn_hash  String
+  msisdn_hash  String    @unique
   sim_swapped_at DateTime?
   reachable    Boolean?
   updated_at   DateTime  @updatedAt

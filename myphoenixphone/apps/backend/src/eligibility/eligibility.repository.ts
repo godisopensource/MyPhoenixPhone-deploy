@@ -17,7 +17,10 @@ export class EligibilitySignalRepository {
 
   async upsert(
     msisdn_hash: string,
-    data: Omit<EligibilitySignal, 'id' | 'msisdn_hash' | 'updated_at'>,
+    data: {
+      sim_swapped_at?: Date | null;
+      reachable?: boolean | null;
+    },
   ) {
     try {
       const updated = await this.prisma.eligibilitySignal.upsert({

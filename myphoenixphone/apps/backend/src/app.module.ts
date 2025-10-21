@@ -7,9 +7,10 @@ import { MetricsMiddleware } from './metrics/metrics.middleware';
 import { RequestLoggerMiddleware } from './common/request-logger.middleware';
 import { PrismaModule } from './database/prisma.module';
 import { StorageModule } from './storage/storage.module';
+import { EligibilityModule } from './eligibility/eligibility.module';
 
 @Module({
-  imports: [HealthModule, PrismaModule, StorageModule],
+  imports: [HealthModule, PrismaModule, StorageModule, EligibilityModule],
   controllers: [AppController, MetricsController],
   providers: [AppService],
 })
