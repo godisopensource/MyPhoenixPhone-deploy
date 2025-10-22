@@ -9,7 +9,19 @@ import {
 } from '@nestjs/common';
 import { CaptchaGuard } from './captcha.guard';
 import { NumberVerificationService } from './number-verification.service';
+import { ConsentRepository } from '../consent/consent.repository';
 import * as crypto from 'crypto';
+
+/**
+ * Device selection from user
+ */
+export interface DeviceSelection {
+  manufacturer?: string;
+  model?: string;
+  variant?: string;
+  /** Special selections: 'not_found' | 'unknown_brand' | 'unknown_model' */
+  selection?: 'not_found' | 'unknown_brand' | 'unknown_model';
+}
 
 /**
  * DTO for number verification request
@@ -23,6 +35,9 @@ export class VerifyNumberDto {
 
   /** Verification code received via SMS (optional - if not provided, code will be sent) */
   code?: string;
+
+  /** Device selection from user (optional - collected during verification flow) */
+  deviceSelection?: DeviceSelection;
 }
 
 /**
@@ -47,6 +62,7 @@ export interface VerifyNumberResponse {
 export class VerificationController {
   constructor(
     private readonly numberVerificationService: NumberVerificationService,
+    private readonly consentRepository: ConsentRepository,
   ) {}
 
   /**
@@ -93,6 +109,26 @@ export class VerificationController {
 
       if (result.verified) {
         console.log(`[VerificationController] Number verified successfully for MSISDN hash: ${msisdnHash}`);
+        
+        // Create a consent record after successful verification
+        // This allows the user to access /eligibility without going through Auth France flow
+        try {
+          await this.consentRepository.create({
+            msisdn_hash: msisdnHash,
+            scopes: ['number_verification'],
+            proof: {
+              verification_method: 'sms_code',
+              verified_at: new Date().toISOString(),
+              channel: 'web',
+              device_selection: dto.deviceSelection || null,
+            },
+          });
+          console.log(`[VerificationController] Consent created for MSISDN hash: ${msisdnHash}`);
+        } catch (consentError) {
+          console.error(`[VerificationController] Failed to create consent:`, consentError);
+          // Don't fail the verification if consent creation fails
+        }
+        
         return {
           ok: true,
           codeSent: false,
@@ -153,6 +189,24 @@ export class VerificationController {
 
       if (result.verified) {
         console.log(`[VerificationController][DEBUG] Number verified successfully for MSISDN hash: ${msisdnHash}`);
+        
+        // Create a consent record after successful verification
+        try {
+          await this.consentRepository.create({
+            msisdn_hash: msisdnHash,
+            scopes: ['number_verification'],
+            proof: {
+              verification_method: 'sms_code_debug',
+              verified_at: new Date().toISOString(),
+              channel: 'web',
+              device_selection: dto.deviceSelection || null,
+            },
+          });
+          console.log(`[VerificationController][DEBUG] Consent created for MSISDN hash: ${msisdnHash}`);
+        } catch (consentError) {
+          console.error(`[VerificationController][DEBUG] Failed to create consent:`, consentError);
+        }
+        
         return {
           ok: true,
           codeSent: false,

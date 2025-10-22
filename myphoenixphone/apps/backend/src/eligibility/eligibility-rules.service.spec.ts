@@ -178,4 +178,151 @@ describe('EligibilityRulesService', () => {
       ]);
     });
   });
+
+  describe('device model validation', () => {
+    const recentSimSwap: SimSwapResult = {
+      swappedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    };
+    const reachability: ReachabilityResult = { reachable: true };
+
+    it('should mark as eligible when device model is eligible', () => {
+      const deviceValidation = {
+        eligible: true,
+        manufacturer: 'Apple',
+        model: 'iPhone 14',
+        variant: 'Pro',
+        reason: 'DEVICE_MODEL_ELIGIBLE' as const,
+      };
+
+      const result = service.evaluateEligibility(
+        recentSimSwap,
+        reachability,
+        deviceValidation,
+      );
+
+      expect(result.eligible).toBe(true);
+      expect(result.reasons).toContain(EligibilityReason.DEVICE_MODEL_ELIGIBLE);
+      expect(result.snapshot.device?.manufacturer).toBe('Apple');
+      expect(result.snapshot.device?.model).toBe('iPhone 14');
+      expect(result.snapshot.device?.variant).toBe('Pro');
+      expect(result.snapshot.device?.eligible).toBe(true);
+    });
+
+    it('should mark as ineligible when device model is not found', () => {
+      const deviceValidation = {
+        eligible: false,
+        reason: 'DEVICE_MODEL_NOT_FOUND' as const,
+        action: 'donate' as const,
+      };
+
+      const result = service.evaluateEligibility(
+        recentSimSwap,
+        reachability,
+        deviceValidation,
+      );
+
+      expect(result.eligible).toBe(false);
+      expect(result.reasons).toContain(
+        EligibilityReason.DEVICE_MODEL_NOT_FOUND,
+      );
+      expect(result.snapshot.device?.eligible).toBe(false);
+      expect(result.snapshot.device?.action).toBe('donate');
+    });
+
+    it('should mark as ineligible when device model is unknown but brand is eligible', () => {
+      const deviceValidation = {
+        eligible: false,
+        reason: 'DEVICE_MODEL_UNKNOWN' as const,
+        action: 'visit_store' as const,
+      };
+
+      const result = service.evaluateEligibility(
+        recentSimSwap,
+        reachability,
+        deviceValidation,
+      );
+
+      expect(result.eligible).toBe(false);
+      expect(result.reasons).toContain(EligibilityReason.DEVICE_MODEL_UNKNOWN);
+      expect(result.snapshot.device?.action).toBe('visit_store');
+    });
+
+    it('should mark as ineligible when device brand is not eligible', () => {
+      const deviceValidation = {
+        eligible: false,
+        reason: 'DEVICE_BRAND_NOT_ELIGIBLE' as const,
+        action: 'donate' as const,
+      };
+
+      const result = service.evaluateEligibility(
+        recentSimSwap,
+        reachability,
+        deviceValidation,
+      );
+
+      expect(result.eligible).toBe(false);
+      expect(result.reasons).toContain(
+        EligibilityReason.DEVICE_BRAND_NOT_ELIGIBLE,
+      );
+    });
+
+    it('should mark as ineligible when device model is not eligible', () => {
+      const deviceValidation = {
+        eligible: false,
+        manufacturer: 'Apple',
+        model: 'iPhone 6',
+        reason: 'DEVICE_BRAND_NOT_ELIGIBLE' as const,
+        action: 'donate' as const,
+      };
+
+      const result = service.evaluateEligibility(
+        recentSimSwap,
+        reachability,
+        deviceValidation,
+      );
+
+      expect(result.eligible).toBe(false);
+      expect(result.reasons).toContain(
+        EligibilityReason.DEVICE_BRAND_NOT_ELIGIBLE,
+      );
+      expect(result.snapshot.device?.manufacturer).toBe('Apple');
+      expect(result.snapshot.device?.model).toBe('iPhone 6');
+    });
+
+    it('should be eligible when no device validation provided (optional criterion)', () => {
+      const result = service.evaluateEligibility(
+        recentSimSwap,
+        reachability,
+        null,
+      );
+
+      expect(result.eligible).toBe(true);
+      expect(result.snapshot.device).toBeUndefined();
+    });
+
+    it('should fail overall eligibility even with recent SIM swap if device not eligible', () => {
+      const deviceValidation = {
+        eligible: false,
+        manufacturer: 'Nokia',
+        model: '3310',
+        reason: 'DEVICE_BRAND_NOT_ELIGIBLE' as const,
+        action: 'donate' as const,
+      };
+
+      const result = service.evaluateEligibility(
+        recentSimSwap,
+        reachability,
+        deviceValidation,
+      );
+
+      expect(result.eligible).toBe(false);
+      expect(result.reasons).toContain(EligibilityReason.SIM_SWAP_RECENT);
+      expect(result.reasons).toContain(
+        EligibilityReason.DEVICE_BRAND_NOT_ELIGIBLE,
+      );
+      expect(result.reasons).toContain(
+        EligibilityReason.DOES_NOT_MEET_CRITERIA,
+      );
+    });
+  });
 });

@@ -12,6 +12,11 @@ export enum EligibilityReason {
   DEVICE_REACHABLE = 'DEVICE_REACHABLE',
   DEVICE_UNREACHABLE = 'DEVICE_UNREACHABLE',
   DEVICE_REACHABILITY_UNKNOWN = 'DEVICE_REACHABILITY_UNKNOWN',
+  DEVICE_MODEL_ELIGIBLE = 'DEVICE_MODEL_ELIGIBLE',
+  DEVICE_MODEL_NOT_FOUND = 'DEVICE_MODEL_NOT_FOUND',
+  DEVICE_MODEL_UNKNOWN = 'DEVICE_MODEL_UNKNOWN',
+  DEVICE_BRAND_NOT_ELIGIBLE = 'DEVICE_BRAND_NOT_ELIGIBLE',
+  DEVICE_MODEL_NOT_ELIGIBLE = 'DEVICE_MODEL_NOT_ELIGIBLE',
   MEETS_CRITERIA = 'MEETS_CRITERIA',
   DOES_NOT_MEET_CRITERIA = 'DOES_NOT_MEET_CRITERIA',
 }
@@ -30,6 +35,14 @@ export interface EligibilityEvaluation {
     reachability?: {
       reachable: boolean;
       connectivity?: string[];
+    };
+    device?: {
+      manufacturer?: string;
+      model?: string;
+      variant?: string;
+      eligible: boolean;
+      reason: string;
+      action?: 'donate' | 'visit_store';
     };
   };
 }
@@ -71,19 +84,22 @@ export class EligibilityRulesService {
   }
 
   /**
-   * Evaluate eligibility based on SIM swap and reachability signals
+   * Evaluate eligibility based on SIM swap, reachability, and device model signals
    *
    * Current rules (configurable via env vars):
    * - SIM swap within X days: strong indicator of vulnerability
    * - Device unreachable: may indicate lost/stolen device
+   * - Device model: must be in eligible list
    *
    * @param simSwap - SIM swap status from CAMARA
    * @param reachability - Device reachability status from CAMARA
+   * @param deviceValidation - Device model validation result (optional)
    * @returns Eligibility evaluation with reasons and snapshot
    */
   evaluateEligibility(
     simSwap: SimSwapResult,
     reachability: ReachabilityResult,
+    deviceValidation?: import('./device-model.service').DeviceModelValidation | null,
   ): EligibilityEvaluation {
     const reasons: EligibilityReason[] = [];
     const snapshot: EligibilityEvaluation['snapshot'] = {};
@@ -98,10 +114,16 @@ export class EligibilityRulesService {
     reasons.push(...reachabilityEvaluation.reasons);
     snapshot.reachability = reachabilityEvaluation.snapshot;
 
+    // Evaluate device model if provided
+    const deviceEvaluation = this.evaluateDeviceModel(deviceValidation);
+    reasons.push(...deviceEvaluation.reasons);
+    snapshot.device = deviceEvaluation.snapshot;
+
     // Determine overall eligibility
     const eligible = this.determineEligibility(
       simSwapEvaluation,
       reachabilityEvaluation,
+      deviceEvaluation,
     );
 
     if (eligible) {
@@ -187,15 +209,74 @@ export class EligibilityRulesService {
   }
 
   /**
+   * Evaluate device model signal
+   */
+  private evaluateDeviceModel(
+    deviceValidation?: import('./device-model.service').DeviceModelValidation | null,
+  ): {
+    reasons: EligibilityReason[];
+    snapshot: EligibilityEvaluation['snapshot']['device'];
+    isEligibleDevice: boolean;
+  } {
+    const reasons: EligibilityReason[] = [];
+
+    // If no device validation provided, treat as eligible (optional criterion)
+    if (!deviceValidation) {
+      return {
+        reasons: [],
+        snapshot: undefined,
+        isEligibleDevice: true,
+      };
+    }
+
+    const snapshot: EligibilityEvaluation['snapshot']['device'] = {
+      manufacturer: deviceValidation.manufacturer,
+      model: deviceValidation.model,
+      variant: deviceValidation.variant,
+      eligible: deviceValidation.eligible,
+      reason: deviceValidation.reason,
+      action: deviceValidation.action,
+    };
+
+    // Add appropriate reason based on validation result
+    if (deviceValidation.eligible) {
+      reasons.push(EligibilityReason.DEVICE_MODEL_ELIGIBLE);
+    } else {
+      // Map device validation reason to eligibility reason
+      const reason = deviceValidation.reason.toLowerCase();
+      if (reason.includes('not found') || reason.includes('not_found')) {
+        reasons.push(EligibilityReason.DEVICE_MODEL_NOT_FOUND);
+      } else if (
+        reason.includes('unknown') &&
+        deviceValidation.action === 'visit_store'
+      ) {
+        reasons.push(EligibilityReason.DEVICE_MODEL_UNKNOWN);
+      } else if (reason.includes('brand')) {
+        reasons.push(EligibilityReason.DEVICE_BRAND_NOT_ELIGIBLE);
+      } else {
+        reasons.push(EligibilityReason.DEVICE_MODEL_NOT_ELIGIBLE);
+      }
+    }
+
+    return {
+      reasons,
+      snapshot,
+      isEligibleDevice: deviceValidation.eligible,
+    };
+  }
+
+  /**
    * Determine overall eligibility based on signal evaluations
    *
    * Current logic:
    * - Recent SIM swap (within threshold) = eligible
    * - Optional: require specific reachability state
+   * - Device model must be eligible (if provided)
    */
   private determineEligibility(
     simSwapEval: { isRecentSwap: boolean },
     reachabilityEval: { isReachable: boolean },
+    deviceEval: { isEligibleDevice: boolean },
   ): boolean {
     // Primary criterion: recent SIM swap
     const meetsSimSwapCriterion = simSwapEval.isRecentSwap;
@@ -209,8 +290,15 @@ export class EligibilityRulesService {
       meetsReachabilityCriterion = !reachabilityEval.isReachable;
     }
 
-    // Both criteria must be met
-    return meetsSimSwapCriterion && meetsReachabilityCriterion;
+    // Device model criterion (mandatory if device validation provided)
+    const meetsDeviceCriterion = deviceEval.isEligibleDevice;
+
+    // All criteria must be met
+    return (
+      meetsSimSwapCriterion &&
+      meetsReachabilityCriterion &&
+      meetsDeviceCriterion
+    );
   }
 
   /**

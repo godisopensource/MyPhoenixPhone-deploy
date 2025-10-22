@@ -1,6 +1,8 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { SimSwapService } from '../camara/sim-swap.service';
 import { ReachabilityService } from '../camara/reachability.service';
+import { DeviceModelService } from './device-model.service';
+import { ConsentRepository } from '../consent/consent.repository';
 import { EligibilitySignalRepository } from './eligibility.repository';
 import {
   EligibilityRulesService,
@@ -42,6 +44,8 @@ export class EligibilityService {
   constructor(
     private readonly simSwapService: SimSwapService,
     private readonly reachabilityService: ReachabilityService,
+    private readonly deviceModelService: DeviceModelService,
+    private readonly consentRepository: ConsentRepository,
     private readonly signalRepository: EligibilitySignalRepository,
     private readonly rulesService: EligibilityRulesService,
   ) {}
@@ -61,6 +65,23 @@ export class EligibilityService {
       // Hash MSISDN for privacy (SEC-01 requirement)
       const msisdnHash = this.hashMsisdn(phoneNumber);
       this.logger.debug(`MSISDN hash: ${msisdnHash.substring(0, 12)}...`);
+
+      // Retrieve device selection from consent proof
+      const consents = await this.consentRepository.findByMsisdnHash(msisdnHash);
+      const latestConsent = consents.filter((c) => !c.revoked_at).sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )[0];
+      
+      const proof = latestConsent?.proof as any;
+      const deviceSelection = proof?.device_selection || null;
+      this.logger.debug(`Device selection: ${JSON.stringify(deviceSelection)}`);
+
+      // Validate device model if provided
+      let deviceValidation: import('./device-model.service').DeviceModelValidation | null = null;
+      if (deviceSelection) {
+        deviceValidation = this.deviceModelService.validateDeviceSelection(deviceSelection);
+        this.logger.debug(`Device validation: ${JSON.stringify(deviceValidation)}`);
+      }
 
       // Fetch signals from CAMARA adapters in parallel
       const [simSwapResult, reachabilityResult] = await Promise.all([
@@ -85,6 +106,7 @@ export class EligibilityService {
       const evaluation = this.rulesService.evaluateEligibility(
         simSwapResult,
         reachabilityResult,
+        deviceValidation,
       );
 
       // Record metrics

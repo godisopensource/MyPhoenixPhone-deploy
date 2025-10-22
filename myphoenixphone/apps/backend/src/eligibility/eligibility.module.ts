@@ -4,6 +4,7 @@ import { EligibilityService } from './eligibility.service';
 import { EligibilityRulesService } from './eligibility-rules.service';
 import { EligibilitySignalRepository } from './eligibility.repository';
 import { ConsentGuard } from './consent.guard';
+import { DeviceModelService } from './device-model.service';
 import { PrismaModule } from '../database/prisma.module';
 import { StorageModule } from '../storage/storage.module';
 import { SimSwapService } from '../camara/sim-swap.service';
@@ -18,6 +19,7 @@ import { OAuth2ClientService } from '../camara/oauth2-client.service';
  * - GET /eligibility/signals endpoint (for debugging)
  * - Eligibility evaluation logic (rules service)
  * - CAMARA adapters (SIM Swap, Reachability)
+ * - Device model validation
  * - Signal storage (repository)
  */
 @Module({
@@ -27,6 +29,7 @@ import { OAuth2ClientService } from '../camara/oauth2-client.service';
     // Core services
     EligibilityService,
     EligibilityRulesService,
+    DeviceModelService,
 
     // CAMARA adapters
     OAuth2ClientService,
@@ -36,6 +39,6 @@ import { OAuth2ClientService } from '../camara/oauth2-client.service';
     // Guards
     ConsentGuard,
   ],
-  exports: [EligibilityService, EligibilityRulesService],
+  exports: [EligibilityService, EligibilityRulesService, DeviceModelService],
 })
 export class EligibilityModule {}

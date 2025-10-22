@@ -182,8 +182,8 @@ export default function VerifyPage() {
           setAwaitingCode(true);
           setError(null);
         } else {
-          // verification completed
-          window.location.href = "/eligibility-result";
+          // verification completed - redirect with phone number in query params
+          window.location.href = `/eligibility-result?phoneNumber=${encodeURIComponent(msisdn)}`;
         }
       } else {
         const data = await res.json().catch(() => null);
