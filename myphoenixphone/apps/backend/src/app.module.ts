@@ -9,6 +9,7 @@ import { PrismaModule } from './database/prisma.module';
 import { StorageModule } from './storage/storage.module';
 import { EligibilityModule } from './eligibility/eligibility.module';
 import { VerificationModule } from './verification/verification.module';
+import { ConsentModule } from './consent/consent.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { VerificationModule } from './verification/verification.module';
     StorageModule,
     EligibilityModule,
     VerificationModule,
+    ConsentModule,
   ],
   controllers: [AppController, MetricsController],
   providers: [AppService],
