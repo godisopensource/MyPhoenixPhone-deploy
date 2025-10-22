@@ -6,6 +6,11 @@ import session = require('express-session');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableShutdownHooks();
+  // Allow CORS for local development (web app runs on localhost:3000)
+  app.enableCors({
+    origin: process.env.DEV_WEB_ORIGIN || 'http://localhost:3000',
+    credentials: true,
+  });
 
   // Cookie parser and session middleware are required to persist
   // auth state/nonce across the redirect to/from Orange Authentication France.

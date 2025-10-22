@@ -118,6 +118,66 @@ export class VerificationController {
   }
 
   /**
+   * Temporary debug endpoint that performs number verification without CAPTCHA.
+   * Useful for local testing to isolate CAMARA / network issues from CAPTCHA failures.
+   * NOTE: This endpoint should not be exposed in production.
+   */
+  @Post('debug-number')
+  @HttpCode(HttpStatus.OK)
+  async debugVerifyNumber(
+    @Body() dto: VerifyNumberDto,
+  ): Promise<VerifyNumberResponse> {
+    if (!this.isValidE164(dto.phoneNumber)) {
+      throw new BadRequestException(
+        'Invalid phone number format (expected E.164, e.g., +33612345678)',
+      );
+    }
+
+    const msisdnHash = this.hashMsisdn(dto.phoneNumber);
+    console.log(`[VerificationController][DEBUG] Processing verification for MSISDN hash: ${msisdnHash}`);
+
+    try {
+      const result = await this.numberVerificationService.verifyNumber(
+        dto.phoneNumber,
+        dto.code,
+      );
+
+      if (result.codeSent) {
+        console.log(`[VerificationController][DEBUG] Verification code sent to MSISDN hash: ${msisdnHash}`);
+        return {
+          ok: true,
+          codeSent: true,
+          message: 'Verification code sent successfully (debug)',
+        };
+      }
+
+      if (result.verified) {
+        console.log(`[VerificationController][DEBUG] Number verified successfully for MSISDN hash: ${msisdnHash}`);
+        return {
+          ok: true,
+          codeSent: false,
+          message: 'Phone number verified successfully (debug)',
+        };
+      }
+
+      console.log(`[VerificationController][DEBUG] Number verification failed for MSISDN hash: ${msisdnHash}`);
+      return {
+        ok: false,
+        codeSent: false,
+        message: 'Phone number verification failed (debug)',
+      };
+    } catch (error) {
+      console.error(
+        `[VerificationController][DEBUG] Error verifying number for MSISDN hash ${msisdnHash}:`,
+        error instanceof Error ? error.message : error,
+      );
+      throw new BadRequestException(
+        `Failed to verify phone number (debug): ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  /**
    * Validate phone number format (E.164: +[country code][subscriber number])
    */
   private isValidE164(phoneNumber: string): boolean {

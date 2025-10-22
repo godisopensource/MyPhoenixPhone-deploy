@@ -4,6 +4,7 @@ var __name = (target, value) => __defProp(target, "name", { value, configurable:
 import { ResourceTemplate, McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import http from "http";
 const config$2 = {
   api: {
     baseUrl: process.env.API_BASE_URL || "https://api.orange.com/camara/playground",
@@ -2704,11 +2705,118 @@ const mcpServer = new McpServer({
 registerResources(mcpServer);
 registerTools(mcpServer);
 registerPrompts(mcpServer);
+// In-memory store for verification codes (phoneNumber -> code)
+const verificationCodes = /* @__PURE__ */ new Map();
+
+/**
+ * Start a tiny HTTP proxy that exposes simplified CAMARA Number Verification
+ * endpoints for local/playground development. This keeps the backend routed
+ * through the MCP server as the canonical integration point.
+ *
+ * Routes implemented:
+ * - POST /number-verification/v0.3/verify-with-code/send-code
+ *     body: { phoneNumber }
+ *     -> checks playground phone via adminAction READ, generates a 6-digit code,
+ *        stores it in-memory and responds with 204 No Content on success.
+ * - POST /number-verification/v0.3/verify-with-code/verify
+ *     body: { phoneNumber, code }
+ *     -> validates code and responds { devicePhoneNumberVerified: true } on success
+ */
+function startHttpProxy() {
+  const port = parseInt(process.env.MCP_PROXY_PORT || "3001", 10);
+  const server = http.createServer(async (req, res) => {
+    try {
+      const method = req.method || "";
+      const parsed = new URL(req.url || "", `http://localhost`);
+      // Only accept JSON bodies
+      const readBody = async () => {
+        let body = "";
+        for await (const chunk of req) body += chunk;
+        return body ? JSON.parse(body) : {};
+      };
+
+      if (method === "POST" && parsed.pathname === "/number-verification/v0.3/verify-with-code/send-code") {
+        const data = await readBody();
+        const phoneNumber = data && data.phoneNumber;
+        if (!phoneNumber) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ code: 400, message: "phoneNumber is required" }));
+          return;
+        }
+
+        try {
+          // Validate phone exists in playground using admin READ
+          await adminAction({ action: "READ", phoneNumber });
+        } catch (err) {
+          console.error("[MCP Proxy] playground READ failed for", phoneNumber, err instanceof Error ? err.message : err);
+          res.writeHead(404, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ code: 404, message: "phone number not found in playground" }));
+          return;
+        }
+
+        // Generate a temporary 6-digit code and store it
+        const code = String(Math.floor(100000 + Math.random() * 900000));
+        verificationCodes.set(phoneNumber, code);
+        console.error(`[MCP Proxy] send-code for ${phoneNumber} -> code=${code}`);
+
+        // Respond like CAMARA send-code (204 No Content)
+        res.writeHead(204);
+        res.end();
+        return;
+      }
+
+      if (method === "POST" && parsed.pathname === "/number-verification/v0.3/verify-with-code/verify") {
+        const data = await readBody();
+        const phoneNumber = data && data.phoneNumber;
+        const code = data && data.code;
+        if (!phoneNumber || !code) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ code: 400, message: "phoneNumber and code are required" }));
+          return;
+        }
+
+        const expected = verificationCodes.get(phoneNumber);
+        if (expected && String(code) === String(expected)) {
+          // Success
+          verificationCodes.delete(phoneNumber);
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ devicePhoneNumberVerified: true }));
+          console.error(`[MCP Proxy] verify success for ${phoneNumber}`);
+          return;
+        }
+
+        // Invalid code
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ devicePhoneNumberVerified: false, error: "invalid_code" }));
+        console.error(`[MCP Proxy] verify failed for ${phoneNumber} (expected=${expected} provided=${code})`);
+        return;
+      }
+
+      // Unknown path
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ code: 404, message: "Not found" }));
+    } catch (error) {
+      console.error("[MCP Proxy] error handling request:", error);
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ code: 500, message: String(error instanceof Error ? error.message : error) }));
+    }
+  });
+
+  server.listen(port, () => {
+    console.error(`[MCP Proxy] Listening for number-verification proxy on http://localhost:${port}`);
+  });
+}
 async function main() {
   try {
     const transport = new StdioServerTransport();
     await mcpServer.connect(transport);
     console.error("[MCP server]: Conected");
+    // Start the HTTP proxy for number verification (local dev)
+    try {
+      startHttpProxy();
+    } catch (err) {
+      console.error('[MCP Proxy] failed to start proxy:', err);
+    }
   } catch (error) {
     console.error("[MCP Server] Failed to start:", error);
     process.exit(1);

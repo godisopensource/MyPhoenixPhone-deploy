@@ -6,6 +6,7 @@
     "mcp:start": "npm --workspace packages/mcp run start",
   "dev:with-mcp": "bash -lc 'set -a; [ -f apps/backend/.env ] && source apps/backend/.env; ORANGE_CLIENT_ID=$CAMARA_CLIENT_ID ORANGE_CLIENT_SECRET=$CAMARA_CLIENT_SECRET npx turbo run dev'",
     "dev": "turbo run dev",
+    "dev:local": "concurrently \"npm --workspace packages/mcp run dev\" \"npm --workspace apps/backend run dev\" \"npm --workspace apps/web run dev\" --names MCP,BACKEND,WEB --prefix-colors yellow,blue,green",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"
@@ -13,7 +14,8 @@
   "devDependencies": {
     "prettier": "^3.6.2",
     "turbo": "^2.5.8",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "concurrently": "^8.2.0"
   },
   "engines": {
     "node": ">=20"

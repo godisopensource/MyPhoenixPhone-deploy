@@ -37,6 +37,26 @@ export class CaptchaGuard implements CanActivate {
       request.query?.captchaToken ||
       request.headers['x-captcha-token'];
 
+    const phoneNumber = request.body?.phoneNumber || request.body?.msisdn || request.body?.phone || request.body?.msisdn;
+
+    // Reuse a recent successful captcha validation stored in session to avoid forcing
+    // the user to re-complete the widget between the send-code and verify-code steps.
+    // This relies on the express-session middleware being enabled in main.ts.
+    try {
+      const sessionAny: any = (request as any).session;
+      const ttl = parseInt(process.env.CAPTCHA_SESSION_TTL_MS || '300000', 10); // default 5 minutes
+      if (sessionAny && sessionAny._captcha && phoneNumber) {
+        const { phoneNumber: validatedPhone, verifiedAt } = sessionAny._captcha;
+        if (validatedPhone === phoneNumber && Date.now() - (verifiedAt || 0) < ttl) {
+          // Session has a recent successful validation for this phone number
+          console.log('[CaptchaGuard] Re-using session captcha validation for', phoneNumber);
+          return true;
+        }
+      }
+    } catch (e) {
+      // ignore session read errors and fall back to token verification
+    }
+
     if (!token || typeof token !== 'string') {
       throw new UnauthorizedException('CAPTCHA token is required');
     }
@@ -46,6 +66,17 @@ export class CaptchaGuard implements CanActivate {
 
     if (!isValid) {
       throw new UnauthorizedException('Invalid or expired CAPTCHA token');
+    }
+
+    // Persist a small session marker so the same browser can reuse the successful
+    // captcha validation for a short time window (avoids re-challenge between steps)
+    try {
+      const sessionAny: any = (request as any).session;
+      if (sessionAny && phoneNumber) {
+        sessionAny._captcha = { phoneNumber, verifiedAt: Date.now() };
+      }
+    } catch (e) {
+      // ignore session write errors
     }
 
     return true;
