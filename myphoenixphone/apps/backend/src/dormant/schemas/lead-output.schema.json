@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LeadOutput",
+  "description": "Lead generated from dormant device detection",
+  "type": "object",
+  "required": [
+    "lead_id",
+    "msisdn_hash",
+    "dormant_score",
+    "eligible",
+    "activation_window_days",
+    "next_action"
+  ],
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for the lead"
+    },
+    "msisdn_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of MSISDN with environment-specific salt",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "dormant_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Confidence score that device is dormant (0-1)"
+    },
+    "eligible": {
+      "type": "boolean",
+      "description": "Whether the lead is eligible for nudge campaign"
+    },
+    "activation_window_days": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30,
+      "description": "Days remaining in the activation window"
+    },
+    "next_action": {
+      "type": "string",
+      "enum": ["send_nudge", "hold", "exclude", "expired"],
+      "description": "Recommended next action for this lead"
+    },
+    "exclusions": {
+      "type": "array",
+      "description": "Reasons why lead was excluded (if applicable)",
+      "items": {
+        "type": "string",
+        "enum": [
+          "too_soon_after_swap",
+          "business_line",
+          "m2m_line",
+          "fraud_flag",
+          "opt_out",
+          "recently_contacted",
+          "multiple_swaps_detected",
+          "device_still_reachable",
+          "no_swap_detected"
+        ]
+      }
+    },
+    "signals": {
+      "type": "object",
+      "description": "Key signals used in scoring",
+      "properties": {
+        "days_since_swap": {
+          "type": "number",
+          "description": "Days elapsed since SIM swap"
+        },
+        "days_unreachable": {
+          "type": "number",
+          "description": "Days device has been unreachable"
+        },
+        "swap_count_30d": {
+          "type": "integer",
+          "description": "Number of swaps in last 30 days"
+        }
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Lead creation timestamp (ISO 8601)"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Lead expiration timestamp (ISO 8601)"
+    }
+  },
+  "examples": [
+    {
+      "lead_id": "550e8400-e29b-41d4-a716-446655440000",
+      "msisdn_hash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+      "dormant_score": 0.82,
+      "eligible": true,
+      "activation_window_days": 14,
+      "next_action": "send_nudge",
+      "exclusions": [],
+      "signals": {
+        "days_since_swap": 3.5,
+        "days_unreachable": 3.2,
+        "swap_count_30d": 1
+      },
+      "created_at": "2025-10-22T12:00:00Z",
+      "expires_at": "2025-11-21T12:00:00Z"
+    },
+    {
+      "lead_id": "660e9511-f39c-52e5-b827-557766551111",
+      "msisdn_hash": "6f995909eb39158262e1f67a9ed7382884714e1e7dbccd73c22f832e2653e9ab",
+      "dormant_score": 0.45,
+      "eligible": false,
+      "activation_window_days": 1,
+      "next_action": "exclude",
+      "exclusions": ["too_soon_after_swap", "multiple_swaps_detected"],
+      "signals": {
+        "days_since_swap": 1.2,
+        "days_unreachable": 1.0,
+        "swap_count_30d": 3
+      },
+      "created_at": "2025-10-22T12:00:00Z",
+      "expires_at": "2025-11-21T12:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DormantInputEvent",
+  "description": "Network event input for dormant device detection",
+  "type": "object",
+  "required": [
+    "msisdn_hash",
+    "sim_swap",
+    "old_device_reachability",
+    "line_type",
+    "fraud_flag"
+  ],
+  "properties": {
+    "msisdn_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of MSISDN with environment-specific salt",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sim_swap": {
+      "type": "object",
+      "required": ["occurred", "ts"],
+      "properties": {
+        "occurred": {
+          "type": "boolean",
+          "description": "Whether a SIM swap has been detected"
+        },
+        "ts": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the SIM swap (ISO 8601)"
+        }
+      }
+    },
+    "old_device_reachability": {
+      "type": "object",
+      "required": ["reachable", "checked_ts"],
+      "properties": {
+        "reachable": {
+          "type": "boolean",
+          "description": "Whether the old device is currently reachable"
+        },
+        "checked_ts": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when reachability was checked (ISO 8601)"
+        },
+        "last_activity_ts": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last known activity timestamp (optional)"
+        }
+      }
+    },
+    "line_type": {
+      "type": "string",
+      "enum": ["consumer", "business", "m2m"],
+      "description": "Type of line: consumer, business, or machine-to-machine"
+    },
+    "fraud_flag": {
+      "type": "boolean",
+      "description": "Whether the line is flagged for potential SIM-swap fraud"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional metadata for debugging and analytics",
+      "properties": {
+        "swap_count_30d": {
+          "type": "integer",
+          "description": "Number of SIM swaps in the last 30 days"
+        },
+        "opt_out": {
+          "type": "boolean",
+          "description": "User has opted out of marketing communications"
+        },
+        "last_contact_ts": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last time user was contacted for any campaign"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "msisdn_hash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+      "sim_swap": {
+        "occurred": true,
+        "ts": "2025-10-19T10:15:00Z"
+      },
+      "old_device_reachability": {
+        "reachable": false,
+        "checked_ts": "2025-10-22T11:00:00Z",
+        "last_activity_ts": "2025-10-19T09:30:00Z"
+      },
+      "line_type": "consumer",
+      "fraud_flag": false,
+      "metadata": {
+        "swap_count_30d": 1,
+        "opt_out": false,
+        "last_contact_ts": "2025-09-01T12:00:00Z"
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@myphoenixphone/dormant-schemas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "JSON schemas and validation for dormant device detection",
+  "scripts": {
+    "validate": "node validate-schemas.js"
+  },
+  "devDependencies": {
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1"
+  }
+}
