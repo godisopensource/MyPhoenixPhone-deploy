@@ -1,0 +1,252 @@
+[
+  {
+    "id": "iphone-15-pro-max-256",
+    "brand": "Apple",
+    "model": "iPhone 15 Pro Max",
+    "storage": "256GB",
+    "keywords": ["iphone", "15", "pro", "max", "apple"],
+    "avg_price_tier": 5,
+    "release_year": 2023,
+    "image_url": "/images/phones/iphone-15-pro-max.jpg"
+  },
+  {
+    "id": "iphone-15-pro-128",
+    "brand": "Apple",
+    "model": "iPhone 15 Pro",
+    "storage": "128GB",
+    "keywords": ["iphone", "15", "pro", "apple"],
+    "avg_price_tier": 5,
+    "release_year": 2023,
+    "image_url": "/images/phones/iphone-15-pro.jpg"
+  },
+  {
+    "id": "iphone-14-pro-128",
+    "brand": "Apple",
+    "model": "iPhone 14 Pro",
+    "storage": "128GB",
+    "keywords": ["iphone", "14", "pro", "apple"],
+    "avg_price_tier": 4,
+    "release_year": 2022,
+    "image_url": "/images/phones/iphone-14-pro.jpg"
+  },
+  {
+    "id": "iphone-13-pro-128",
+    "brand": "Apple",
+    "model": "iPhone 13 Pro",
+    "storage": "128GB",
+    "keywords": ["iphone", "13", "pro", "apple"],
+    "avg_price_tier": 3,
+    "release_year": 2021,
+    "image_url": "/images/phones/iphone-13-pro.jpg"
+  },
+  {
+    "id": "iphone-13-128",
+    "brand": "Apple",
+    "model": "iPhone 13",
+    "storage": "128GB",
+    "keywords": ["iphone", "13", "apple"],
+    "avg_price_tier": 3,
+    "release_year": 2021,
+    "image_url": "/images/phones/iphone-13.jpg"
+  },
+  {
+    "id": "iphone-12-64",
+    "brand": "Apple",
+    "model": "iPhone 12",
+    "storage": "64GB",
+    "keywords": ["iphone", "12", "apple"],
+    "avg_price_tier": 2,
+    "release_year": 2020,
+    "image_url": "/images/phones/iphone-12.jpg"
+  },
+  {
+    "id": "galaxy-s23-ultra-256",
+    "brand": "Samsung",
+    "model": "Galaxy S23 Ultra",
+    "storage": "256GB",
+    "keywords": ["galaxy", "s23", "ultra", "samsung"],
+    "avg_price_tier": 5,
+    "release_year": 2023,
+    "image_url": "/images/phones/galaxy-s23-ultra.jpg"
+  },
+  {
+    "id": "galaxy-s23-128",
+    "brand": "Samsung",
+    "model": "Galaxy S23",
+    "storage": "128GB",
+    "keywords": ["galaxy", "s23", "samsung"],
+    "avg_price_tier": 4,
+    "release_year": 2023,
+    "image_url": "/images/phones/galaxy-s23.jpg"
+  },
+  {
+    "id": "galaxy-s22-128",
+    "brand": "Samsung",
+    "model": "Galaxy S22",
+    "storage": "128GB",
+    "keywords": ["galaxy", "s22", "samsung"],
+    "avg_price_tier": 3,
+    "release_year": 2022,
+    "image_url": "/images/phones/galaxy-s22.jpg"
+  },
+  {
+    "id": "galaxy-s21-128",
+    "brand": "Samsung",
+    "model": "Galaxy S21",
+    "storage": "128GB",
+    "keywords": ["galaxy", "s21", "samsung"],
+    "avg_price_tier": 2,
+    "release_year": 2021,
+    "image_url": "/images/phones/galaxy-s21.jpg"
+  },
+  {
+    "id": "galaxy-a54-128",
+    "brand": "Samsung",
+    "model": "Galaxy A54 5G",
+    "storage": "128GB",
+    "keywords": ["galaxy", "a54", "samsung"],
+    "avg_price_tier": 2,
+    "release_year": 2023,
+    "image_url": "/images/phones/galaxy-a54.jpg"
+  },
+  {
+    "id": "galaxy-a34-128",
+    "brand": "Samsung",
+    "model": "Galaxy A34 5G",
+    "storage": "128GB",
+    "keywords": ["galaxy", "a34", "samsung"],
+    "avg_price_tier": 1,
+    "release_year": 2023,
+    "image_url": "/images/phones/galaxy-a34.jpg"
+  },
+  {
+    "id": "pixel-8-pro-256",
+    "brand": "Google",
+    "model": "Pixel 8 Pro",
+    "storage": "256GB",
+    "keywords": ["pixel", "8", "pro", "google"],
+    "avg_price_tier": 4,
+    "release_year": 2023,
+    "image_url": "/images/phones/pixel-8-pro.jpg"
+  },
+  {
+    "id": "pixel-8-128",
+    "brand": "Google",
+    "model": "Pixel 8",
+    "storage": "128GB",
+    "keywords": ["pixel", "8", "google"],
+    "avg_price_tier": 3,
+    "release_year": 2023,
+    "image_url": "/images/phones/pixel-8.jpg"
+  },
+  {
+    "id": "pixel-7-128",
+    "brand": "Google",
+    "model": "Pixel 7",
+    "storage": "128GB",
+    "keywords": ["pixel", "7", "google"],
+    "avg_price_tier": 2,
+    "release_year": 2022,
+    "image_url": "/images/phones/pixel-7.jpg"
+  },
+  {
+    "id": "pixel-6-128",
+    "brand": "Google",
+    "model": "Pixel 6",
+    "storage": "128GB",
+    "keywords": ["pixel", "6", "google"],
+    "avg_price_tier": 2,
+    "release_year": 2021,
+    "image_url": "/images/phones/pixel-6.jpg"
+  },
+  {
+    "id": "redmi-note-12-pro-256",
+    "brand": "Xiaomi",
+    "model": "Redmi Note 12 Pro",
+    "storage": "256GB",
+    "keywords": ["redmi", "note", "12", "pro", "xiaomi"],
+    "avg_price_tier": 2,
+    "release_year": 2023,
+    "image_url": "/images/phones/redmi-note-12-pro.jpg"
+  },
+  {
+    "id": "redmi-note-12-128",
+    "brand": "Xiaomi",
+    "model": "Redmi Note 12",
+    "storage": "128GB",
+    "keywords": ["redmi", "note", "12", "xiaomi"],
+    "avg_price_tier": 1,
+    "release_year": 2023,
+    "image_url": "/images/phones/redmi-note-12.jpg"
+  },
+  {
+    "id": "redmi-note-11-128",
+    "brand": "Xiaomi",
+    "model": "Redmi Note 11",
+    "storage": "128GB",
+    "keywords": ["redmi", "note", "11", "xiaomi"],
+    "avg_price_tier": 1,
+    "release_year": 2022,
+    "image_url": "/images/phones/redmi-note-11.jpg"
+  },
+  {
+    "id": "redmi-note-10-128",
+    "brand": "Xiaomi",
+    "model": "Redmi Note 10",
+    "storage": "128GB",
+    "keywords": ["redmi", "note", "10", "xiaomi"],
+    "avg_price_tier": 1,
+    "release_year": 2021,
+    "image_url": "/images/phones/redmi-note-10.jpg"
+  },
+  {
+    "id": "oneplus-11-256",
+    "brand": "OnePlus",
+    "model": "OnePlus 11",
+    "storage": "256GB",
+    "keywords": ["oneplus", "11"],
+    "avg_price_tier": 4,
+    "release_year": 2023,
+    "image_url": "/images/phones/oneplus-11.jpg"
+  },
+  {
+    "id": "oneplus-10-pro-256",
+    "brand": "OnePlus",
+    "model": "OnePlus 10 Pro",
+    "storage": "256GB",
+    "keywords": ["oneplus", "10", "pro"],
+    "avg_price_tier": 3,
+    "release_year": 2022,
+    "image_url": "/images/phones/oneplus-10-pro.jpg"
+  },
+  {
+    "id": "oppo-find-x5-pro-256",
+    "brand": "Oppo",
+    "model": "Find X5 Pro",
+    "storage": "256GB",
+    "keywords": ["oppo", "find", "x5", "pro"],
+    "avg_price_tier": 4,
+    "release_year": 2022,
+    "image_url": "/images/phones/oppo-find-x5-pro.jpg"
+  },
+  {
+    "id": "oppo-reno-8-pro-256",
+    "brand": "Oppo",
+    "model": "Reno 8 Pro",
+    "storage": "256GB",
+    "keywords": ["oppo", "reno", "8", "pro"],
+    "avg_price_tier": 3,
+    "release_year": 2022,
+    "image_url": "/images/phones/oppo-reno-8-pro.jpg"
+  },
+  {
+    "id": "huawei-p50-pro-256",
+    "brand": "Huawei",
+    "model": "P50 Pro",
+    "storage": "256GB",
+    "keywords": ["huawei", "p50", "pro"],
+    "avg_price_tier": 3,
+    "release_year": 2021,
+    "image_url": "/images/phones/huawei-p50-pro.jpg"
+  }
+]

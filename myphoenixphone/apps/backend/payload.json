@@ -1,0 +1,12 @@
+{
+  "msisdn_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "sim_swap": { "occurred": true, "ts": "2025-10-18T10:00:00Z" },
+  "old_device_reachability": {
+    "reachable": false,
+    "checked_ts": "2025-10-22T12:00:00Z",
+    "last_activity_ts": "2025-10-18T09:30:00Z"
+  },
+  "line_type": "consumer",
+  "fraud_flag": false,
+  "metadata": { "swap_count_30d": 1, "opt_out": false }
+}

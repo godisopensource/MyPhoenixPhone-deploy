@@ -10,6 +10,8 @@ import { StorageModule } from './storage/storage.module';
 import { EligibilityModule } from './eligibility/eligibility.module';
 import { VerificationModule } from './verification/verification.module';
 import { ConsentModule } from './consent/consent.module';
+import { DormantModule } from './dormant/dormant.module';
+import { PricingModule } from './pricing/pricing.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { ConsentModule } from './consent/consent.module';
     EligibilityModule,
     VerificationModule,
     ConsentModule,
+    DormantModule,
+    PricingModule,
   ],
   controllers: [AppController, MetricsController],
   providers: [AppService],

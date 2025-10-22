@@ -38,3 +38,81 @@ model Interaction {
 
   @@index([msisdn_hash])
 }
+
+// Dormant Device Detection Models
+
+model NetworkEvent {
+  id                    String    @id @default(uuid())
+  msisdn_hash           String
+  event_type            String    // 'sim_swap' | 'reachability_check'
+  payload               Json      // Full event payload matching dormant-event.schema.json
+  processed             Boolean   @default(false)
+  created_at            DateTime  @default(now())
+
+  @@index([msisdn_hash])
+  @@index([processed, created_at])
+  @@index([event_type])
+}
+
+model Lead {
+  id                    String    @id @default(uuid())
+  msisdn_hash           String
+  dormant_score         Float     // 0.0 to 1.0
+  eligible              Boolean
+  activation_window_days Int
+  next_action           String    // 'send_nudge' | 'hold' | 'exclude' | 'expired'
+  exclusions            String[]  // Array of exclusion reasons
+  signals               Json      // Snapshot of signals used in scoring
+  
+  // Contact tracking
+  contact_count         Int       @default(0)
+  last_contact_at       DateTime?
+  
+  // Model/device info (captured on landing)
+  device_model          String?
+  device_imei           String?   // Encrypted or null after estimation
+  device_condition      Json?     // Questionnaire responses
+  imei_consent_at       DateTime?
+  
+  // Pricing & handover
+  estimated_value       Float?
+  handover_choice       String?   // 'ship' | 'store' | 'donate' | 'recycle'
+  handover_completed_at DateTime?
+  
+  // Lifecycle
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+  expires_at            DateTime  // TTL enforcement
+  
+  contact_attempts      ContactAttempt[]
+  
+  @@index([msisdn_hash])
+  @@index([eligible, next_action])
+  @@index([expires_at])
+  @@index([created_at])
+  @@unique([msisdn_hash, created_at]) // Idempotency per day
+}
+
+model ContactAttempt {
+  id              String    @id @default(uuid())
+  lead_id         String
+  channel         String    // 'sms' | 'rcs' | 'push' | 'email'
+  template_variant String   // 'A' | 'B' | 'C' | 'D'
+  status          String    // 'sent' | 'delivered' | 'clicked' | 'failed'
+  clicked_at      DateTime?
+  created_at      DateTime  @default(now())
+  
+  lead            Lead      @relation(fields: [lead_id], references: [id], onDelete: Cascade)
+  
+  @@index([lead_id])
+  @@index([status, created_at])
+}
+
+model OptOut {
+  id              String    @id @default(uuid())
+  msisdn_hash     String    @unique
+  reason          String?
+  created_at      DateTime  @default(now())
+  
+  @@index([msisdn_hash])
+}
