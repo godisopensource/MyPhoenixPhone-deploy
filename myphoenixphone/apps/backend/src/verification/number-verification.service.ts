@@ -24,13 +24,17 @@ export class NumberVerificationService {
 
     if (explicitBase && explicitBase.length > 0) {
       // Use provided CAMARA_BASE_URL and append the number-verification path
-      this.baseUrl = explicitBase.replace(/\/$/, '') + '/number-verification/v0.3';
+      this.baseUrl =
+        explicitBase.replace(/\/$/, '') + '/number-verification/v0.3';
     } else if (env === 'playground') {
       // Default playground URL (without extra '/api' segment)
-      this.baseUrl = 'https://api.orange.com/camara/playground/number-verification/v0.3';
+      this.baseUrl =
+        'https://api.orange.com/camara/playground/number-verification/v0.3';
     } else {
       // Fallback to generic CAMARA base + path
-      this.baseUrl = (process.env.CAMARA_BASE_URL || 'https://api.orange.com/camara') + '/number-verification/v0.3';
+      this.baseUrl =
+        (process.env.CAMARA_BASE_URL || 'https://api.orange.com/camara') +
+        '/number-verification/v0.3';
     }
   }
 
@@ -42,7 +46,11 @@ export class NumberVerificationService {
    * @returns Promise that resolves when code is sent
    */
   async sendVerificationCode(phoneNumber: string): Promise<void> {
-  const useProxy = (process.env.USE_MCP_PROXY === 'true') || !!process.env.MCP_PROXY_URL || process.env.CAMARA_ENV === 'playground' || (process.env.CAMARA_BASE_URL || '').includes('playground');
+    const useProxy =
+      process.env.USE_MCP_PROXY === 'true' ||
+      !!process.env.MCP_PROXY_URL ||
+      process.env.CAMARA_ENV === 'playground' ||
+      (process.env.CAMARA_BASE_URL || '').includes('playground');
     const proxyUrl = process.env.MCP_PROXY_URL || 'http://localhost:3001';
 
     const requestBody = { phoneNumber };
@@ -51,12 +59,17 @@ export class NumberVerificationService {
       const url = `${proxyUrl.replace(/\/$/, '')}/number-verification/v0.3/verify-with-code/send-code`;
       const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
         body: JSON.stringify(requestBody),
       });
       if (!res.ok) {
         const raw = await res.text().catch(() => '');
-        throw new Error(`MCP Proxy send-code failed: ${res.status} - ${raw || res.statusText}`);
+        throw new Error(
+          `MCP Proxy send-code failed: ${res.status} - ${raw || res.statusText}`,
+        );
       }
       // 204 No Content expected
       return;
@@ -76,7 +89,9 @@ export class NumberVerificationService {
 
     if (!response.ok) {
       const raw = await response.text().catch(() => '');
-      throw new Error(`Number Verification send-code failed: ${response.status} - ${raw || response.statusText}`);
+      throw new Error(
+        `Number Verification send-code failed: ${response.status} - ${raw || response.statusText}`,
+      );
     }
   }
 
@@ -91,7 +106,11 @@ export class NumberVerificationService {
     phoneNumber: string,
     code: string,
   ): Promise<NumberVerificationResult> {
-  const useProxy = (process.env.USE_MCP_PROXY === 'true') || !!process.env.MCP_PROXY_URL || process.env.CAMARA_ENV === 'playground' || (process.env.CAMARA_BASE_URL || '').includes('playground');
+    const useProxy =
+      process.env.USE_MCP_PROXY === 'true' ||
+      !!process.env.MCP_PROXY_URL ||
+      process.env.CAMARA_ENV === 'playground' ||
+      (process.env.CAMARA_BASE_URL || '').includes('playground');
     const proxyUrl = process.env.MCP_PROXY_URL || 'http://localhost:3001';
 
     const requestBody = { phoneNumber, code };
@@ -100,15 +119,22 @@ export class NumberVerificationService {
       const url = `${proxyUrl.replace(/\/$/, '')}/number-verification/v0.3/verify-with-code/verify`;
       const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
         body: JSON.stringify(requestBody),
       });
       const raw = await res.text().catch(() => '');
       if (!res.ok) {
-        throw new Error(`MCP Proxy verify failed: ${res.status} - ${raw || res.statusText}`);
+        throw new Error(
+          `MCP Proxy verify failed: ${res.status} - ${raw || res.statusText}`,
+        );
       }
       try {
-        const parsed = raw ? JSON.parse(raw) : { devicePhoneNumberVerified: true };
+        const parsed = raw
+          ? JSON.parse(raw)
+          : { devicePhoneNumberVerified: true };
         return parsed as NumberVerificationResult;
       } catch {
         return { devicePhoneNumberVerified: true } as NumberVerificationResult;
@@ -133,7 +159,9 @@ export class NumberVerificationService {
         code: 'UNKNOWN_ERROR',
         message: response.statusText,
       }));
-      throw new Error(`Number Verification verify-code failed: ${errorData.status} ${errorData.code} - ${errorData.message}`);
+      throw new Error(
+        `Number Verification verify-code failed: ${errorData.status} ${errorData.code} - ${errorData.message}`,
+      );
     }
 
     const result = await response.json();

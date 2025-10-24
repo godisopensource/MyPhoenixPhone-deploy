@@ -1,8 +1,18 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { DormantDetectorService } from '../dormant/dormant-detector.service';
 import { OrangeSmsService } from '../nudge/sms.service';
-import { CreateCampaignDto, UpdateCampaignDto, CampaignResponse, CampaignStatus } from './dto/campaign.dto';
+import {
+  CreateCampaignDto,
+  UpdateCampaignDto,
+  CampaignResponse,
+  CampaignStatus,
+} from './dto/campaign.dto';
 
 @Injectable()
 export class CampaignService {
@@ -36,7 +46,9 @@ export class CampaignService {
         template_id: createDto.template_id,
         template_variant: createDto.template_variant,
         channel: createDto.channel || 'sms',
-        scheduled_at: createDto.scheduled_at ? new Date(createDto.scheduled_at) : null,
+        scheduled_at: createDto.scheduled_at
+          ? new Date(createDto.scheduled_at)
+          : null,
         max_per_hour: createDto.max_per_hour || 100,
         batch_size: createDto.batch_size || 10,
         created_by: createDto.created_by,
@@ -65,7 +77,11 @@ export class CampaignService {
   /**
    * List all campaigns
    */
-  async findAll(filters?: { status?: string; limit?: number; offset?: number }) {
+  async findAll(filters?: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }) {
     const { status, limit = 50, offset = 0 } = filters || {};
 
     const where: any = {};
@@ -94,9 +110,12 @@ export class CampaignService {
   /**
    * Update campaign
    */
-  async update(id: string, updateDto: UpdateCampaignDto): Promise<CampaignResponse> {
+  async update(
+    id: string,
+    updateDto: UpdateCampaignDto,
+  ): Promise<CampaignResponse> {
     const campaign = await this.prisma.campaign.findUnique({ where: { id } });
-    
+
     if (!campaign) {
       throw new NotFoundException(`Campaign ${id} not found`);
     }
@@ -110,9 +129,13 @@ export class CampaignService {
       where: { id },
       data: {
         ...(updateDto.name && { name: updateDto.name }),
-        ...(updateDto.description !== undefined && { description: updateDto.description }),
+        ...(updateDto.description !== undefined && {
+          description: updateDto.description,
+        }),
         ...(updateDto.status && { status: updateDto.status }),
-        ...(updateDto.scheduled_at && { scheduled_at: new Date(updateDto.scheduled_at) }),
+        ...(updateDto.scheduled_at && {
+          scheduled_at: new Date(updateDto.scheduled_at),
+        }),
       },
     });
 
@@ -124,13 +147,15 @@ export class CampaignService {
    */
   async delete(id: string): Promise<void> {
     const campaign = await this.prisma.campaign.findUnique({ where: { id } });
-    
+
     if (!campaign) {
       throw new NotFoundException(`Campaign ${id} not found`);
     }
 
     if (campaign.status === 'sending') {
-      throw new BadRequestException('Cannot delete a campaign that is currently sending');
+      throw new BadRequestException(
+        'Cannot delete a campaign that is currently sending',
+      );
     }
 
     if (campaign.status === 'completed') {
@@ -171,7 +196,8 @@ export class CampaignService {
       total_attempts: attempts.length,
       delivered_rate: delivered > 0 ? (delivered / attempts.length) * 100 : 0,
       click_rate: delivered > 0 ? (clicked / delivered) * 100 : 0,
-      conversion_rate: clicked > 0 ? (campaign.stats.total_converted / clicked) * 100 : 0,
+      conversion_rate:
+        clicked > 0 ? (campaign.stats.total_converted / clicked) * 100 : 0,
     };
   }
 
@@ -180,13 +206,15 @@ export class CampaignService {
    */
   async startSending(id: string): Promise<CampaignResponse> {
     const campaign = await this.prisma.campaign.findUnique({ where: { id } });
-    
+
     if (!campaign) {
       throw new NotFoundException(`Campaign ${id} not found`);
     }
 
     if (campaign.status !== 'scheduled' && campaign.status !== 'draft') {
-      throw new BadRequestException(`Campaign must be draft or scheduled to start sending`);
+      throw new BadRequestException(
+        `Campaign must be draft or scheduled to start sending`,
+      );
     }
 
     // Update status to sending
@@ -199,10 +227,10 @@ export class CampaignService {
     });
 
     this.logger.log(`Started sending campaign ${id}: ${updated.name}`);
-    
+
     // Trigger actual nudge service (DD-09)
     // Run async to avoid blocking the response
-    this.smsService.sendCampaign(id).catch(error => {
+    this.smsService.sendCampaign(id).catch((error) => {
       this.logger.error(`Failed to send campaign ${id}`, error);
     });
 
@@ -218,12 +246,18 @@ export class CampaignService {
       total_delivered: campaign.total_delivered,
       total_clicked: campaign.total_clicked,
       total_converted: campaign.total_converted,
-      click_rate: campaign.total_delivered > 0
-        ? Math.round((campaign.total_clicked / campaign.total_delivered) * 100 * 100) / 100
-        : 0,
-      conversion_rate: campaign.total_clicked > 0
-        ? Math.round((campaign.total_converted / campaign.total_clicked) * 100 * 100) / 100
-        : 0,
+      click_rate:
+        campaign.total_delivered > 0
+          ? Math.round(
+              (campaign.total_clicked / campaign.total_delivered) * 100 * 100,
+            ) / 100
+          : 0,
+      conversion_rate:
+        campaign.total_clicked > 0
+          ? Math.round(
+              (campaign.total_converted / campaign.total_clicked) * 100 * 100,
+            ) / 100
+          : 0,
     };
 
     return {
@@ -251,7 +285,10 @@ export class CampaignService {
   /**
    * Validate campaign status transitions
    */
-  private validateStatusTransition(currentStatus: string, newStatus: string): void {
+  private validateStatusTransition(
+    currentStatus: string,
+    newStatus: string,
+  ): void {
     const validTransitions: Record<string, string[]> = {
       draft: ['scheduled', 'sending', 'cancelled'],
       scheduled: ['sending', 'cancelled'],

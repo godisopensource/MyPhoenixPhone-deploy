@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { CheckIcon, WarningIcon } from '../../../components/solaris-icons';
 
 interface DepositCode {
   code: string;
@@ -71,7 +72,10 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
   return (
     <main className="container py-5">
       <div className="text-center mb-4">
-        <h1 style={{ color: '#ff7900' }}>🏬 Dépôt en boutique</h1>
+        <h1 style={{ color: '#ff7900' }}>
+          {/* Shop/Store title without emoji */}
+          Dépôt en boutique
+        </h1>
         <p className="text-muted">Présentez ce QR au conseiller</p>
       </div>
 
@@ -100,7 +104,17 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
           <p className="mt-2 text-muted">Valide jusqu'à expiration</p>
           {geoVerified !== null && (
             <div className="mt-2">
-              {geoVerified ? <span className="badge bg-success">✅ Point proche</span> : <span className="badge bg-warning">⚠️ Vérification impossible</span>}
+              {geoVerified ? (
+                <span className="badge bg-success d-inline-flex align-items-center">
+                  <CheckIcon className="me-1" />
+                  Point proche
+                </span>
+              ) : (
+                <span className="badge bg-warning d-inline-flex align-items-center">
+                  <WarningIcon className="me-1" />
+                  Vérification impossible
+                </span>
+              )}
             </div>
           )}
           <div className="mt-3 d-flex gap-2">

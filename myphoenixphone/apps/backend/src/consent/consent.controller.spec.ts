@@ -232,9 +232,9 @@ describe('ConsentController', () => {
     });
 
     it('should reject if consentId is missing', async () => {
-      await expect(
-        controller.revokeConsent({ consentId: '' }),
-      ).rejects.toThrow(BadRequestException);
+      await expect(controller.revokeConsent({ consentId: '' })).rejects.toThrow(
+        BadRequestException,
+      );
 
       expect(consentRepository.findById).not.toHaveBeenCalled();
     });

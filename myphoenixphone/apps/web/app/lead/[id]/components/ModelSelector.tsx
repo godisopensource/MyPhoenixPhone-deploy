@@ -19,16 +19,40 @@ export default function ModelSelector({ onSelect }: Props) {
   const [phones, setPhones] = useState<PhoneModel[]>([]);
   const [search, setSearch] = useState('');
   const [filteredPhones, setFilteredPhones] = useState<PhoneModel[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load phone models
-    fetch('/eligible-phone-models.json')
-      .then(res => res.json())
-      .then(data => {
-        setPhones(data);
-        setFilteredPhones(data);
+    // Load phone models from backend
+    const apiUrl = typeof window !== 'undefined' 
+      ? (window.location.origin.includes('localhost') ? 'http://localhost:3003' : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003')
+      : 'http://localhost:3003';
+    
+    setLoading(true);
+    setError(null);
+    
+    fetch(`${apiUrl}/phone-models`)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        return res.json();
       })
-      .catch(err => console.error('Failed to load phone models:', err));
+      .then(data => {
+        if (Array.isArray(data)) {
+          setPhones(data);
+          setFilteredPhones(data);
+        } else {
+          throw new Error('Format de données invalide');
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load phone models:', err);
+        setError(err.message || 'Impossible de charger les modèles de téléphones');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -75,7 +99,20 @@ export default function ModelSelector({ onSelect }: Props) {
         </div>
 
         <div className="list-group mb-3" style={{ maxHeight: '500px', overflowY: 'auto' }}>
-          {filteredPhones.length === 0 ? (
+          {loading ? (
+            <div className="alert alert-info">
+              <div className="spinner-border spinner-border-sm me-2" role="status">
+                <span className="visually-hidden">Chargement...</span>
+              </div>
+              Chargement des modèles de téléphones...
+            </div>
+          ) : error ? (
+            <div className="alert alert-danger">
+              <strong>Erreur:</strong> {error}
+              <br />
+              <small>Vérifiez que le backend est démarré sur le port 3003</small>
+            </div>
+          ) : filteredPhones.length === 0 ? (
             <div className="alert alert-info">
               Aucun modèle trouvé. Essayez une autre recherche ou cliquez sur "Je ne sais pas".
             </div>

@@ -1,5 +1,18 @@
-import { Controller, Post, Get, Body, Param, HttpException, HttpStatus, Logger } from '@nestjs/common';
-import { HandoverService, ColissimoLabel, StoreDepositCode } from './handover.service';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Param,
+  HttpException,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
+import {
+  HandoverService,
+  ColissimoLabel,
+  StoreDepositCode,
+} from './handover.service';
 
 @Controller('handover')
 export class HandoverController {
@@ -27,7 +40,9 @@ export class HandoverController {
 
       this.logger.log(`Generating shipping label for lead: ${body.lead_id}`);
 
-      const label = await this.handoverService.generateColissimoLabel(body.lead_id);
+      const label = await this.handoverService.generateColissimoLabel(
+        body.lead_id,
+      );
 
       // Record the handover
       await this.handoverService.recordHandover(body.lead_id, 'ship', {
@@ -41,7 +56,10 @@ export class HandoverController {
     } catch (error) {
       this.logger.error('Failed to generate shipping label', error);
       throw new HttpException(
-        { error: error instanceof Error ? error.message : 'Failed to generate label' },
+        {
+          error:
+            error instanceof Error ? error.message : 'Failed to generate label',
+        },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -55,8 +73,19 @@ export class HandoverController {
    */
   @Post('store')
   async generateStoreDepositCode(
-    @Body() body: { lead_id: string; store_id?: string; phone_number?: string; latitude?: number; longitude?: number },
-  ): Promise<{ success: boolean; data: StoreDepositCode; geofence_verified?: boolean }> {
+    @Body()
+    body: {
+      lead_id: string;
+      store_id?: string;
+      phone_number?: string;
+      latitude?: number;
+      longitude?: number;
+    },
+  ): Promise<{
+    success: boolean;
+    data: StoreDepositCode;
+    geofence_verified?: boolean;
+  }> {
     try {
       if (!body.lead_id) {
         throw new HttpException(
@@ -65,7 +94,9 @@ export class HandoverController {
         );
       }
 
-      this.logger.log(`Generating store deposit code for lead: ${body.lead_id}`);
+      this.logger.log(
+        `Generating store deposit code for lead: ${body.lead_id}`,
+      );
 
       // Optionally verify device is near store using Orange Network APIs
       let geofenceVerified = true;
@@ -77,9 +108,7 @@ export class HandoverController {
           2000, // 2km radius
         );
 
-        this.logger.log(
-          `Geofence verification for store: ${geofenceVerified}`,
-        );
+        this.logger.log(`Geofence verification for store: ${geofenceVerified}`);
       }
 
       const depositCode = await this.handoverService.generateStoreDepositCode(
@@ -100,7 +129,10 @@ export class HandoverController {
     } catch (error) {
       this.logger.error('Failed to generate store deposit code', error);
       throw new HttpException(
-        { error: error instanceof Error ? error.message : 'Failed to generate code' },
+        {
+          error:
+            error instanceof Error ? error.message : 'Failed to generate code',
+        },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -139,7 +171,12 @@ export class HandoverController {
     } catch (error) {
       this.logger.error('Failed to record donation', error);
       throw new HttpException(
-        { error: error instanceof Error ? error.message : 'Failed to record donation' },
+        {
+          error:
+            error instanceof Error
+              ? error.message
+              : 'Failed to record donation',
+        },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -164,7 +201,10 @@ export class HandoverController {
     } catch (error) {
       this.logger.error('Failed to fetch handover history', error);
       throw new HttpException(
-        { error: error instanceof Error ? error.message : 'Failed to fetch history' },
+        {
+          error:
+            error instanceof Error ? error.message : 'Failed to fetch history',
+        },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

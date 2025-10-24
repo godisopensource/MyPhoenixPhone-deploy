@@ -37,7 +37,11 @@ export class CaptchaGuard implements CanActivate {
       request.query?.captchaToken ||
       request.headers['x-captcha-token'];
 
-    const phoneNumber = request.body?.phoneNumber || request.body?.msisdn || request.body?.phone || request.body?.msisdn;
+    const phoneNumber =
+      request.body?.phoneNumber ||
+      request.body?.msisdn ||
+      request.body?.phone ||
+      request.body?.msisdn;
 
     // Reuse a recent successful captcha validation stored in session to avoid forcing
     // the user to re-complete the widget between the send-code and verify-code steps.
@@ -47,9 +51,15 @@ export class CaptchaGuard implements CanActivate {
       const ttl = parseInt(process.env.CAPTCHA_SESSION_TTL_MS || '300000', 10); // default 5 minutes
       if (sessionAny && sessionAny._captcha && phoneNumber) {
         const { phoneNumber: validatedPhone, verifiedAt } = sessionAny._captcha;
-        if (validatedPhone === phoneNumber && Date.now() - (verifiedAt || 0) < ttl) {
+        if (
+          validatedPhone === phoneNumber &&
+          Date.now() - (verifiedAt || 0) < ttl
+        ) {
           // Session has a recent successful validation for this phone number
-          console.log('[CaptchaGuard] Re-using session captcha validation for', phoneNumber);
+          console.log(
+            '[CaptchaGuard] Re-using session captcha validation for',
+            phoneNumber,
+          );
           return true;
         }
       }
@@ -94,7 +104,7 @@ export class CaptchaGuard implements CanActivate {
       const formData = new URLSearchParams();
       formData.append('secret', this.captchaSecretKey);
       formData.append('response', token);
-      
+
       const clientIp = this.getClientIp(request);
       if (clientIp) {
         formData.append('remoteip', clientIp);
@@ -141,9 +151,7 @@ export class CaptchaGuard implements CanActivate {
     // Try X-Forwarded-For first (common with proxies/load balancers)
     const forwardedFor = request.headers['x-forwarded-for'];
     if (forwardedFor) {
-      const ips = Array.isArray(forwardedFor)
-        ? forwardedFor[0]
-        : forwardedFor;
+      const ips = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
       return ips.split(',')[0].trim();
     }
 

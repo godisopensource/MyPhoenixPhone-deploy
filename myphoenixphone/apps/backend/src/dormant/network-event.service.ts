@@ -51,8 +51,10 @@ export class NetworkEventService {
    */
   async collectSignals(msisdn: string): Promise<DormantInputEvent> {
     const msisdn_hash = this.hashMsisdn(msisdn);
-    
-    this.logger.debug(`Collecting signals for hashed MSISDN: ${msisdn_hash.substring(0, 8)}...`);
+
+    this.logger.debug(
+      `Collecting signals for hashed MSISDN: ${msisdn_hash.substring(0, 8)}...`,
+    );
 
     // Get reachability status
     let reachabilityData: {
@@ -62,14 +64,18 @@ export class NetworkEventService {
     };
 
     try {
-      const reachabilityStatus = await this.reachabilityService.getReachabilityStatus(msisdn);
+      const reachabilityStatus =
+        await this.reachabilityService.getReachabilityStatus(msisdn);
       reachabilityData = {
         reachable: reachabilityStatus.reachable,
         checked_ts: new Date().toISOString(),
         last_activity_ts: reachabilityStatus.lastStatusTime,
       };
     } catch (error) {
-      this.logger.error(`Failed to get reachability for ${msisdn_hash.substring(0, 8)}:`, error.message);
+      this.logger.error(
+        `Failed to get reachability for ${msisdn_hash.substring(0, 8)}:`,
+        error.message,
+      );
       // Default to unknown reachability
       reachabilityData = {
         reachable: false,
@@ -127,7 +133,10 @@ export class NetworkEventService {
   /**
    * Store a network event for processing
    */
-  async storeEvent(event: DormantInputEvent, eventType: string): Promise<string> {
+  async storeEvent(
+    event: DormantInputEvent,
+    eventType: string,
+  ): Promise<string> {
     const networkEvent = await this.prisma.networkEvent.create({
       data: {
         msisdn_hash: event.msisdn_hash,
@@ -137,7 +146,9 @@ export class NetworkEventService {
       },
     });
 
-    this.logger.log(`Stored ${eventType} event ${networkEvent.id} for ${event.msisdn_hash.substring(0, 8)}...`);
+    this.logger.log(
+      `Stored ${eventType} event ${networkEvent.id} for ${event.msisdn_hash.substring(0, 8)}...`,
+    );
     return networkEvent.id;
   }
 
@@ -154,14 +165,16 @@ export class NetworkEventService {
   /**
    * Get unprocessed events for batch processing
    */
-  async getUnprocessedEvents(limit = 100): Promise<Array<{ id: string; payload: DormantInputEvent }>> {
+  async getUnprocessedEvents(
+    limit = 100,
+  ): Promise<Array<{ id: string; payload: DormantInputEvent }>> {
     const events = await this.prisma.networkEvent.findMany({
       where: { processed: false },
       orderBy: { created_at: 'asc' },
       take: limit,
     });
 
-    return events.map(event => ({
+    return events.map((event) => ({
       id: event.id,
       // Prisma returns JsonValue; cast via unknown to DormantInputEvent
       payload: event.payload as unknown as DormantInputEvent,
@@ -172,8 +185,10 @@ export class NetworkEventService {
    * Clean up old processed events (retention policy)
    */
   async cleanupOldEvents(retentionDays = 90): Promise<number> {
-    const cutoffDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
-    
+    const cutoffDate = new Date(
+      Date.now() - retentionDays * 24 * 60 * 60 * 1000,
+    );
+
     const result = await this.prisma.networkEvent.deleteMany({
       where: {
         processed: true,

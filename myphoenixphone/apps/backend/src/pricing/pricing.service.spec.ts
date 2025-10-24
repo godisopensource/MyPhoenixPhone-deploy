@@ -153,7 +153,9 @@ describe('PricingService', () => {
       );
 
       expect(estimate.breakdown?.multiplier).toBeCloseTo(0.85, 2);
-      expect(estimate.breakdown?.condition_penalties).toContain('Rayures écran (-15%)');
+      expect(estimate.breakdown?.condition_penalties).toContain(
+        'Rayures écran (-15%)',
+      );
       expect(estimate.estimated_value).toBeLessThan(450); // Base ~450, reduced by 15%
     });
 
@@ -174,7 +176,9 @@ describe('PricingService', () => {
 
       expect(estimate.estimated_value).toBe(0);
       expect(estimate.breakdown?.multiplier).toBe(0);
-      expect(estimate.breakdown?.condition_penalties).toContain('Écran cassé (0% de valeur)');
+      expect(estimate.breakdown?.condition_penalties).toContain(
+        'Écran cassé (0% de valeur)',
+      );
     });
 
     it('should apply battery fair penalty (-10%)', () => {
@@ -193,7 +197,9 @@ describe('PricingService', () => {
       );
 
       expect(estimate.breakdown?.multiplier).toBeCloseTo(0.9, 2);
-      expect(estimate.breakdown?.condition_penalties).toContain('Batterie usée (-10%)');
+      expect(estimate.breakdown?.condition_penalties).toContain(
+        'Batterie usée (-10%)',
+      );
     });
 
     it('should apply battery good penalty (-5%)', () => {
@@ -212,7 +218,9 @@ describe('PricingService', () => {
       );
 
       expect(estimate.breakdown?.multiplier).toBeCloseTo(0.95, 2);
-      expect(estimate.breakdown?.condition_penalties).toContain('Batterie normale (-5%)');
+      expect(estimate.breakdown?.condition_penalties).toContain(
+        'Batterie normale (-5%)',
+      );
     });
 
     it('should return zero value for water damage', () => {
@@ -232,7 +240,9 @@ describe('PricingService', () => {
 
       expect(estimate.estimated_value).toBe(0);
       expect(estimate.breakdown?.multiplier).toBe(0);
-      expect(estimate.breakdown?.condition_penalties).toContain('Dégât des eaux (0% de valeur)');
+      expect(estimate.breakdown?.condition_penalties).toContain(
+        'Dégât des eaux (0% de valeur)',
+      );
     });
 
     it('should apply physical damage penalty (-20%)', () => {
@@ -251,7 +261,9 @@ describe('PricingService', () => {
       );
 
       expect(estimate.breakdown?.multiplier).toBeCloseTo(0.8, 2);
-      expect(estimate.breakdown?.condition_penalties).toContain('Dégâts physiques (-20%): dents, scratches');
+      expect(estimate.breakdown?.condition_penalties).toContain(
+        'Dégâts physiques (-20%): dents, scratches',
+      );
     });
 
     it('should apply carrier lock penalty (-10%)', () => {
@@ -270,7 +282,9 @@ describe('PricingService', () => {
       );
 
       expect(estimate.breakdown?.multiplier).toBeCloseTo(0.9, 2);
-      expect(estimate.breakdown?.condition_penalties).toContain('Verrouillé opérateur (-10%)');
+      expect(estimate.breakdown?.condition_penalties).toContain(
+        'Verrouillé opérateur (-10%)',
+      );
     });
   });
 
@@ -315,7 +329,9 @@ describe('PricingService', () => {
       // Tier 1 device with all penalties stacked
       expect(estimate.estimated_value).toBeGreaterThan(0);
       expect(estimate.estimated_value).toBeLessThan(20); // Tier 1 base ~20
-      expect(estimate.breakdown?.condition_penalties.length).toBeGreaterThanOrEqual(3);
+      expect(
+        estimate.breakdown?.condition_penalties.length,
+      ).toBeGreaterThanOrEqual(3);
     });
   });
 

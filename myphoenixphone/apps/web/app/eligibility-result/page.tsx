@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, Suspense } from "react";
+import { CheckCircleIcon, CrossIcon } from '../components/solaris-icons';
 import { useSearchParams } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -105,8 +106,18 @@ function EligibilityResultContent() {
             </div>
             <div className="card-body">
               <div className="mb-4">
-                <span className={`badge ${data.eligible ? "bg-success" : "bg-danger"} fs-5`}>
-                  {data.eligible ? "✓ Éligible" : "✗ Non éligible"}
+                <span className={`badge ${data.eligible ? "bg-success" : "bg-danger"} fs-5 d-inline-flex align-items-center`}>
+                  {data.eligible ? (
+                    <>
+                      <CheckCircleIcon className="me-2" width={16} height={16} />
+                      Éligible
+                    </>
+                  ) : (
+                    <>
+                      <CrossIcon className="me-2" width={16} height={16} />
+                      Non éligible
+                    </>
+                  )}
                 </span>
               </div>
 

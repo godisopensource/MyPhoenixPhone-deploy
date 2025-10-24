@@ -6,7 +6,7 @@ import session = require('express-session');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableShutdownHooks();
-  
+
   // Allow CORS for local development
   // Support multiple origins when running with Turbo (backend on 3000, frontend on 3001, etc.)
   const allowedOrigins = [
@@ -20,17 +20,20 @@ async function bootstrap() {
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps, Postman, curl)
       if (!origin) return callback(null, true);
-      
+
       // In development, allow all localhost origins
-      if (process.env.NODE_ENV !== 'production' && origin.startsWith('http://localhost:')) {
+      if (
+        process.env.NODE_ENV !== 'production' &&
+        origin.startsWith('http://localhost:')
+      ) {
         return callback(null, true);
       }
-      
+
       // Check allowed origins list
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      
+
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,

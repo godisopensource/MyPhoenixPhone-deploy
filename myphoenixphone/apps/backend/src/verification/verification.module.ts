@@ -12,11 +12,7 @@ import { ConsentModule } from '../consent/consent.module';
 @Module({
   imports: [ConsentModule],
   controllers: [VerificationController],
-  providers: [
-    NumberVerificationService,
-    CaptchaGuard,
-    OAuth2ClientService,
-  ],
+  providers: [NumberVerificationService, CaptchaGuard, OAuth2ClientService],
   exports: [NumberVerificationService, CaptchaGuard],
 })
 export class VerificationModule {}

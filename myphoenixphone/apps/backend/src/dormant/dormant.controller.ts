@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Param, Body, Query, HttpCode, HttpStatus, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  Query,
+  HttpCode,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
 import { DormantDetectorService } from './dormant-detector.service';
 import { NetworkEventService } from './network-event.service';
 import type { DormantInputEvent } from './network-event.service';
@@ -20,14 +30,16 @@ export class DormantController {
   @Post('process')
   @HttpCode(HttpStatus.OK)
   async processEvent(@Body() event: DormantInputEvent): Promise<LeadOutput> {
-    this.logger.log(`Processing event for ${event.msisdn_hash.substring(0, 8)}...`);
-    
+    this.logger.log(
+      `Processing event for ${event.msisdn_hash.substring(0, 8)}...`,
+    );
+
     // Store the event
     await this.eventService.storeEvent(event, 'dormant_check');
-    
+
     // Process through detector
     const lead = await this.detectorService.process(event);
-    
+
     return lead;
   }
 
@@ -37,22 +49,24 @@ export class DormantController {
    */
   @Post('collect')
   @HttpCode(HttpStatus.OK)
-  async collectAndProcess(@Body() body: { msisdn: string }): Promise<LeadOutput> {
+  async collectAndProcess(
+    @Body() body: { msisdn: string },
+  ): Promise<LeadOutput> {
     const { msisdn } = body;
     this.logger.log(`Collecting signals for MSISDN`);
-    
+
     // Collect signals from network
     const event = await this.eventService.collectSignals(msisdn);
-    
+
     // Store the event
     const eventId = await this.eventService.storeEvent(event, 'dormant_check');
-    
+
     // Process through detector
     const lead = await this.detectorService.process(event);
-    
+
     // Mark event as processed
     await this.eventService.markProcessed(eventId);
-    
+
     return lead;
   }
 
@@ -117,7 +131,7 @@ export class DormantController {
   async purgeExpired() {
     const count = await this.detectorService.purgeExpiredLeads();
     const eventCount = await this.eventService.cleanupOldEvents();
-    
+
     return {
       leads_purged: count,
       events_cleaned: eventCount,

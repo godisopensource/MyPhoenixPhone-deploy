@@ -22,7 +22,7 @@ export class LeadTrackingService {
   /**
    * Associe un lead_id avec un msisdn et une campagne
    * Crée un Lead dans la DB si inexistant, sinon update
-   * 
+   *
    * @param leadId - UUID généré pour le lead
    * @param msisdnHash - Hash du numéro de téléphone
    * @param campaignId - ID de la campagne qui génère ce lead
@@ -48,7 +48,11 @@ export class LeadTrackingService {
       // On stocke le lead_id dans les signals JSON pour garder l'historique
       const signals = (existingLead.signals as any) || {};
       const leadIds = signals.lead_ids || [];
-      leadIds.push({ id: leadId, campaign_id: campaignId, created_at: new Date() });
+      leadIds.push({
+        id: leadId,
+        campaign_id: campaignId,
+        created_at: new Date(),
+      });
 
       return this.prisma.lead.update({
         where: { id: existingLead.id }, // Use unique ID field
@@ -58,7 +62,7 @@ export class LeadTrackingService {
             lead_ids: leadIds,
             last_lead_id: leadId, // dernier lead_id généré
             last_campaign_id: campaignId,
-          } as any, // Cast to any for Prisma Json type
+          }, // Cast to any for Prisma Json type
         },
       });
     } else {
@@ -72,7 +76,9 @@ export class LeadTrackingService {
           next_action: 'send_nudge',
           exclusions: [],
           signals: {
-            lead_ids: [{ id: leadId, campaign_id: campaignId, created_at: new Date() }],
+            lead_ids: [
+              { id: leadId, campaign_id: campaignId, created_at: new Date() },
+            ],
             last_lead_id: leadId,
             last_campaign_id: campaignId,
           } as any, // Cast to any for Prisma Json type

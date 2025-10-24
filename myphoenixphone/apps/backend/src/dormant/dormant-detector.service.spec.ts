@@ -50,7 +50,11 @@ describe('DormantDetectorService', () => {
         activation_window_days: 11,
         next_action: 'send_nudge',
         exclusions: [],
-        signals: { days_since_swap: 3.5, days_unreachable: 3.2, swap_count_30d: 1 },
+        signals: {
+          days_since_swap: 3.5,
+          days_unreachable: 3.2,
+          swap_count_30d: 1,
+        },
         contact_count: 0,
         last_contact_at: null,
         device_model: null,
@@ -68,8 +72,12 @@ describe('DormantDetectorService', () => {
       const result = await service.process(fixture.event as any);
 
       expect(result.eligible).toBe(true);
-      expect(result.dormant_score).toBeGreaterThanOrEqual(fixture.expected.dormant_score?.min ?? 0.75);
-      expect(result.dormant_score).toBeLessThanOrEqual(fixture.expected.dormant_score?.max ?? 1.0);
+      expect(result.dormant_score).toBeGreaterThanOrEqual(
+        fixture.expected.dormant_score?.min ?? 0.75,
+      );
+      expect(result.dormant_score).toBeLessThanOrEqual(
+        fixture.expected.dormant_score?.max ?? 1.0,
+      );
       expect(result.next_action).toBe(fixture.expected.next_action);
       expect(result.exclusions).toEqual(fixture.expected.exclusions);
     });
@@ -88,7 +96,11 @@ describe('DormantDetectorService', () => {
         activation_window_days: 1,
         next_action: 'hold',
         exclusions: ['too_soon_after_swap'],
-        signals: { days_since_swap: 1.2, days_unreachable: 1.0, swap_count_30d: 1 },
+        signals: {
+          days_since_swap: 1.2,
+          days_unreachable: 1.0,
+          swap_count_30d: 1,
+        },
         contact_count: 0,
         last_contact_at: null,
         device_model: null,

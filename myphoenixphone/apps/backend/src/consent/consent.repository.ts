@@ -15,14 +15,12 @@ const consentOps = new Counter({
 export class ConsentRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
-    data: {
-      msisdn_hash: string;
-      scopes: string[];
-      proof: any;
-      revoked_at?: Date | null;
-    },
-  ) {
+  async create(data: {
+    msisdn_hash: string;
+    scopes: string[];
+    proof: any;
+    revoked_at?: Date | null;
+  }) {
     try {
       const created = await this.prisma.consent.create({ data });
       consentOps.inc({ op: 'create', result: 'ok' });

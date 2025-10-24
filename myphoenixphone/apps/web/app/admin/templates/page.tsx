@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { InfoIcon, BoxIcon, CrossIcon, CheckIcon, PrintIcon } from '../../components/solaris-icons';
 
 interface Template {
   id: string;
@@ -147,26 +148,10 @@ export default function TemplatesPage() {
 
   const getChannelIcon = (channel: string) => {
     const icons = {
-      sms: (
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/>
-        </svg>
-      ),
-      email: (
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/>
-        </svg>
-      ),
-      rcs: (
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
-        </svg>
-      ),
-      push: (
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"/>
-        </svg>
-      ),
+      sms: <InfoIcon width={16} height={16} />,
+      email: <PrintIcon width={16} height={16} />,
+      rcs: <InfoIcon width={16} height={16} />,
+      push: <InfoIcon width={16} height={16} />,
     };
     return icons[channel as keyof typeof icons] || icons.sms;
   };
@@ -203,9 +188,7 @@ export default function TemplatesPage() {
           }}
           style={{ backgroundColor: '#ff7900', borderColor: '#ff7900' }}
         >
-          <svg className="me-2" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-          </svg>
+          <BoxIcon className="me-2" width={16} height={16} />
           Nouveau template
         </button>
       </div>
@@ -327,15 +310,13 @@ export default function TemplatesPage() {
               />
             </div>
 
-            <div className="d-flex gap-2">
+              <div className="d-flex gap-2">
               <button
                 className="btn btn-primary"
                 onClick={handleSave}
                 style={{ backgroundColor: '#ff7900', borderColor: '#ff7900' }}
               >
-                <svg className="me-2" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.71l-5.223 2.206A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/>
-                </svg>
+                <CheckIcon className="me-2" width={16} height={16} />
                 Enregistrer
               </button>
               <button
@@ -379,9 +360,7 @@ export default function TemplatesPage() {
           <div className="col-12">
             <div className="card border-0 shadow-sm">
               <div className="card-body text-center py-5">
-                <svg width="64" height="64" fill="#dee2e6" viewBox="0 0 16 16" className="mb-3">
-                  <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
-                </svg>
+                <InfoIcon width={64} height={64} className="mb-3" fill="#dee2e6" />
                 <h5 className="text-muted">Aucun template</h5>
                 <p className="text-muted mb-0">Commencez par créer votre premier modèle</p>
               </div>
@@ -409,10 +388,7 @@ export default function TemplatesPage() {
                       className="btn btn-sm btn-outline-danger"
                       onClick={() => handleDelete(template.id, template.name)}
                     >
-                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                        <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                      </svg>
+                      <CrossIcon width={14} height={14} />
                     </button>
                   </div>
 
@@ -434,9 +410,7 @@ export default function TemplatesPage() {
                   {(template.variants.b || template.variants.c || template.variants.d) && (
                     <div className="mb-3">
                       <small className="text-muted">
-                        <svg width="12" height="12" fill="currentColor" className="me-1" viewBox="0 0 16 16">
-                          <circle cx="8" cy="8" r="8"/>
-                        </svg>
+                        <CheckIcon className="me-1" width={12} height={12} />
                         Tests A/B/C/D
                       </small>
                     </div>
@@ -453,10 +427,7 @@ export default function TemplatesPage() {
                     className="btn btn-sm btn-outline-primary w-100"
                     onClick={() => handleEdit(template)}
                   >
-                    <svg className="me-1" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                      <path fillRule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                    </svg>
+                    <BoxIcon className="me-1" width={14} height={14} />
                     Modifier
                   </button>
                 </div>

@@ -15,6 +15,7 @@ import { PricingModule } from './pricing/pricing.module';
 import { CampaignModule } from './campaign/campaign.module';
 import { NudgeModule } from './nudge/nudge.module';
 import { HandoverModule } from './handover/handover.module';
+import { PhoneModelsModule } from './phone-models/phone-models.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { HandoverModule } from './handover/handover.module';
     CampaignModule,
     NudgeModule,
     HandoverModule,
+    PhoneModelsModule,
   ],
   controllers: [AppController, MetricsController],
   providers: [AppService],

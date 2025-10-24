@@ -99,7 +99,9 @@ export class EligibilityRulesService {
   evaluateEligibility(
     simSwap: SimSwapResult,
     reachability: ReachabilityResult,
-    deviceValidation?: import('./device-model.service').DeviceModelValidation | null,
+    deviceValidation?:
+      | import('./device-model.service').DeviceModelValidation
+      | null,
   ): EligibilityEvaluation {
     const reasons: EligibilityReason[] = [];
     const snapshot: EligibilityEvaluation['snapshot'] = {};
@@ -212,7 +214,9 @@ export class EligibilityRulesService {
    * Evaluate device model signal
    */
   private evaluateDeviceModel(
-    deviceValidation?: import('./device-model.service').DeviceModelValidation | null,
+    deviceValidation?:
+      | import('./device-model.service').DeviceModelValidation
+      | null,
   ): {
     reasons: EligibilityReason[];
     snapshot: EligibilityEvaluation['snapshot']['device'];

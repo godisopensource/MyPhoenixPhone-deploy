@@ -37,16 +37,17 @@ describe('LeadTrackingService', () => {
   describe('generateLeadId', () => {
     it('should generate a valid UUID v4', () => {
       const leadId = service.generateLeadId();
-      
+
       // UUID v4 format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
-      const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const uuidV4Regex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       expect(leadId).toMatch(uuidV4Regex);
     });
 
     it('should generate unique IDs', () => {
       const id1 = service.generateLeadId();
       const id2 = service.generateLeadId();
-      
+
       expect(id1).not.toBe(id2);
     });
   });
@@ -68,7 +69,11 @@ describe('LeadTrackingService', () => {
         },
       });
 
-      const result = await service.associateLeadWithCampaign(leadId, msisdnHash, campaignId);
+      const result = await service.associateLeadWithCampaign(
+        leadId,
+        msisdnHash,
+        campaignId,
+      );
 
       expect(mockPrismaService.lead.findFirst).toHaveBeenCalledWith({
         where: { msisdn_hash: msisdnHash },
@@ -106,7 +111,11 @@ describe('LeadTrackingService', () => {
         },
       });
 
-      const result = await service.associateLeadWithCampaign(leadId, msisdnHash, campaignId);
+      const result = await service.associateLeadWithCampaign(
+        leadId,
+        msisdnHash,
+        campaignId,
+      );
 
       expect(mockPrismaService.lead.update).toHaveBeenCalledWith({
         where: { id: existingLead.id },

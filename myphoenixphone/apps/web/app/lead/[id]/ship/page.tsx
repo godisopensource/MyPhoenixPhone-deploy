@@ -1,7 +1,8 @@
  'use client';
 
  import { useState, useEffect } from 'react';
- import Link from 'next/link';
+import Link from 'next/link';
+import { BoxIcon } from '../../../components/solaris-icons';
 
  interface ShippingLabel {
    tracking_number: string;
@@ -43,19 +44,44 @@
    };
 
    const downloadPdf = () => {
-     if (!label?.label_base64) return;
-     const a = document.createElement('a');
-     a.href = `data:application/pdf;base64,${label.label_base64}`;
-     a.download = `colissimo-${label.tracking_number}.pdf`;
-     a.click();
+     if (!label?.label_base64) {
+       alert('Aucune étiquette disponible');
+       return;
+     }
+     try {
+       // Créer un blob à partir du base64
+       const byteCharacters = atob(label.label_base64);
+       const byteNumbers = new Array(byteCharacters.length);
+       for (let i = 0; i < byteCharacters.length; i++) {
+         byteNumbers[i] = byteCharacters.charCodeAt(i);
+       }
+       const byteArray = new Uint8Array(byteNumbers);
+       const blob = new Blob([byteArray], { type: 'application/pdf' });
+       
+       // Créer un lien de téléchargement
+       const url = window.URL.createObjectURL(blob);
+       const a = document.createElement('a');
+       a.href = url;
+       a.download = `colissimo-${label.tracking_number}.pdf`;
+       document.body.appendChild(a);
+       a.click();
+       document.body.removeChild(a);
+       window.URL.revokeObjectURL(url);
+     } catch (err) {
+       console.error('Erreur lors du téléchargement:', err);
+       alert('Erreur lors du téléchargement du PDF');
+     }
    };
 
    return (
      <main className="container py-5">
-       <div className="text-center mb-4">
-         <h1 style={{ color: '#ff7900' }}>📦 Envoi gratuit</h1>
-         <p className="text-muted">Recevez une étiquette Colissimo prépayée</p>
-       </div>
+      <div className="text-center mb-4">
+        <h1 style={{ color: '#ff7900' }}>
+          <BoxIcon width={28} height={28} className="me-2" />
+          Envoi gratuit
+        </h1>
+        <p className="text-muted">Recevez une étiquette Colissimo prépayée</p>
+      </div>
 
        {error && <div className="alert alert-danger"><strong>Erreur :</strong> {error}</div>}
 
@@ -76,12 +102,30 @@
          </section>
        ) : (
          <section className="mx-auto" style={{ maxWidth: 680 }}>
-           <div className="alert alert-success">Étiquette générée</div>
+           <div className="alert alert-success">✓ Étiquette générée avec succès</div>
            <p><strong>Numéro de suivi:</strong> <code style={{ color: '#ff7900' }}>{label.tracking_number}</code></p>
-           {label.label_base64 && <iframe src={`data:application/pdf;base64,${label.label_base64}`} style={{ width: '100%', height: 420 }} title="Étiquette" />}
+           <p className="text-muted small">Valide jusqu'au: {new Date(label.expiry_date).toLocaleDateString('fr-FR')}</p>
+           
+           {label.label_base64 && (
+             <div className="border rounded p-2 mb-3" style={{ backgroundColor: '#f8f9fa' }}>
+               <iframe 
+                 src={`data:application/pdf;base64,${label.label_base64}`} 
+                 style={{ width: '100%', height: 420, border: 'none' }} 
+                 title="Étiquette Colissimo"
+               />
+               <p className="text-muted small mt-2 mb-0">
+                 Si l'aperçu ne s'affiche pas, utilisez le bouton "Télécharger PDF" ci-dessous.
+               </p>
+             </div>
+           )}
+           
            <div className="mt-3 d-flex gap-2">
-             <button className="btn btn-primary" style={{ background: '#ff7900', borderColor: '#ff7900' }} onClick={() => window.print()}>Imprimer</button>
-             <button className="btn btn-outline-secondary" onClick={downloadPdf}>Télécharger PDF</button>
+             <button className="btn btn-primary" style={{ background: '#ff7900', borderColor: '#ff7900' }} onClick={() => window.print()}>
+               🖨️ Imprimer
+             </button>
+             <button className="btn btn-outline-secondary" onClick={downloadPdf}>
+               📥 Télécharger PDF
+             </button>
            </div>
          </section>
        )}

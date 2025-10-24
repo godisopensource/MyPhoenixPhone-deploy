@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { BoxIcon, ShopIcon, HeartIcon } from '../../../components/solaris-icons';
 
 interface PhoneModel {
   id: string;
@@ -100,13 +101,15 @@ export default function EstimateDisplay({ estimate, phone, onReset, leadId }: Pr
                   className="btn btn-outline-primary w-100 h-100 text-decoration-none"
                   style={!leadId ? { pointerEvents: 'none', opacity: 0.5 } : {}}
                 >
-                  <div className="py-3">
-                    <div className="fs-4 mb-2">📦</div>
-                    <h6>Envoi gratuit</h6>
-                    <small className="text-muted">
-                      Générer une étiquette Colissimo prépayée
-                    </small>
-                  </div>
+                    <div className="py-3">
+                      <div className="fs-4 mb-2">
+                        <BoxIcon width={28} height={28} className="" />
+                      </div>
+                      <h6>Envoi gratuit</h6>
+                      <small className="text-muted">
+                        Générer une étiquette Colissimo prépayée
+                      </small>
+                    </div>
                 </Link>
               </div>
 
@@ -117,7 +120,9 @@ export default function EstimateDisplay({ estimate, phone, onReset, leadId }: Pr
                   style={!leadId ? { pointerEvents: 'none', opacity: 0.5 } : {}}
                 >
                   <div className="py-3">
-                    <div className="fs-4 mb-2">🏪</div>
+                    <div className="fs-4 mb-2">
+                      <ShopIcon width={28} height={28} className="" />
+                    </div>
                     <h6>En boutique</h6>
                     <small className="text-muted">
                       Générer un code de dépôt
@@ -129,7 +134,9 @@ export default function EstimateDisplay({ estimate, phone, onReset, leadId }: Pr
               <div className="col-md-4 mb-3">
                 <button className="btn btn-outline-secondary w-100 h-100">
                   <div className="py-3">
-                    <div className="fs-4 mb-2">❤️</div>
+                    <div className="fs-4 mb-2">
+                      <HeartIcon width={28} height={28} className="" />
+                    </div>
                     <h6>Don solidaire</h6>
                     <small className="text-muted">
                       Offrir à une association (Emmaüs Connect)

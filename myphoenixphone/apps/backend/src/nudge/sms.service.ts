@@ -7,19 +7,22 @@ import axios from 'axios';
  * Orange SMS Service
  * Intègre l'API Orange Contact Everyone pour l'envoi de SMS
  * https://developer.orange.com/apis/contact-everyone
- * 
+ *
  * En mode DEV: simulation (mock) de l'envoi
  * En mode PROD: utilise les credentials Orange Contact Everyone
  */
 @Injectable()
 export class OrangeSmsService {
   private readonly logger = new Logger(OrangeSmsService.name);
-  
+
   // Configuration Orange Contact Everyone API
-  private readonly orangeApiUrl = process.env.ORANGE_SMS_API_URL || 'https://api.orange.com/smsmessaging/v1';
+  private readonly orangeApiUrl =
+    process.env.ORANGE_SMS_API_URL || 'https://api.orange.com/smsmessaging/v1';
   private readonly orangeApiKey = process.env.ORANGE_SMS_API_KEY;
-  private readonly orangeSenderName = process.env.ORANGE_SMS_SENDER_NAME || 'Orange';
-  private readonly frontendBaseUrl = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
+  private readonly orangeSenderName =
+    process.env.ORANGE_SMS_SENDER_NAME || 'Orange';
+  private readonly frontendBaseUrl =
+    process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
   private readonly isDev = process.env.NODE_ENV !== 'production';
 
   constructor(
@@ -29,7 +32,7 @@ export class OrangeSmsService {
 
   /**
    * Envoie une campagne SMS à une liste de leads
-   * 
+   *
    * @param campaignId - ID de la campagne
    * @returns Statistiques d'envoi
    */
@@ -46,7 +49,9 @@ export class OrangeSmsService {
     }
 
     if (campaign.status !== 'scheduled' && campaign.status !== 'draft') {
-      throw new Error(`Campaign ${campaignId} cannot be sent (status: ${campaign.status})`);
+      throw new Error(
+        `Campaign ${campaignId} cannot be sent (status: ${campaign.status})`,
+      );
     }
 
     // 2. Récupérer les leads ciblés via les filtres
@@ -88,11 +93,11 @@ export class OrangeSmsService {
       const batch = leads.slice(i, i + batchSize);
 
       const results = await Promise.all(
-        batch.map(lead => this.sendSmsToLead(lead, campaign)),
+        batch.map((lead) => this.sendSmsToLead(lead, campaign)),
       );
 
       totalSent += results.length;
-      totalDelivered += results.filter(r => r.delivered).length;
+      totalDelivered += results.filter((r) => r.delivered).length;
 
       // Throttling: attendre entre les batches
       if (i + batchSize < leads.length) {
@@ -215,7 +220,7 @@ export class OrangeSmsService {
       payload,
       {
         headers: {
-          'Authorization': `Bearer ${this.orangeApiKey}`,
+          Authorization: `Bearer ${this.orangeApiKey}`,
           'Content-Type': 'application/json',
         },
       },
@@ -228,7 +233,11 @@ export class OrangeSmsService {
   /**
    * Construit le message SMS à partir du template
    */
-  private buildMessage(templateId: string, variant: string, url: string): string {
+  private buildMessage(
+    templateId: string,
+    variant: string,
+    url: string,
+  ): string {
     // Templates prédéfinis (DD-01)
     const templates: Record<string, Record<string, string>> = {
       default: {
@@ -285,6 +294,6 @@ export class OrangeSmsService {
    * Utilitaire: sleep pour throttling
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

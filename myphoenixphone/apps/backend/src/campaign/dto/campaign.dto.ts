@@ -1,4 +1,13 @@
-import { IsString, IsOptional, IsInt, Min, IsEnum, IsDateString, IsObject, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  Min,
+  IsEnum,
+  IsDateString,
+  IsObject,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export enum CampaignChannel {

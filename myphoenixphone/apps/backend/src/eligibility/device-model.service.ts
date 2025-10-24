@@ -36,7 +36,11 @@ export interface DeviceModelValidation {
   manufacturer?: string;
   model?: string;
   variant?: string;
-  reason: 'DEVICE_MODEL_ELIGIBLE' | 'DEVICE_MODEL_NOT_FOUND' | 'DEVICE_MODEL_UNKNOWN' | 'DEVICE_BRAND_NOT_ELIGIBLE';
+  reason:
+    | 'DEVICE_MODEL_ELIGIBLE'
+    | 'DEVICE_MODEL_NOT_FOUND'
+    | 'DEVICE_MODEL_UNKNOWN'
+    | 'DEVICE_BRAND_NOT_ELIGIBLE';
   action?: 'donate' | 'visit_store';
 }
 
@@ -61,13 +65,13 @@ export class DeviceModelService {
       const filePath = path.join(__dirname, 'eligible-phone-models.json');
       const fileContent = fs.readFileSync(filePath, 'utf-8');
       this.eligibleModels = JSON.parse(fileContent);
-      
+
       const manufacturerCount = Object.keys(this.eligibleModels).length;
       const modelCount = Object.values(this.eligibleModels).reduce(
         (sum, models) => sum + models.length,
         0,
       );
-      
+
       this.logger.log(
         `Loaded ${modelCount} eligible models from ${manufacturerCount} manufacturers`,
       );
@@ -103,7 +107,7 @@ export class DeviceModelService {
 
   /**
    * Validate device selection from user
-   * 
+   *
    * Business rules:
    * - If model found in list → eligible
    * - If "not_found" → not eligible, suggest donation
@@ -111,7 +115,9 @@ export class DeviceModelService {
    * - If "unknown_model" + brand not in list → not eligible, suggest donation
    */
   validateDeviceSelection(selection: DeviceSelection): DeviceModelValidation {
-    this.logger.debug(`Validating device selection: ${JSON.stringify(selection)}`);
+    this.logger.debug(
+      `Validating device selection: ${JSON.stringify(selection)}`,
+    );
 
     // Handle special selections
     if (selection.selection === 'not_found') {

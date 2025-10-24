@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { InfoIcon, BoxIcon, TruckIcon, CrossIcon, CheckIcon, PrintIcon } from '../../components/solaris-icons';
 
 interface Campaign {
   id: string;
@@ -107,26 +108,10 @@ export default function CampaignsPage() {
 
   const getChannelIcon = (channel: string) => {
     const icons = {
-      sms: (
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/>
-        </svg>
-      ),
-      email: (
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/>
-        </svg>
-      ),
-      rcs: (
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
-        </svg>
-      ),
-      push: (
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"/>
-        </svg>
-      ),
+      sms: <InfoIcon width={16} height={16} />,
+      email: <PrintIcon width={16} height={16} />,
+      rcs: <InfoIcon width={16} height={16} />,
+      push: <InfoIcon width={16} height={16} />,
     };
     return icons[channel as keyof typeof icons] || icons.sms;
   };
@@ -143,9 +128,7 @@ export default function CampaignsPage() {
           className="btn btn-primary"
           style={{ backgroundColor: '#ff7900', borderColor: '#ff7900' }}
         >
-          <svg className="me-2" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-          </svg>
+          <BoxIcon className="me-2" width={16} height={16} />
           Nouvelle campagne
         </Link>
       </div>
@@ -176,10 +159,7 @@ export default function CampaignsPage() {
                 className="btn btn-sm btn-outline-secondary"
                 onClick={fetchCampaigns}
               >
-                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path fillRule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-                  <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-                </svg>
+                <InfoIcon width={16} height={16} />
               </button>
             </div>
           </div>
@@ -196,9 +176,7 @@ export default function CampaignsPage() {
       ) : campaigns.length === 0 ? (
         <div className="card border-0 shadow-sm">
           <div className="card-body text-center py-5">
-            <svg width="64" height="64" fill="#dee2e6" viewBox="0 0 16 16" className="mb-3">
-              <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
-            </svg>
+            <InfoIcon width={64} height={64} className="mb-3" fill="#dee2e6" />
             <h5 className="text-muted">Aucune campagne</h5>
             <p className="text-muted mb-3">
               {filterStatus !== 'all' 
@@ -301,9 +279,7 @@ export default function CampaignsPage() {
                             className="btn btn-outline-secondary"
                             title="Statistiques"
                           >
-                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                              <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/>
-                            </svg>
+                            <CheckIcon width={14} height={14} />
                           </Link>
                           
                           {(campaign.status === 'draft' || campaign.status === 'scheduled') && (
@@ -313,10 +289,7 @@ export default function CampaignsPage() {
                                 className="btn btn-outline-secondary"
                                 title="Modifier"
                               >
-                                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                                  <path fillRule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                                </svg>
+                                <BoxIcon width={14} height={14} />
                               </Link>
                               
                               <button 
@@ -325,9 +298,7 @@ export default function CampaignsPage() {
                                 title="Lancer"
                                 style={{ color: '#ff7900', borderColor: '#ff7900' }}
                               >
-                                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                  <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
-                                </svg>
+                                <TruckIcon width={14} height={14} />
                               </button>
                             </>
                           )}
@@ -337,10 +308,7 @@ export default function CampaignsPage() {
                             onClick={() => handleDelete(campaign.id, campaign.name)}
                             title="Supprimer"
                           >
-                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                              <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                              <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                            </svg>
+                            <CrossIcon width={14} height={14} />
                           </button>
                         </div>
                       </td>

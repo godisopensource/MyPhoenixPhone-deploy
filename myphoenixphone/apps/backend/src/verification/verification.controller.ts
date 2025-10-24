@@ -90,7 +90,9 @@ export class VerificationController {
 
     // Hash MSISDN for logging (SEC-01)
     const msisdnHash = this.hashMsisdn(dto.phoneNumber);
-    console.log(`[VerificationController] Processing verification for MSISDN hash: ${msisdnHash}`);
+    console.log(
+      `[VerificationController] Processing verification for MSISDN hash: ${msisdnHash}`,
+    );
 
     try {
       const result = await this.numberVerificationService.verifyNumber(
@@ -99,7 +101,9 @@ export class VerificationController {
       );
 
       if (result.codeSent) {
-        console.log(`[VerificationController] Verification code sent to MSISDN hash: ${msisdnHash}`);
+        console.log(
+          `[VerificationController] Verification code sent to MSISDN hash: ${msisdnHash}`,
+        );
         return {
           ok: true,
           codeSent: true,
@@ -108,8 +112,10 @@ export class VerificationController {
       }
 
       if (result.verified) {
-        console.log(`[VerificationController] Number verified successfully for MSISDN hash: ${msisdnHash}`);
-        
+        console.log(
+          `[VerificationController] Number verified successfully for MSISDN hash: ${msisdnHash}`,
+        );
+
         // Create a consent record after successful verification
         // This allows the user to access /eligibility without going through Auth France flow
         try {
@@ -123,12 +129,17 @@ export class VerificationController {
               device_selection: dto.deviceSelection || null,
             },
           });
-          console.log(`[VerificationController] Consent created for MSISDN hash: ${msisdnHash}`);
+          console.log(
+            `[VerificationController] Consent created for MSISDN hash: ${msisdnHash}`,
+          );
         } catch (consentError) {
-          console.error(`[VerificationController] Failed to create consent:`, consentError);
+          console.error(
+            `[VerificationController] Failed to create consent:`,
+            consentError,
+          );
           // Don't fail the verification if consent creation fails
         }
-        
+
         return {
           ok: true,
           codeSent: false,
@@ -136,7 +147,9 @@ export class VerificationController {
         };
       }
 
-      console.log(`[VerificationController] Number verification failed for MSISDN hash: ${msisdnHash}`);
+      console.log(
+        `[VerificationController] Number verification failed for MSISDN hash: ${msisdnHash}`,
+      );
       return {
         ok: false,
         codeSent: false,
@@ -170,7 +183,9 @@ export class VerificationController {
     }
 
     const msisdnHash = this.hashMsisdn(dto.phoneNumber);
-    console.log(`[VerificationController][DEBUG] Processing verification for MSISDN hash: ${msisdnHash}`);
+    console.log(
+      `[VerificationController][DEBUG] Processing verification for MSISDN hash: ${msisdnHash}`,
+    );
 
     try {
       const result = await this.numberVerificationService.verifyNumber(
@@ -179,7 +194,9 @@ export class VerificationController {
       );
 
       if (result.codeSent) {
-        console.log(`[VerificationController][DEBUG] Verification code sent to MSISDN hash: ${msisdnHash}`);
+        console.log(
+          `[VerificationController][DEBUG] Verification code sent to MSISDN hash: ${msisdnHash}`,
+        );
         return {
           ok: true,
           codeSent: true,
@@ -188,8 +205,10 @@ export class VerificationController {
       }
 
       if (result.verified) {
-        console.log(`[VerificationController][DEBUG] Number verified successfully for MSISDN hash: ${msisdnHash}`);
-        
+        console.log(
+          `[VerificationController][DEBUG] Number verified successfully for MSISDN hash: ${msisdnHash}`,
+        );
+
         // Create a consent record after successful verification
         try {
           await this.consentRepository.create({
@@ -202,11 +221,16 @@ export class VerificationController {
               device_selection: dto.deviceSelection || null,
             },
           });
-          console.log(`[VerificationController][DEBUG] Consent created for MSISDN hash: ${msisdnHash}`);
+          console.log(
+            `[VerificationController][DEBUG] Consent created for MSISDN hash: ${msisdnHash}`,
+          );
         } catch (consentError) {
-          console.error(`[VerificationController][DEBUG] Failed to create consent:`, consentError);
+          console.error(
+            `[VerificationController][DEBUG] Failed to create consent:`,
+            consentError,
+          );
         }
-        
+
         return {
           ok: true,
           codeSent: false,
@@ -214,7 +238,9 @@ export class VerificationController {
         };
       }
 
-      console.log(`[VerificationController][DEBUG] Number verification failed for MSISDN hash: ${msisdnHash}`);
+      console.log(
+        `[VerificationController][DEBUG] Number verification failed for MSISDN hash: ${msisdnHash}`,
+      );
       return {
         ok: false,
         codeSent: false,

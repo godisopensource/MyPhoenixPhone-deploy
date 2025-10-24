@@ -1,6 +1,9 @@
 import { Controller, Post, Body, Logger } from '@nestjs/common';
 import { PricingService } from './pricing.service';
-import type { PricingEstimateDto, PricingEstimateResponse } from './dto/pricing.dto';
+import type {
+  PricingEstimateDto,
+  PricingEstimateResponse,
+} from './dto/pricing.dto';
 
 /**
  * Pricing Controller - DD-07
@@ -20,9 +23,7 @@ export class PricingController {
    * @returns Price estimate with breakdown
    */
   @Post('estimate')
-  estimateValue(
-    @Body() dto: PricingEstimateDto,
-  ): PricingEstimateResponse {
+  estimateValue(@Body() dto: PricingEstimateDto): PricingEstimateResponse {
     this.logger.log(
       `Estimating value for ${dto.model} (${dto.manufacturer || 'unknown brand'})`,
     );

@@ -24,7 +24,8 @@ describe('Dormant System Integration (e2e)', () => {
     await app.init();
 
     prisma = moduleFixture.get<PrismaService>(PrismaService);
-    reachabilityService = moduleFixture.get<ReachabilityService>(ReachabilityService);
+    reachabilityService =
+      moduleFixture.get<ReachabilityService>(ReachabilityService);
   });
 
   afterAll(async () => {
@@ -50,7 +51,9 @@ describe('Dormant System Integration (e2e)', () => {
         old_device_reachability: {
           reachable: false,
           checked_ts: new Date().toISOString(),
-          last_activity_ts: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+          last_activity_ts: new Date(
+            Date.now() - 4 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
         },
         line_type: 'consumer' as const,
         fraud_flag: false,
@@ -80,7 +83,9 @@ describe('Dormant System Integration (e2e)', () => {
         old_device_reachability: {
           reachable: false,
           checked_ts: new Date().toISOString(),
-          last_activity_ts: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+          last_activity_ts: new Date(
+            Date.now() - 4 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
         },
         line_type: 'consumer' as const,
         fraud_flag: true, // FRAUD FLAG
@@ -109,7 +114,9 @@ describe('Dormant System Integration (e2e)', () => {
         old_device_reachability: {
           reachable: false,
           checked_ts: new Date().toISOString(),
-          last_activity_ts: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+          last_activity_ts: new Date(
+            Date.now() - 1 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
         },
         line_type: 'consumer' as const,
         fraud_flag: false,
@@ -139,7 +146,9 @@ describe('Dormant System Integration (e2e)', () => {
         old_device_reachability: {
           reachable: false,
           checked_ts: new Date().toISOString(),
-          last_activity_ts: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          last_activity_ts: new Date(
+            Date.now() - 5 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
         },
         line_type: 'consumer' as const,
         fraud_flag: false,
@@ -168,7 +177,9 @@ describe('Dormant System Integration (e2e)', () => {
         old_device_reachability: {
           reachable: false,
           checked_ts: new Date().toISOString(),
-          last_activity_ts: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          last_activity_ts: new Date(
+            Date.now() - 5 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
         },
         line_type: 'business' as const, // BUSINESS LINE
         fraud_flag: false,

@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
 import * as QRCode from 'qrcode';
+import PDFDocument from 'pdfkit';
 
 export interface ColissimoLabel {
   tracking_number: string;
@@ -43,7 +44,9 @@ export class HandoverService {
 
     if (this.isDev) {
       // DEV MODE: Simulate label generation
-      this.logger.debug(`[DEV MODE] Generated mock Colissimo label: ${trackingNumber}`);
+      this.logger.debug(
+        `[DEV MODE] Generated mock Colissimo label: ${trackingNumber}`,
+      );
 
       // Generate a simple mock PDF label as base64
       const mockPdfBase64 = await this.generateMockPdfLabel(trackingNumber);
@@ -83,7 +86,10 @@ export class HandoverService {
    * Generate a store deposit code + QR code
    * QR code encodes: store code + expiry timestamp
    */
-  async generateStoreDepositCode(leadId: string, storeId?: string): Promise<StoreDepositCode> {
+  async generateStoreDepositCode(
+    leadId: string,
+    storeId?: string,
+  ): Promise<StoreDepositCode> {
     this.logger.log(`Generating store deposit code for lead: ${leadId}`);
 
     // Generate unique store code (format: ORANGE + timestamp + random)
@@ -153,7 +159,9 @@ export class HandoverService {
 
     // In DEV mode, skip database if not available
     if (this.isDev && !process.env.DATABASE_URL) {
-      this.logger.debug(`[DEV MODE] Skipping database recording (no DATABASE_URL)`);
+      this.logger.debug(
+        `[DEV MODE] Skipping database recording (no DATABASE_URL)`,
+      );
       return {
         id: leadId,
         converted: true,
@@ -191,9 +199,9 @@ export class HandoverService {
         converted_at: new Date(),
         // Store handover info in signals JSON
         signals: {
-          ...((lead.signals as any) || {}),
+          ...(lead.signals || {}),
           handover: handoverData,
-        } as any,
+        },
       },
     });
 
@@ -203,37 +211,113 @@ export class HandoverService {
 
   /**
    * Generate mock PDF label (DEV MODE)
-   * Creates a simple text-based PDF representation in base64
+   * Creates a real PDF document with tracking info and barcode
    */
   private async generateMockPdfLabel(trackingNumber: string): Promise<string> {
-    // Simple mock PDF content (this is NOT a real PDF, just a text representation)
-    const mockContent = `
-COLISSIMO PREPAID LABEL
-=======================
-Tracking: ${trackingNumber}
-Generated: ${new Date().toISOString()}
-Valid for 30 days
+    return new Promise((resolve, reject) => {
+      try {
+        const doc = new PDFDocument({ size: 'A4', margin: 50 });
+        const chunks: Buffer[] = [];
 
-This is a mock label for development.
-In production, this would be a real PDF from Colissimo API.
+        // Collect PDF data
+        doc.on('data', (chunk) => chunks.push(chunk));
+        doc.on('end', () => {
+          const pdfBuffer = Buffer.concat(chunks);
+          resolve(pdfBuffer.toString('base64'));
+        });
+        doc.on('error', reject);
 
-Recipient: Lead/Customer
-Service: MyPhoenixPhone - Device Trade-In
-Weight: Not specified
-Value: Estimated per form
+        // Header
+        doc
+          .fontSize(24)
+          .fillColor('#ff7900')
+          .text('COLISSIMO', 50, 50)
+          .fontSize(12)
+          .fillColor('#000')
+          .text('Étiquette Prépayée', 50, 80);
 
-Print and attach this label to your package.
-    `;
+        // Tracking number (large)
+        doc
+          .fontSize(32)
+          .font('Helvetica-Bold')
+          .text(trackingNumber, 50, 150);
 
-    // Convert to base64
-    return Buffer.from(mockContent).toString('base64');
+        // Details
+        doc.fontSize(11).font('Helvetica');
+
+        const details = [
+          ['Généré le:', new Date().toLocaleString('fr-FR')],
+          ['Validité:', '30 jours'],
+          ['Service:', 'MyPhoenixPhone - Reprise'],
+          ['Poids:', 'Déclaré par client'],
+          ['Format:', 'Colis standard'],
+        ];
+
+        let yPos = 220;
+        details.forEach(([label, value]) => {
+          doc
+            .font('Helvetica-Bold')
+            .text(label, 50, yPos, { width: 150, continued: true })
+            .font('Helvetica')
+            .text(' ' + value);
+          yPos += 25;
+        });
+
+        // Instructions
+        doc
+          .fontSize(14)
+          .font('Helvetica-Bold')
+          .text('Instructions:', 50, yPos + 30);
+
+        const instructions = [
+          '1. Imprimez cette étiquette en format A4',
+          '2. Découpez selon les pointillés',
+          '3. Fixez solidement sur votre colis',
+          '4. Déposez dans un point Colissimo',
+        ];
+
+        yPos += 60;
+        instructions.forEach((instruction) => {
+          doc.fontSize(10).font('Helvetica').text(instruction, 70, yPos);
+          yPos += 20;
+        });
+
+        // Barcode simulation (simple text representation)
+        doc
+          .fontSize(8)
+          .font('Courier')
+          .text('||| || ||| | || ||| || | ||| ||', 50, yPos + 40)
+          .fontSize(10)
+          .font('Helvetica')
+          .text(trackingNumber, 50, yPos + 55, { align: 'left' });
+
+        // Footer
+        doc
+          .fontSize(8)
+          .fillColor('#666')
+          .text(
+            'Ceci est une étiquette de développement. En production, utilisez les API Colissimo.',
+            50,
+            750,
+            { align: 'center', width: 500 },
+          );
+
+        // Finalize PDF
+        doc.end();
+      } catch (error) {
+        this.logger.error('Failed to generate PDF', error);
+        reject(error);
+      }
+    });
   }
 
   /**
    * Call real Colissimo API (PRODUCTION)
    * Requires COLISSIMO_API_KEY and COLISSIMO_ACCOUNT_NUMBER env vars
    */
-  private async callColissimoApi(trackingNumber: string): Promise<Partial<ColissimoLabel>> {
+  private async callColissimoApi(
+    trackingNumber: string,
+  ): Promise<Partial<ColissimoLabel>> {
     const apiKey = process.env.COLISSIMO_API_KEY;
     const accountNumber = process.env.COLISSIMO_ACCOUNT_NUMBER;
 
@@ -242,7 +326,10 @@ Print and attach this label to your package.
     }
 
     // Mock implementation (replace with real API call)
-    this.logger.debug('Calling Colissimo API with tracking number:', trackingNumber);
+    this.logger.debug(
+      'Calling Colissimo API with tracking number:',
+      trackingNumber,
+    );
 
     // Example: POST to https://api.colissimo.fr/shipment/v1/labels
     // With authentication and tracking number
@@ -270,7 +357,9 @@ Print and attach this label to your package.
 
     if (this.isDev) {
       // DEV MODE: Simulate geofencing
-      this.logger.debug('[DEV MODE] Geofencing verification simulated - returning true');
+      this.logger.debug(
+        '[DEV MODE] Geofencing verification simulated - returning true',
+      );
       // In dev, simulate 80% success rate
       return Math.random() > 0.2;
     }
@@ -307,14 +396,17 @@ Print and attach this label to your package.
     const apiKey = process.env.ORANGE_NETWORK_API_KEY;
 
     if (!apiKey) {
-      this.logger.warn('Missing ORANGE_NETWORK_API_KEY - location verification disabled');
+      this.logger.warn(
+        'Missing ORANGE_NETWORK_API_KEY - location verification disabled',
+      );
       return true; // Fallback to allow
     }
 
     try {
       // Orange Network APIs endpoint for Device Location Verification
       // Reference: https://developer.orange.com/apis/device-location-verification-camara
-      const url = 'https://api.orange.com/camaraV1/device-location-verification/verify';
+      const url =
+        'https://api.orange.com/camaraV1/device-location-verification/verify';
 
       const response = await fetch(url, {
         method: 'POST',
@@ -323,7 +415,9 @@ Print and attach this label to your package.
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          phoneNumber: phoneNumber.startsWith('+') ? phoneNumber : `+33${phoneNumber.substring(1)}`,
+          phoneNumber: phoneNumber.startsWith('+')
+            ? phoneNumber
+            : `+33${phoneNumber.substring(1)}`,
           latitude,
           longitude,
           radius: radiusMeters,
@@ -332,13 +426,17 @@ Print and attach this label to your package.
       });
 
       if (!response.ok) {
-        this.logger.error(`Orange Location API error: ${response.status} ${response.statusText}`);
+        this.logger.error(
+          `Orange Location API error: ${response.status} ${response.statusText}`,
+        );
         return true; // Fallback
       }
 
-      const data = (await response.json()) as any;
+      const data = await response.json();
       // Response contains: { verificationResult: "TRUE" | "FALSE" }
-      return data.verificationResult === 'TRUE' || data.verificationResult === true;
+      return (
+        data.verificationResult === 'TRUE' || data.verificationResult === true
+      );
     } catch (error) {
       this.logger.error('Orange Location API call failed', error);
       return true; // Fallback to allow if API unavailable
@@ -357,7 +455,7 @@ Print and attach this label to your package.
       throw new Error(`Lead ${leadId} not found`);
     }
 
-    const signals = (lead.signals as any) || {};
+    const signals = lead.signals || {};
     return signals.handover || null;
   }
 }

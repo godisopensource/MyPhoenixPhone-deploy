@@ -1,4 +1,12 @@
-import { IsString, IsBoolean, IsObject, IsOptional, IsEnum, IsNumber, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsBoolean,
+  IsObject,
+  IsOptional,
+  IsEnum,
+  IsNumber,
+  IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class SimSwapDto {

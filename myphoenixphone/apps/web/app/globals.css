@@ -21,6 +21,16 @@ body {
   background: var(--background);
 }
 
+/* Enforce Orange HelvNeue font provided by Boosted (orange-helvetica.min.css)
+   Keep monospace for code blocks */
+body, button, input, select, textarea, h1, h2, h3, h4, h5, h6 {
+  font-family: HelvNeueOrange, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+code, kbd, pre, samp, tt {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;

@@ -39,11 +39,11 @@ Convert dormant device leads into trade-in/donation completions through a fricti
 ┌─────────────────────────────────────┐
 │  Étape 1 sur 3: Votre téléphone     │
 │                                     │
-│  ✓ Détection automatique:           │
+│  [OK] Détection automatique:           │
 │  ┌─────────────────────────────┐   │
 │  │ [📱] iPhone 13 Pro          │   │
 │  │      Apple                   │   │
-│  │      [C'est bien ça ✓]      │   │
+│  │      [C'est bien ça]      │   │
 │  └─────────────────────────────┘   │
 │                                     │
 │  ❌ Ce n'est pas mon téléphone      │
@@ -125,7 +125,7 @@ Convert dormant device leads into trade-in/donation completions through a fricti
 │                                     │
 │  Saisir l'IMEI (15 chiffres):       │
 │  ┌─────────────────────────────┐   │
-│  │ 351234567890123         [✓] │   │
+│  │ 351234567890123         [OK] │   │
 │  └─────────────────────────────┘   │
 │                                     │
 │  ℹ️ L'IMEI permet une estimation    │
@@ -236,7 +236,7 @@ Convert dormant device leads into trade-in/donation completions through a fricti
 │  │                             │   │
 │  │         💰 120 €            │   │
 │  │                             │   │
-│  │  🎁 +20€ BONUS cette semaine │   │
+│  │  +20€ BONUS cette semaine │   │
 │  │     Total: 140€             │   │
 │  │                             │   │
 │  └─────────────────────────────┘   │
@@ -244,14 +244,14 @@ Convert dormant device leads into trade-in/donation completions through a fricti
 │  Comment souhaitez-vous procéder?   │
 │                                     │
 │  ┌─────────────────────────────┐   │
-│  │ 📦 Envoi gratuit à domicile │   │
+│  │ Envoi gratuit à domicile │   │
 │  │    Étiquette fournie        │   │
 │  │    Paiement sous 5 jours    │   │
 │  │    [Choisir]                │   │
 │  └─────────────────────────────┘   │
 │                                     │
 │  ┌─────────────────────────────┐   │
-│  │ 🏪 Dépôt en boutique Orange │   │
+│  │ Dépôt en boutique Orange │   │
 │  │    Trouver une boutique     │   │
 │  │    Paiement immédiat        │   │
 │  │    [Choisir]                │   │
@@ -311,7 +311,7 @@ Convert dormant device leads into trade-in/donation completions through a fricti
 #### Option A: Shipping Label
 ```
 ┌─────────────────────────────────────┐
-│  📦 Envoi gratuit                   │
+│  Envoi gratuit                   │
 │                                     │
 │  Votre étiquette d'envoi:           │
 │                                     │
@@ -331,17 +331,17 @@ Convert dormant device leads into trade-in/donation completions through a fricti
 │  3. Collez l'étiquette              │
 │  4. Déposez en bureau de poste      │
 │                                     │
-│  💰 Paiement sous 5 jours après     │
+│  Paiement sous 5 jours après     │
 │     réception et contrôle           │
 │                                     │
-│  [✓ Terminé]                        │
+│  [Terminé]                        │
 └─────────────────────────────────────┘
 ```
 
 #### Option B: Store Drop-off
 ```
 ┌─────────────────────────────────────┐
-│  🏪 Dépôt en boutique               │
+│  Dépôt en boutique               │
 │                                     │
 │  Votre code de dépôt:               │
 │                                     │
@@ -363,10 +363,10 @@ Convert dormant device leads into trade-in/donation completions through a fricti
 │  2. Apportez votre téléphone        │
 │  3. Montrez ce code au conseiller   │
 │                                     │
-│  💰 Paiement immédiat après         │
+│  Paiement immédiat après         │
 │     contrôle en boutique            │
 │                                     │
-│  [✓ J'ai noté le code]              │
+│  [J'ai noté le code]              │
 └─────────────────────────────────────┘
 ```
 
@@ -392,7 +392,7 @@ Convert dormant device leads into trade-in/donation completions through a fricti
 │  • 1 personne aidée                 │
 │                                     │
 │  [Partager mon geste 📱]            │
-│  [✓ Terminé]                        │
+│  [Terminé]                        │
 └─────────────────────────────────────┘
 ```
 
@@ -541,7 +541,7 @@ Track these user actions:
 ### Network Error
 ```
 ┌─────────────────────────────────────┐
-│  ⚠️ Erreur de connexion             │
+│  Erreur de connexion             │
 │                                     │
 │  Impossible de charger l'estimation.│
 │  Vérifiez votre connexion et       │

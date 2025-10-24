@@ -5,6 +5,7 @@ import ModelSelector from './components/ModelSelector';
 import ConditionForm from './components/ConditionForm';
 import ConsentCheckbox from './components/ConsentCheckbox';
 import EstimateDisplay from './components/EstimateDisplay';
+import { InfoIcon, CheckCircleIcon, CheckIcon, WarningIcon, CrossIcon, BatteryIcon, LockIcon, UnlockIcon, BoxIcon } from '../../components/solaris-icons';
 
 interface DeviceCondition {
   screen: 'perfect' | 'scratches' | 'broken';
@@ -108,11 +109,8 @@ export default function LeadPage({ params }: { params: Promise<{ id: string }> }
         <p className="lead text-muted mb-2">
           Découvrez instantanément la valeur de reprise de votre appareil
         </p>
-        <div className="d-inline-flex align-items-center gap-2 text-muted">
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-          </svg>
+          <div className="d-inline-flex align-items-center gap-2 text-muted">
+          <InfoIcon className="me-2" />
           <small>Estimation gratuite et sans engagement</small>
         </div>
       </div>
@@ -138,13 +136,17 @@ export default function LeadPage({ params }: { params: Promise<{ id: string }> }
             ].map(({ num, label }) => (
               <div key={num} className="text-center position-relative" style={{ zIndex: 1 }}>
                 <div className="mb-2">
-                  <span 
+                    <span 
                     className={`d-inline-flex align-items-center justify-content-center rounded-circle ${
                       step >= num ? 'bg-primary text-white' : 'bg-white text-muted border border-2'
                     }`}
                     style={{ width: '40px', height: '40px', fontWeight: 'bold' }}
                   >
-                    {step > num ? '✓' : num}
+                    {step > num ? (
+                      <CheckCircleIcon width={18} height={18} />
+                    ) : (
+                      num
+                    )}
                   </span>
                 </div>
                 <small className={step >= num ? 'text-primary fw-semibold' : 'text-muted'}>
@@ -177,10 +179,7 @@ export default function LeadPage({ params }: { params: Promise<{ id: string }> }
         <div className="row justify-content-center">
           <div className="col-lg-8">
             <div className="alert alert-info d-flex align-items-center mb-4" role="alert">
-              <svg className="me-2" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm.256 7a4.474 4.474 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10c.26 0 .507.009.74.025.226-.341.496-.65.804-.918C9.077 9.038 8.564 9 8 9c-5 0-6 3-6 4s1 1 1 1h5.256Z"/>
-                <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Zm-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686Z"/>
-              </svg>
+              <InfoIcon className="me-2" />
               <div>
                 <strong>{selectedPhone.brand} {selectedPhone.model}</strong>
                 {selectedPhone.storage && <span className="ms-2 badge bg-secondary">{selectedPhone.storage}</span>}
@@ -218,27 +217,53 @@ export default function LeadPage({ params }: { params: Promise<{ id: string }> }
                   <div className="col-md-6">
                     <small className="text-muted d-block mb-1">État de l'écran</small>
                     <strong>
-                      {condition.screen === 'perfect' && '✓ Parfait'}
-                      {condition.screen === 'scratches' && '⚠ Rayures'}
-                      {condition.screen === 'broken' && '✗ Cassé'}
+                      {condition.screen === 'perfect' && (
+                        <>
+                          <CheckIcon className="me-1" />
+                          Parfait
+                        </>
+                      )}
+                      {condition.screen === 'scratches' && (
+                        <>
+                          <WarningIcon className="me-1" />
+                          Rayures
+                        </>
+                      )}
+                      {condition.screen === 'broken' && (
+                        <>
+                          <CrossIcon className="me-1" />
+                          Cassé
+                        </>
+                      )}
                     </strong>
                   </div>
                   <div className="col-md-6">
                     <small className="text-muted d-block mb-1">État de la batterie</small>
                     <strong>
-                      {condition.battery === 'excellent' && '✓ Excellente (>80%)'}
+                      {condition.battery === 'excellent' && (
+                        <>
+                          <BatteryIcon className="me-1" />
+                          Excellente (&gt;80%)
+                        </>
+                      )}
                       {condition.battery === 'good' && 'Bonne (60-80%)'}
                       {condition.battery === 'fair' && 'Moyenne (<60%)'}
                     </strong>
                   </div>
                   <div className="col-md-6">
                     <small className="text-muted d-block mb-1">Verrouillage opérateur</small>
-                    <strong>{condition.unlocked ? '✓ Déverrouillé' : '✗ Verrouillé'}</strong>
+                    <strong>{condition.unlocked ? (
+                      <><UnlockIcon className="me-1" />Déverrouillé</>
+                    ) : (
+                      <><LockIcon className="me-1" />Verrouillé</>
+                    )}</strong>
                   </div>
                   <div className="col-12">
                     <small className="text-muted d-block mb-1">Dommages physiques</small>
                     <strong>
-                      {condition.damage.length === 0 ? '✓ Aucun dommage' : condition.damage.join(', ')}
+                      {condition.damage.length === 0 ? (
+                        <><CheckIcon className="me-1" />Aucun dommage</>
+                      ) : condition.damage.join(', ')}
                     </strong>
                   </div>
                 </div>
@@ -262,11 +287,9 @@ export default function LeadPage({ params }: { params: Promise<{ id: string }> }
                     <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                     Calcul en cours...
                   </>
-                ) : (
+                    ) : (
                   <>
-                    <svg className="me-2" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2.5 1a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-2zm0 3a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1h-1zm3 0a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1h-1zm3 0a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1h-1zm3 0a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1h-1z"/>
-                    </svg>
+                    <BoxIcon className="me-2" />
                     Obtenir mon estimation gratuite
                   </>
                 )}

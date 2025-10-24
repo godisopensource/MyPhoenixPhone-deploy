@@ -41,7 +41,9 @@ describe('AuthFranceService', () => {
       expect(result).toHaveProperty('state');
       expect(result).toHaveProperty('nonce');
 
-      expect(result.authUrl).toContain('https://login.sandbox.orange.fr/oauth/authorize');
+      expect(result.authUrl).toContain(
+        'https://login.sandbox.orange.fr/oauth/authorize',
+      );
       expect(result.authUrl).toContain('client_id=test-client-id');
       expect(result.authUrl).toContain('response_type=code');
       expect(result.authUrl).toContain('scope=openid+profile+phone+email');
@@ -122,7 +124,12 @@ describe('AuthFranceService', () => {
 
     it('should reject if state does not match', async () => {
       await expect(
-        service.handleCallback('auth-code', 'wrong-state', 'test-state', 'test-nonce'),
+        service.handleCallback(
+          'auth-code',
+          'wrong-state',
+          'test-state',
+          'test-nonce',
+        ),
       ).rejects.toThrow(BadRequestException);
 
       expect(mockedAxios.post).not.toHaveBeenCalled();

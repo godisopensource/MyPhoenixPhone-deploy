@@ -35,11 +35,15 @@ export class DormantDetectorService {
   private readonly logger = new Logger(DormantDetectorService.name);
 
   // Configuration from RULES.md
-  private readonly MIN_DAYS_AFTER_SWAP = Number(process.env.MIN_DAYS_AFTER_SWAP) || 3;
-  private readonly MAX_ACTIVATION_WINDOW_DAYS = Number(process.env.MAX_ACTIVATION_WINDOW_DAYS) || 14;
+  private readonly MIN_DAYS_AFTER_SWAP =
+    Number(process.env.MIN_DAYS_AFTER_SWAP) || 3;
+  private readonly MAX_ACTIVATION_WINDOW_DAYS =
+    Number(process.env.MAX_ACTIVATION_WINDOW_DAYS) || 14;
   private readonly LEAD_TTL_DAYS = Number(process.env.LEAD_TTL_DAYS) || 30;
-  private readonly MAX_SWAPS_30D_THRESHOLD = Number(process.env.MAX_SWAPS_30D_THRESHOLD) || 2;
-  private readonly MIN_DAYS_BETWEEN_CONTACTS = Number(process.env.MIN_DAYS_BETWEEN_CONTACTS) || 14;
+  private readonly MAX_SWAPS_30D_THRESHOLD =
+    Number(process.env.MAX_SWAPS_30D_THRESHOLD) || 2;
+  private readonly MIN_DAYS_BETWEEN_CONTACTS =
+    Number(process.env.MIN_DAYS_BETWEEN_CONTACTS) || 14;
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -48,24 +52,28 @@ export class DormantDetectorService {
    * Implements the complete rule engine from RULES.md
    */
   async process(event: DormantInputEvent): Promise<LeadOutput> {
-    this.logger.debug(`Processing event for ${event.msisdn_hash.substring(0, 8)}...`);
+    this.logger.debug(
+      `Processing event for ${event.msisdn_hash.substring(0, 8)}...`,
+    );
 
     // Calculate signals
     const signals = this.calculateSignals(event);
-    
+
     // Check exclusions
     const exclusions = this.checkExclusions(event, signals);
-    
+
     // Calculate dormant score
     const dormant_score = this.calculateScore(event, signals, exclusions);
-    
+
     // Determine eligibility and next action
-    const eligible = exclusions.length === 0 && signals.days_since_swap >= this.MIN_DAYS_AFTER_SWAP;
+    const eligible =
+      exclusions.length === 0 &&
+      signals.days_since_swap >= this.MIN_DAYS_AFTER_SWAP;
     const next_action = this.determineNextAction(signals, exclusions);
-    
+
     // Calculate activation window
     const activation_window_days = this.calculateActivationWindow(signals);
-    
+
     // Create or update lead with idempotency
     const lead = await this.createOrUpdateLead({
       msisdn_hash: event.msisdn_hash,
@@ -97,19 +105,26 @@ export class DormantDetectorService {
   private calculateSignals(event: DormantInputEvent) {
     const now = Date.now();
     const swapTime = new Date(event.sim_swap.ts).getTime();
-    const reachabilityTime = new Date(event.old_device_reachability.checked_ts).getTime();
-    
+    const reachabilityTime = new Date(
+      event.old_device_reachability.checked_ts,
+    ).getTime();
+
     const days_since_swap = (now - swapTime) / (1000 * 60 * 60 * 24);
-    
+
     let days_unreachable = 0;
-    if (!event.old_device_reachability.reachable && event.old_device_reachability.last_activity_ts) {
-      const lastActivityTime = new Date(event.old_device_reachability.last_activity_ts).getTime();
+    if (
+      !event.old_device_reachability.reachable &&
+      event.old_device_reachability.last_activity_ts
+    ) {
+      const lastActivityTime = new Date(
+        event.old_device_reachability.last_activity_ts,
+      ).getTime();
       days_unreachable = (now - lastActivityTime) / (1000 * 60 * 60 * 24);
     } else if (!event.old_device_reachability.reachable) {
       // If no last activity, assume unreachable since swap
       days_unreachable = days_since_swap;
     }
-    
+
     const swap_count_30d = event.metadata?.swap_count_30d || 1;
 
     return {
@@ -161,7 +176,8 @@ export class DormantDetectorService {
     // Rule: Recently contacted (< MIN_DAYS_BETWEEN_CONTACTS)
     if (event.metadata?.last_contact_ts) {
       const daysSinceContact =
-        (Date.now() - new Date(event.metadata.last_contact_ts).getTime()) / (1000 * 60 * 60 * 24);
+        (Date.now() - new Date(event.metadata.last_contact_ts).getTime()) /
+        (1000 * 60 * 60 * 24);
       if (daysSinceContact < this.MIN_DAYS_BETWEEN_CONTACTS) {
         exclusions.push('recently_contacted');
       }
@@ -182,8 +198,8 @@ export class DormantDetectorService {
 
   /**
    * Calculate dormant score using formula from RULES.md
-   * 
-   * dormant_score = 
+   *
+   * dormant_score =
    *   0.40 × swap_signal +
    *   0.35 × unreachability_signal +
    *   0.15 × time_window_signal +
@@ -191,7 +207,11 @@ export class DormantDetectorService {
    */
   private calculateScore(
     event: DormantInputEvent,
-    signals: { days_since_swap: number; days_unreachable: number; swap_count_30d: number },
+    signals: {
+      days_since_swap: number;
+      days_unreachable: number;
+      swap_count_30d: number;
+    },
     exclusions: ExclusionReason[],
   ): number {
     // If excluded, score is 0
@@ -214,9 +234,14 @@ export class DormantDetectorService {
       time_window_signal = 1.0;
     } else {
       // Decay: max(0, 1 - abs(days_since_swap - 8.5) / 5.5)
-      const optimal_midpoint = (this.MIN_DAYS_AFTER_SWAP + this.MAX_ACTIVATION_WINDOW_DAYS) / 2;
-      const decay_factor = this.MAX_ACTIVATION_WINDOW_DAYS - this.MIN_DAYS_AFTER_SWAP;
-      time_window_signal = Math.max(0, 1 - Math.abs(signals.days_since_swap - optimal_midpoint) / decay_factor);
+      const optimal_midpoint =
+        (this.MIN_DAYS_AFTER_SWAP + this.MAX_ACTIVATION_WINDOW_DAYS) / 2;
+      const decay_factor =
+        this.MAX_ACTIVATION_WINDOW_DAYS - this.MIN_DAYS_AFTER_SWAP;
+      time_window_signal = Math.max(
+        0,
+        1 - Math.abs(signals.days_since_swap - optimal_midpoint) / decay_factor,
+      );
     }
 
     // History signal: max(0, 1 - swap_count_30d / 3)
@@ -257,8 +282,11 @@ export class DormantDetectorService {
   /**
    * Calculate remaining days in activation window
    */
-  private calculateActivationWindow(signals: { days_since_swap: number }): number {
-    const days_remaining = this.MAX_ACTIVATION_WINDOW_DAYS - signals.days_since_swap;
+  private calculateActivationWindow(signals: {
+    days_since_swap: number;
+  }): number {
+    const days_remaining =
+      this.MAX_ACTIVATION_WINDOW_DAYS - signals.days_since_swap;
     return Math.max(1, Math.ceil(days_remaining));
   }
 
@@ -277,7 +305,7 @@ export class DormantDetectorService {
   }) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -311,7 +339,9 @@ export class DormantDetectorService {
     }
 
     // Create new lead
-    this.logger.log(`Creating new lead for ${data.msisdn_hash.substring(0, 8)}...`);
+    this.logger.log(
+      `Creating new lead for ${data.msisdn_hash.substring(0, 8)}...`,
+    );
     return this.prisma.lead.create({
       data: {
         msisdn_hash: data.msisdn_hash,
@@ -387,7 +417,14 @@ export class DormantDetectorService {
     limit?: number;
     offset?: number;
   }) {
-    const { status, tier, lastActiveBefore, lastActiveAfter, limit = 100, offset = 0 } = filters;
+    const {
+      status,
+      tier,
+      lastActiveBefore,
+      lastActiveAfter,
+      limit = 100,
+      offset = 0,
+    } = filters;
 
     const where: any = {
       expires_at: { gt: new Date() }, // Only non-expired leads
@@ -416,10 +453,16 @@ export class DormantDetectorService {
 
     // Last active date filters
     if (lastActiveBefore) {
-      where.created_at = { ...where.created_at, lte: new Date(lastActiveBefore) };
+      where.created_at = {
+        ...where.created_at,
+        lte: new Date(lastActiveBefore),
+      };
     }
     if (lastActiveAfter) {
-      where.created_at = { ...where.created_at, gte: new Date(lastActiveAfter) };
+      where.created_at = {
+        ...where.created_at,
+        gte: new Date(lastActiveAfter),
+      };
     }
 
     const [leads, total] = await Promise.all([
@@ -460,10 +503,18 @@ export class DormantDetectorService {
 
     // By status
     const eligible = await this.prisma.lead.count({
-      where: { eligible: true, contact_count: { lt: 2 }, expires_at: { gt: now } },
+      where: {
+        eligible: true,
+        contact_count: { lt: 2 },
+        expires_at: { gt: now },
+      },
     });
     const contacted = await this.prisma.lead.count({
-      where: { contact_count: { gte: 1 }, converted_at: null, expires_at: { gt: now } },
+      where: {
+        contact_count: { gte: 1 },
+        converted_at: null,
+        expires_at: { gt: now },
+      },
     });
     const converted = await this.prisma.lead.count({
       where: { converted_at: { not: null } },
@@ -505,14 +556,16 @@ export class DormantDetectorService {
 
     // Value distribution
     const average_value = total_leads > 0 ? total_value / total_leads : 0;
-    const median_value = values.length > 0
-      ? values.sort((a, b) => a - b)[Math.floor(values.length / 2)]
-      : 0;
+    const median_value =
+      values.length > 0
+        ? values.sort((a, b) => a - b)[Math.floor(values.length / 2)]
+        : 0;
 
     // Conversion funnel
     const funnel_eligible = eligible + contacted + converted;
     const funnel_contacted = contacted + converted;
-    const conversion_rate = funnel_eligible > 0 ? (converted / funnel_eligible) * 100 : 0;
+    const conversion_rate =
+      funnel_eligible > 0 ? (converted / funnel_eligible) * 100 : 0;
 
     return {
       total_leads,

@@ -67,15 +67,11 @@ describe('NumberVerificationService', () => {
         }),
       });
 
-      await expect(
-        service.sendVerificationCode('invalid'),
-      ).rejects.toThrow();
+      await expect(service.sendVerificationCode('invalid')).rejects.toThrow();
     });
 
     it('should throw error when fetch fails', async () => {
-      (global.fetch as jest.Mock).mockRejectedValue(
-        new Error('Network error'),
-      );
+      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       await expect(
         service.sendVerificationCode('+33612345678'),
@@ -140,9 +136,7 @@ describe('NumberVerificationService', () => {
     });
 
     it('should throw error when fetch fails', async () => {
-      (global.fetch as jest.Mock).mockRejectedValue(
-        new Error('Network error'),
-      );
+      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       await expect(
         service.verifyCode('+33612345678', '123456'),

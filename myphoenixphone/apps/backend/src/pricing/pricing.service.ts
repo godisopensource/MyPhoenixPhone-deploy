@@ -1,7 +1,10 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-import type { DeviceConditionDto, PricingEstimateResponse } from './dto/pricing.dto';
+import type {
+  DeviceConditionDto,
+  PricingEstimateResponse,
+} from './dto/pricing.dto';
 
 /**
  * Phone model data structure from eligible-phone-models.json
@@ -62,7 +65,9 @@ export class PricingService {
 
       const data = await readFile(filePath, 'utf-8');
       this.phoneModels = JSON.parse(data);
-      this.logger.log(`Loaded ${this.phoneModels.length} eligible phone models`);
+      this.logger.log(
+        `Loaded ${this.phoneModels.length} eligible phone models`,
+      );
     } catch (error) {
       this.logger.error('Failed to load phone models', error);
       throw error;
@@ -83,7 +88,8 @@ export class PricingService {
     // Exact match first
     let match = this.phoneModels.find((phone) => {
       const matchesModel = phone.model.toLowerCase() === model.toLowerCase();
-      const matchesBrand = !manufacturer ||
+      const matchesBrand =
+        !manufacturer ||
         phone.brand.toLowerCase() === manufacturer.toLowerCase();
       const matchesStorage = !storage || phone.storage === storage;
       return matchesModel && matchesBrand && matchesStorage;
@@ -93,7 +99,8 @@ export class PricingService {
 
     // Fuzzy match on keywords and model name
     match = this.phoneModels.find((phone) => {
-      const matchesBrand = !manufacturer ||
+      const matchesBrand =
+        !manufacturer ||
         phone.brand.toLowerCase() === manufacturer.toLowerCase();
       const matchesKeywords = searchTerms.every((term) =>
         phone.keywords.some((kw) => kw.includes(term)),

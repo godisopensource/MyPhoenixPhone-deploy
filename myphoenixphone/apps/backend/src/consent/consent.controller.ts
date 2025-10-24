@@ -59,10 +59,7 @@ export class ConsentController {
    */
   @Post('start')
   @Redirect()
-  startConsent(
-    @Body() _dto: StartConsentDto,
-    @Session() session: AuthSession,
-  ) {
+  startConsent(@Body() _dto: StartConsentDto, @Session() session: AuthSession) {
     try {
       const { authUrl, state, nonce } = this.authFranceService.startAuth();
 
@@ -135,12 +132,13 @@ export class ConsentController {
 
     try {
       // Exchange code for tokens and validate
-      const { idToken, claims, scopes } = await this.authFranceService.handleCallback(
-        code,
-        state,
-        storedState,
-        storedNonce,
-      );
+      const { idToken, claims, scopes } =
+        await this.authFranceService.handleCallback(
+          code,
+          state,
+          storedState,
+          storedNonce,
+        );
 
       // Hash MSISDN if present in claims
       const msisdnHash = claims.phone_number
@@ -149,7 +147,9 @@ export class ConsentController {
 
       if (!msisdnHash) {
         this.logger.warn('No phone_number in ID token claims');
-        throw new BadRequestException('No phone number in authorization response');
+        throw new BadRequestException(
+          'No phone number in authorization response',
+        );
       }
 
       // Store consent proof in database
@@ -244,9 +244,6 @@ export class ConsentController {
    */
   private hashMsisdn(msisdn: string): string {
     const salt = process.env.SALT_MSISDN_HASH || 'default-salt';
-    return crypto
-      .createHash('sha256')
-      .update(`${salt}${msisdn}`)
-      .digest('hex');
+    return crypto.createHash('sha256').update(`${salt}${msisdn}`).digest('hex');
   }
 }

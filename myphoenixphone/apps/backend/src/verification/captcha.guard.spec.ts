@@ -16,7 +16,8 @@ describe('CaptchaGuard', () => {
     process.env = {
       ...originalEnv,
       CAPTCHA_SECRET_KEY: 'test-secret-key',
-      CAPTCHA_VERIFY_URL: 'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+      CAPTCHA_VERIFY_URL:
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify',
     };
 
     guard = new CaptchaGuard();
@@ -126,9 +127,7 @@ describe('CaptchaGuard', () => {
     it('should throw UnauthorizedException when CAPTCHA API throws error', async () => {
       mockRequest.body.captchaToken = 'some-token';
 
-      (global.fetch as jest.Mock).mockRejectedValue(
-        new Error('Network error'),
-      );
+      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
         UnauthorizedException,
@@ -156,7 +155,7 @@ describe('CaptchaGuard', () => {
           body: expect.stringContaining('secret=test-secret-key'),
         }),
       );
-      
+
       const callBody = (global.fetch as jest.Mock).mock.calls[0][1].body;
       expect(callBody).toContain('response=valid-token');
       expect(callBody).toContain('remoteip=192.168.1.100');
