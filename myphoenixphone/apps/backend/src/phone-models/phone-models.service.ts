@@ -25,11 +25,31 @@ export class PhoneModelsService {
       // Try multiple paths to find the phone models JSON file
       const possiblePaths = [
         // From backend working directory to web public folder (monorepo structure)
-        path.resolve(process.cwd(), '..', 'web', 'public', 'eligible-phone-models.json'),
+        path.resolve(
+          process.cwd(),
+          '..',
+          'web',
+          'public',
+          'eligible-phone-models.json',
+        ),
         // From repo root
-        path.resolve(process.cwd(), 'apps', 'web', 'public', 'eligible-phone-models.json'),
+        path.resolve(
+          process.cwd(),
+          'apps',
+          'web',
+          'public',
+          'eligible-phone-models.json',
+        ),
         // If running from apps/backend
-        path.resolve(process.cwd(), '..', '..', 'apps', 'web', 'public', 'eligible-phone-models.json'),
+        path.resolve(
+          process.cwd(),
+          '..',
+          '..',
+          'apps',
+          'web',
+          'public',
+          'eligible-phone-models.json',
+        ),
       ];
 
       let filePath: string | null = null;
@@ -42,7 +62,9 @@ export class PhoneModelsService {
       }
 
       if (!filePath) {
-        this.logger.error(`Phone models file not found. Tried: ${possiblePaths.join(', ')}`);
+        this.logger.error(
+          `Phone models file not found. Tried: ${possiblePaths.join(', ')}`,
+        );
         this.logger.error(`Current working directory: ${process.cwd()}`);
         return [];
       }
@@ -53,7 +75,7 @@ export class PhoneModelsService {
       this.logger.log(`Loaded ${parsed.length} phone models from ${filePath}`);
       return parsed;
     } catch (err) {
-      this.logger.error('Failed to load phone models file', err as any);
+      this.logger.error('Failed to load phone models file', err);
       return [];
     }
   }

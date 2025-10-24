@@ -16,6 +16,8 @@ import { CampaignModule } from './campaign/campaign.module';
 import { NudgeModule } from './nudge/nudge.module';
 import { HandoverModule } from './handover/handover.module';
 import { PhoneModelsModule } from './phone-models/phone-models.module';
+import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
+import { CopyModule } from './copy/copy.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { PhoneModelsModule } from './phone-models/phone-models.module';
     NudgeModule,
     HandoverModule,
     PhoneModelsModule,
+    FeatureFlagsModule,
+    CopyModule,
   ],
   controllers: [AppController, MetricsController],
   providers: [AppService],

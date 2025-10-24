@@ -237,10 +237,7 @@ export class HandoverService {
           .text('Étiquette Prépayée', 50, 80);
 
         // Tracking number (large)
-        doc
-          .fontSize(32)
-          .font('Helvetica-Bold')
-          .text(trackingNumber, 50, 150);
+        doc.fontSize(32).font('Helvetica-Bold').text(trackingNumber, 50, 150);
 
         // Details
         doc.fontSize(11).font('Helvetica');
