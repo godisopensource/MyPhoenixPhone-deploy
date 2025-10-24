@@ -1,6 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 type Eligibility = {
   eligible: boolean;
@@ -17,7 +19,7 @@ type Eligibility = {
   };
 };
 
-export default function EligibilityResult() {
+function EligibilityResultContent() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<Eligibility | null>(null);
@@ -178,6 +180,22 @@ export default function EligibilityResult() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function EligibilityResult() {
+  return (
+    <Suspense fallback={
+      <div className="container-xxl py-5">
+        <div className="d-flex justify-content-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Chargement...</span>
+          </div>
+        </div>
+      </div>
+    }>
+      <EligibilityResultContent />
+    </Suspense>
   );
 }
 

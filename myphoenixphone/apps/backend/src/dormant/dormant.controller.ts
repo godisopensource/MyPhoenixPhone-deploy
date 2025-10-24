@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, HttpCode, HttpStatus, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Query, HttpCode, HttpStatus, Logger } from '@nestjs/common';
 import { DormantDetectorService } from './dormant-detector.service';
 import { NetworkEventService } from './network-event.service';
 import type { DormantInputEvent } from './network-event.service';
@@ -72,6 +72,40 @@ export class DormantController {
   @Get('eligible')
   async getEligibleLeads() {
     return this.detectorService.getEligibleLeads();
+  }
+
+  /**
+   * Query leads with filters (for campaign manager)
+   * GET /dormant/leads?status=eligible&tier=4&limit=50
+   */
+  @Get('leads')
+  async queryLeads(
+    @Query('status') status?: string,
+    @Query('tier') tier?: string,
+    @Query('lastActiveBefore') lastActiveBefore?: string,
+    @Query('lastActiveAfter') lastActiveAfter?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    const filters = {
+      status,
+      tier: tier ? parseInt(tier, 10) : undefined,
+      lastActiveBefore,
+      lastActiveAfter,
+      limit: limit ? parseInt(limit, 10) : undefined,
+      offset: offset ? parseInt(offset, 10) : undefined,
+    };
+
+    return this.detectorService.queryLeads(filters);
+  }
+
+  /**
+   * Get dormant leads statistics
+   * GET /dormant/stats
+   */
+  @Get('stats')
+  async getStats() {
+    return this.detectorService.getStats();
   }
 
   /**

@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 interface PhoneModel {
   id: string;
   brand: string;
@@ -25,9 +27,10 @@ interface Props {
   estimate: Estimate;
   phone: PhoneModel | null;
   onReset: () => void;
+  leadId?: string;
 }
 
-export default function EstimateDisplay({ estimate, phone, onReset }: Props) {
+export default function EstimateDisplay({ estimate, phone, onReset, leadId }: Props) {
   const totalValue = estimate.estimated_value + (estimate.bonus || 0);
 
   return (
@@ -92,7 +95,11 @@ export default function EstimateDisplay({ estimate, phone, onReset }: Props) {
 
             <div className="row mt-3">
               <div className="col-md-4 mb-3">
-                <button className="btn btn-outline-primary w-100 h-100">
+                <Link
+                  href={leadId ? `/lead/${leadId}/ship` : '#'}
+                  className="btn btn-outline-primary w-100 h-100 text-decoration-none"
+                  style={!leadId ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+                >
                   <div className="py-3">
                     <div className="fs-4 mb-2">📦</div>
                     <h6>Envoi gratuit</h6>
@@ -100,11 +107,15 @@ export default function EstimateDisplay({ estimate, phone, onReset }: Props) {
                       Générer une étiquette Colissimo prépayée
                     </small>
                   </div>
-                </button>
+                </Link>
               </div>
 
               <div className="col-md-4 mb-3">
-                <button className="btn btn-outline-primary w-100 h-100">
+                <Link
+                  href={leadId ? `/lead/${leadId}/store` : '#'}
+                  className="btn btn-outline-primary w-100 h-100 text-decoration-none"
+                  style={!leadId ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+                >
                   <div className="py-3">
                     <div className="fs-4 mb-2">🏪</div>
                     <h6>En boutique</h6>
@@ -112,7 +123,7 @@ export default function EstimateDisplay({ estimate, phone, onReset }: Props) {
                       Générer un code de dépôt
                     </small>
                   </div>
-                </button>
+                </Link>
               </div>
 
               <div className="col-md-4 mb-3">

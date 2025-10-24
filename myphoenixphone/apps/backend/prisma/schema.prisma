@@ -78,6 +78,7 @@ model Lead {
   estimated_value       Float?
   handover_choice       String?   // 'ship' | 'store' | 'donate' | 'recycle'
   handover_completed_at DateTime?
+  converted_at          DateTime? // When user completed the full flow (got estimate + chose handover)
   
   // Lifecycle
   created_at            DateTime  @default(now())
@@ -115,4 +116,47 @@ model OptOut {
   created_at      DateTime  @default(now())
   
   @@index([msisdn_hash])
+}
+
+// Campaign Management Models
+
+model Campaign {
+  id                String    @id @default(uuid())
+  name              String
+  description       String?
+  
+  // Audience targeting
+  target_filters    Json      // { status, tier, lastActiveBefore, etc. }
+  estimated_reach   Int?      // Calculated at creation
+  
+  // Message configuration
+  template_id       String    // Reference to message template (A/B/C/D from DD-01)
+  template_variant  String?   // Optional A/B test variant
+  channel           String    @default("sms") // 'sms' | 'email' | 'rcs' | 'push'
+  
+  // Scheduling
+  scheduled_at      DateTime? // If null, send immediately
+  sent_at           DateTime? // When campaign actually started
+  completed_at      DateTime? // When all messages sent
+  
+  // Throttling
+  max_per_hour      Int       @default(100) // Rate limiting
+  batch_size        Int       @default(10)  // Messages per batch
+  
+  // Status
+  status            String    @default("draft") // 'draft' | 'scheduled' | 'sending' | 'completed' | 'cancelled'
+  
+  // Statistics
+  total_sent        Int       @default(0)
+  total_delivered   Int       @default(0)
+  total_clicked     Int       @default(0)
+  total_converted   Int       @default(0)
+  
+  // Metadata
+  created_by        String?   // Admin user ID
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  
+  @@index([status, scheduled_at])
+  @@index([created_at])
 }

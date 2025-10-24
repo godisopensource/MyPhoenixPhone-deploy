@@ -375,4 +375,167 @@ export class DormantDetectorService {
       take: limit,
     });
   }
+
+  /**
+   * Query leads with filters (for campaign manager)
+   */
+  async queryLeads(filters: {
+    status?: string;
+    tier?: number;
+    lastActiveBefore?: string;
+    lastActiveAfter?: string;
+    limit?: number;
+    offset?: number;
+  }) {
+    const { status, tier, lastActiveBefore, lastActiveAfter, limit = 100, offset = 0 } = filters;
+
+    const where: any = {
+      expires_at: { gt: new Date() }, // Only non-expired leads
+    };
+
+    // Status filter
+    if (status === 'eligible') {
+      where.eligible = true;
+      where.contact_count = { lt: 2 };
+    } else if (status === 'contacted') {
+      where.contact_count = { gte: 1 };
+      where.converted_at = null;
+    } else if (status === 'converted') {
+      where.converted_at = { not: null };
+    } else if (status === 'expired') {
+      where.expires_at = { lt: new Date() };
+    }
+
+    // Tier filter (from signals JSON field)
+    if (tier !== undefined) {
+      where.signals = {
+        path: ['device_tier'],
+        equals: tier,
+      };
+    }
+
+    // Last active date filters
+    if (lastActiveBefore) {
+      where.created_at = { ...where.created_at, lte: new Date(lastActiveBefore) };
+    }
+    if (lastActiveAfter) {
+      where.created_at = { ...where.created_at, gte: new Date(lastActiveAfter) };
+    }
+
+    const [leads, total] = await Promise.all([
+      this.prisma.lead.findMany({
+        where,
+        orderBy: { dormant_score: 'desc' },
+        take: limit,
+        skip: offset,
+        include: {
+          contact_attempts: {
+            orderBy: { created_at: 'desc' },
+            take: 1,
+          },
+        },
+      }),
+      this.prisma.lead.count({ where }),
+    ]);
+
+    return {
+      leads,
+      total,
+      limit,
+      offset,
+      filters: { status, tier, lastActiveBefore, lastActiveAfter },
+    };
+  }
+
+  /**
+   * Get dormant leads statistics for dashboard
+   */
+  async getStats() {
+    const now = new Date();
+
+    // Total leads count
+    const total_leads = await this.prisma.lead.count({
+      where: { expires_at: { gt: now } },
+    });
+
+    // By status
+    const eligible = await this.prisma.lead.count({
+      where: { eligible: true, contact_count: { lt: 2 }, expires_at: { gt: now } },
+    });
+    const contacted = await this.prisma.lead.count({
+      where: { contact_count: { gte: 1 }, converted_at: null, expires_at: { gt: now } },
+    });
+    const converted = await this.prisma.lead.count({
+      where: { converted_at: { not: null } },
+    });
+    const expired = await this.prisma.lead.count({
+      where: { expires_at: { lt: now } },
+    });
+
+    // All leads for value calculation (including expired for conversion funnel)
+    const allLeads = await this.prisma.lead.findMany({
+      select: {
+        signals: true,
+        converted_at: true,
+        contact_count: true,
+      },
+    });
+
+    // By tier (from signals.device_tier)
+    const by_tier = {
+      tier_0: 0,
+      tier_1: 0,
+      tier_2: 0,
+      tier_3: 0,
+      tier_4: 0,
+      tier_5: 0,
+    };
+    let total_value = 0;
+    const values: number[] = [];
+
+    allLeads.forEach((lead) => {
+      const signals = lead.signals as any;
+      const tier = signals?.device_tier ?? 0;
+      const value = signals?.estimated_value ?? 0;
+
+      by_tier[`tier_${tier as 0 | 1 | 2 | 3 | 4 | 5}`]++;
+      total_value += value;
+      if (value > 0) values.push(value);
+    });
+
+    // Value distribution
+    const average_value = total_leads > 0 ? total_value / total_leads : 0;
+    const median_value = values.length > 0
+      ? values.sort((a, b) => a - b)[Math.floor(values.length / 2)]
+      : 0;
+
+    // Conversion funnel
+    const funnel_eligible = eligible + contacted + converted;
+    const funnel_contacted = contacted + converted;
+    const conversion_rate = funnel_eligible > 0 ? (converted / funnel_eligible) * 100 : 0;
+
+    return {
+      total_leads,
+      by_status: {
+        eligible,
+        contacted,
+        responded: contacted, // For now, responded = contacted
+        converted,
+        expired,
+      },
+      by_tier,
+      value_distribution: {
+        total_potential_value: Math.round(total_value),
+        average_value: Math.round(average_value),
+        median_value: Math.round(median_value),
+      },
+      conversion_funnel: {
+        eligible: funnel_eligible,
+        contacted: funnel_contacted,
+        responded: funnel_contacted,
+        converted,
+        conversion_rate: Math.round(conversion_rate * 100) / 100,
+      },
+    };
+  }
 }

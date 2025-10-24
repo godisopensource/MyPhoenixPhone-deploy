@@ -12,6 +12,9 @@ import { VerificationModule } from './verification/verification.module';
 import { ConsentModule } from './consent/consent.module';
 import { DormantModule } from './dormant/dormant.module';
 import { PricingModule } from './pricing/pricing.module';
+import { CampaignModule } from './campaign/campaign.module';
+import { NudgeModule } from './nudge/nudge.module';
+import { HandoverModule } from './handover/handover.module';
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { PricingModule } from './pricing/pricing.module';
     ConsentModule,
     DormantModule,
     PricingModule,
+    CampaignModule,
+    NudgeModule,
+    HandoverModule,
   ],
   controllers: [AppController, MetricsController],
   providers: [AppService],

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ModelSelector from './components/ModelSelector';
 import ConditionForm from './components/ConditionForm';
 import ConsentCheckbox from './components/ConsentCheckbox';
@@ -21,7 +21,7 @@ interface PhoneModel {
   storage?: string;
 }
 
-export default function LeadPage({ params }: { params: { id: string } }) {
+export default function LeadPage({ params }: { params: Promise<{ id: string }> }) {
   const [step, setStep] = useState(1);
   const [selectedPhone, setSelectedPhone] = useState<PhoneModel | null>(null);
   const [condition, setCondition] = useState<DeviceCondition | null>(null);
@@ -29,8 +29,11 @@ export default function LeadPage({ params }: { params: { id: string } }) {
   const [estimate, setEstimate] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [leadId, setLeadId] = useState<string>('');
 
-  const leadId = params.id;
+  useEffect(() => {
+    params.then(p => setLeadId(p.id));
+  }, [params]);
 
   const handlePhoneSelect = (phone: PhoneModel) => {
     setSelectedPhone(phone);
@@ -99,41 +102,56 @@ export default function LeadPage({ params }: { params: { id: string } }) {
     <main className="container py-5">
       {/* Hero Section */}
       <div className="text-center mb-5">
-        <h1 className="display-4 mb-3">Valorisez votre ancien téléphone</h1>
-        <p className="lead text-muted">
-          Découvrez instantanément la valeur de reprise de votre appareil Orange
+        <h1 className="display-5 fw-bold mb-3" style={{ color: '#ff7900' }}>
+          Valorisez votre ancien téléphone
+        </h1>
+        <p className="lead text-muted mb-2">
+          Découvrez instantanément la valeur de reprise de votre appareil
         </p>
-        <p className="text-muted">Lead ID: {leadId}</p>
+        <div className="d-inline-flex align-items-center gap-2 text-muted">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+            <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+          </svg>
+          <small>Estimation gratuite et sans engagement</small>
+        </div>
       </div>
 
       {/* Progress Indicator */}
-      <div className="row mb-5">
-        <div className="col-12">
-          <div className="d-flex justify-content-between">
-            <div className={`text-center ${step >= 1 ? 'text-primary' : 'text-muted'}`}>
-              <div className="mb-2">
-                <span className="badge bg-primary rounded-circle">1</span>
-              </div>
-              <small>Modèle</small>
+      <div className="row justify-content-center mb-5">
+        <div className="col-lg-8">
+          <div className="d-flex justify-content-between align-items-center position-relative">
+            {/* Progress line */}
+            <div className="position-absolute top-50 start-0 w-100" style={{ height: '2px', background: '#e0e0e0', zIndex: 0, marginTop: '16px' }}>
+              <div 
+                className="h-100 bg-primary transition-all" 
+                style={{ width: `${((step - 1) / 3) * 100}%`, transition: 'width 0.3s ease' }}
+              />
             </div>
-            <div className={`text-center ${step >= 2 ? 'text-primary' : 'text-muted'}`}>
-              <div className="mb-2">
-                <span className="badge bg-primary rounded-circle">2</span>
+            
+            {/* Step indicators */}
+            {[
+              { num: 1, label: 'Modèle' },
+              { num: 2, label: 'État' },
+              { num: 3, label: 'Consentement' },
+              { num: 4, label: 'Estimation' },
+            ].map(({ num, label }) => (
+              <div key={num} className="text-center position-relative" style={{ zIndex: 1 }}>
+                <div className="mb-2">
+                  <span 
+                    className={`d-inline-flex align-items-center justify-content-center rounded-circle ${
+                      step >= num ? 'bg-primary text-white' : 'bg-white text-muted border border-2'
+                    }`}
+                    style={{ width: '40px', height: '40px', fontWeight: 'bold' }}
+                  >
+                    {step > num ? '✓' : num}
+                  </span>
+                </div>
+                <small className={step >= num ? 'text-primary fw-semibold' : 'text-muted'}>
+                  {label}
+                </small>
               </div>
-              <small>État</small>
-            </div>
-            <div className={`text-center ${step >= 3 ? 'text-primary' : 'text-muted'}`}>
-              <div className="mb-2">
-                <span className="badge bg-primary rounded-circle">3</span>
-              </div>
-              <small>Consentement</small>
-            </div>
-            <div className={`text-center ${step >= 4 ? 'text-primary' : 'text-muted'}`}>
-              <div className="mb-2">
-                <span className="badge bg-primary rounded-circle">4</span>
-              </div>
-              <small>Estimation</small>
-            </div>
+            ))}
           </div>
         </div>
       </div>
@@ -147,60 +165,113 @@ export default function LeadPage({ params }: { params: { id: string } }) {
 
       {/* Step 1: Model Selection */}
       {step === 1 && (
-        <ModelSelector onSelect={handlePhoneSelect} />
+        <div className="row justify-content-center">
+          <div className="col-lg-8">
+            <ModelSelector onSelect={handlePhoneSelect} />
+          </div>
+        </div>
       )}
 
       {/* Step 2: Condition Assessment */}
       {step === 2 && selectedPhone && (
-        <div>
-          <div className="card mb-3">
-            <div className="card-body">
-              <h5 className="card-title">Appareil sélectionné</h5>
-              <p className="card-text">
-                {selectedPhone.brand} {selectedPhone.model} {selectedPhone.storage}
-              </p>
-              <button className="btn btn-link" onClick={() => setStep(1)}>
-                Changer
-              </button>
+        <div className="row justify-content-center">
+          <div className="col-lg-8">
+            <div className="alert alert-info d-flex align-items-center mb-4" role="alert">
+              <svg className="me-2" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm.256 7a4.474 4.474 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10c.26 0 .507.009.74.025.226-.341.496-.65.804-.918C9.077 9.038 8.564 9 8 9c-5 0-6 3-6 4s1 1 1 1h5.256Z"/>
+                <path d="M16 12.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Zm-1.993-1.679a.5.5 0 0 0-.686.172l-1.17 1.95-.547-.547a.5.5 0 0 0-.708.708l.774.773a.75.75 0 0 0 1.174-.144l1.335-2.226a.5.5 0 0 0-.172-.686Z"/>
+              </svg>
+              <div>
+                <strong>{selectedPhone.brand} {selectedPhone.model}</strong>
+                {selectedPhone.storage && <span className="ms-2 badge bg-secondary">{selectedPhone.storage}</span>}
+                <button className="btn btn-link btn-sm p-0 ms-3 text-decoration-none" onClick={() => setStep(1)}>
+                  Modifier
+                </button>
+              </div>
             </div>
+            <ConditionForm
+              onSubmit={handleConditionSubmit}
+              onBack={() => setStep(1)}
+            />
           </div>
-          <ConditionForm
-            onSubmit={handleConditionSubmit}
-            onBack={() => setStep(1)}
-          />
         </div>
       )}
 
       {/* Step 3: Consent & Estimate Request */}
       {step === 3 && condition && (
-        <div>
-          <div className="card mb-3">
-            <div className="card-body">
-              <h5 className="card-title">Récapitulatif</h5>
-              <p><strong>Appareil:</strong> {selectedPhone?.brand} {selectedPhone?.model}</p>
-              <p><strong>Écran:</strong> {condition.screen}</p>
-              <p><strong>Batterie:</strong> {condition.battery}</p>
-              <p><strong>Dommages:</strong> {condition.damage.length > 0 ? condition.damage.join(', ') : 'Aucun'}</p>
-              <p><strong>Déverrouillé:</strong> {condition.unlocked ? 'Oui' : 'Non'}</p>
-              <button className="btn btn-link" onClick={() => setStep(2)}>
-                Modifier
+        <div className="row justify-content-center">
+          <div className="col-lg-8">
+            <div className="card mb-4 border-0 shadow-sm">
+              <div className="card-body p-4">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h5 className="card-title mb-0">Récapitulatif de votre appareil</h5>
+                  <button className="btn btn-sm btn-outline-primary" onClick={() => setStep(2)}>
+                    Modifier
+                  </button>
+                </div>
+                <hr />
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <small className="text-muted d-block mb-1">Appareil</small>
+                    <strong>{selectedPhone?.brand} {selectedPhone?.model}</strong>
+                  </div>
+                  <div className="col-md-6">
+                    <small className="text-muted d-block mb-1">État de l'écran</small>
+                    <strong>
+                      {condition.screen === 'perfect' && '✓ Parfait'}
+                      {condition.screen === 'scratches' && '⚠ Rayures'}
+                      {condition.screen === 'broken' && '✗ Cassé'}
+                    </strong>
+                  </div>
+                  <div className="col-md-6">
+                    <small className="text-muted d-block mb-1">État de la batterie</small>
+                    <strong>
+                      {condition.battery === 'excellent' && '✓ Excellente (>80%)'}
+                      {condition.battery === 'good' && 'Bonne (60-80%)'}
+                      {condition.battery === 'fair' && 'Moyenne (<60%)'}
+                    </strong>
+                  </div>
+                  <div className="col-md-6">
+                    <small className="text-muted d-block mb-1">Verrouillage opérateur</small>
+                    <strong>{condition.unlocked ? '✓ Déverrouillé' : '✗ Verrouillé'}</strong>
+                  </div>
+                  <div className="col-12">
+                    <small className="text-muted d-block mb-1">Dommages physiques</small>
+                    <strong>
+                      {condition.damage.length === 0 ? '✓ Aucun dommage' : condition.damage.join(', ')}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <ConsentCheckbox
+              checked={hasConsent}
+              onChange={handleConsentChange}
+            />
+
+            <div className="d-grid gap-2 mt-4">
+              <button
+                className="btn btn-primary btn-lg"
+                disabled={!hasConsent || loading}
+                onClick={handleGetEstimate}
+                style={{ backgroundColor: '#ff7900', borderColor: '#ff7900' }}
+              >
+                {loading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Calcul en cours...
+                  </>
+                ) : (
+                  <>
+                    <svg className="me-2" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2.5 1a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-2zm0 3a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 2a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1h-1zm3 0a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1h-1zm3 0a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1h-1zm3 0a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1h-1z"/>
+                    </svg>
+                    Obtenir mon estimation gratuite
+                  </>
+                )}
               </button>
             </div>
-          </div>
-
-          <ConsentCheckbox
-            checked={hasConsent}
-            onChange={handleConsentChange}
-          />
-
-          <div className="d-grid gap-2 mt-4">
-            <button
-              className="btn btn-primary btn-lg"
-              disabled={!hasConsent || loading}
-              onClick={handleGetEstimate}
-            >
-              {loading ? 'Calcul en cours...' : 'Obtenir mon estimation'}
-            </button>
           </div>
         </div>
       )}
@@ -211,6 +282,7 @@ export default function LeadPage({ params }: { params: { id: string } }) {
           estimate={estimate}
           phone={selectedPhone}
           onReset={handleReset}
+          leadId={leadId}
         />
       )}
     </main>
