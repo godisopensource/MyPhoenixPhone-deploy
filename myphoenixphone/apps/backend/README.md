@@ -6,14 +6,29 @@
 
 ## Scripts
 
+### Development
 - `npm run start:dev` – start in watch mode
 - `npm run lint` – ESLint
-- `npm run test` – unit tests
-- `npm run test:e2e` – e2e tests
 - `npm run build` – production build
- - `npm run prisma:generate` – generate Prisma client
- - `npm run prisma:migrate:dev` – run migrations in dev (creates new migration if needed)
- - `npm run prisma:migrate:deploy` – apply existing migrations
+
+### Database (Prisma)
+- `npm run prisma:generate` – generate Prisma client
+- `npm run prisma:migrate:dev` – run migrations in dev (creates new migration if needed)
+- `npm run prisma:migrate:deploy` – apply existing migrations
+- `npm run prisma:studio` – open Prisma Studio
+
+### Testing
+- `npm test` – unit tests
+- `npm run test:watch` – unit tests in watch mode
+- `npm run test:cov` – unit tests with coverage
+- `npm run test:e2e` – end-to-end tests
+- `npm run test:pact` – Pact contract tests (consumer + provider)
+- `npm run test:integration` – database integration tests (requires Docker)
+- `npm run test:perf` – all performance tests (requires k6 + running server)
+- `npm run test:perf:eligibility` – eligibility API performance test
+- `npm run test:perf:consent` – consent API performance test
+- `npm run test:perf:verification` – verification API performance test
+- `npm run test:perf:workers` – workers benchmark test
 
 ## Observability
 
@@ -109,18 +124,107 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Run tests
+## Testing Strategy
+
+This project implements a comprehensive, multi-layered testing approach. See [test/DD-12-SUMMARY.md](./test/DD-12-SUMMARY.md) for complete details.
+
+### Test Layers
+
+1. **API Contracts** (OpenAPI/Swagger)
+   - Specification: [src/API-CONTRACTS.md](./src/API-CONTRACTS.md)
+   - 8 endpoint groups documented
+   - 20+ data models with schemas
+
+2. **Contract Tests** (Pact)
+   - Consumer tests: 18 tests
+   - Provider verification: 16 state handlers
+   - Documentation: [test/pact/PACT-SUMMARY.md](./test/pact/PACT-SUMMARY.md)
+   ```bash
+   npm run test:pact
+   ```
+
+3. **Unit Tests** (Jest)
+   - 228 tests across modules
+   - 212 passing (16 DI issues to fix)
+   ```bash
+   npm test                # Run unit tests
+   npm run test:watch     # Watch mode
+   npm run test:cov       # With coverage
+   ```
+
+4. **Integration Tests** (Testcontainers)
+   - 26 tests for database migrations
+   - Requires Docker Desktop running
+   - Documentation: [test/integration/INTEGRATION-TESTS.md](./test/integration/INTEGRATION-TESTS.md)
+   ```bash
+   npm run test:integration
+   ```
+
+5. **E2E Tests** (Playwright)
+   - **Smoke tests**: 10 tests (health checks, basic functionality)
+   - **Happy paths**: 45 tests (eligibility, workers, feature flags, campaigns)
+   - **Error scenarios**: 57 tests (validation, auth, rate limiting)
+   - **Total**: 112 E2E tests
+   - Documentation: [test/e2e/](./test/e2e/)
+   ```bash
+   npm run test:e2e
+   ```
+
+6. **Performance Tests** (k6)
+   - 4 load test scripts with baselines
+   - Requires k6 installed and backend running
+   - Documentation: [test/performance/README.md](./test/performance/README.md)
+   ```bash
+   # Install k6: brew install k6
+   npm run start:dev                # Start server
+   npm run test:perf                # All performance tests
+   npm run test:perf:eligibility    # Individual test
+   ```
+
+### Quick Test Commands
 
 ```bash
-# unit tests
-$ npm run test
+# Unit tests
+npm test
 
-# e2e tests
-$ npm run test:e2e
+# Unit tests with coverage
+npm run test:cov
 
-# test coverage
-$ npm run test:cov
+# E2E tests
+npm run test:e2e
+
+# Contract tests
+npm run test:pact
+
+# Integration tests (requires Docker)
+npm run test:integration
+
+# Performance tests (requires k6 + running server)
+npm run test:perf
+
+# Run specific performance test
+npm run test:perf:eligibility
+npm run test:perf:consent
+npm run test:perf:verification
+npm run test:perf:workers
 ```
+
+### Performance Baselines
+
+| Endpoint | p95 Target | Throughput | Error Rate |
+|----------|------------|------------|------------|
+| Eligibility API | < 500ms | 100 req/s | < 1% |
+| Consent API | < 1000ms | 50 req/s | < 2% |
+| Verification API | < 800ms | 30 req/s | < 1% |
+| Workers (500 leads) | < 60s | 10 leads/s | < 0.5% |
+
+### Test Coverage
+
+- **Total Tests**: 382+ (Unit: 228, E2E: 112, Integration: 26, Pact: 18, Perf: 4 scripts)
+- **Documentation**: 9 comprehensive docs covering all strategies
+- **CI/CD Ready**: GitHub Actions examples provided
+
+See [test/DD-12-SUMMARY.md](./test/DD-12-SUMMARY.md) for complete testing strategy documentation.
 
 ## Deployment
 

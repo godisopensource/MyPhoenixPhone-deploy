@@ -1,0 +1,1345 @@
+{
+  "consumer": {
+    "name": "MyPhoenixPhone-Web"
+  },
+  "interactions": [
+    {
+      "description": "a request that exceeds rate limit",
+      "providerStates": [
+        {
+          "name": "user has exceeded SMS rate limit"
+        }
+      ],
+      "request": {
+        "body": {
+          "phoneNumber": "+33612345678"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Cookie": "connect.sid=s%3Asession-id-here"
+        },
+        "matchingRules": {
+          "header": {
+            "Cookie": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/verify/number"
+      },
+      "response": {
+        "body": {
+          "error": "Too Many Requests",
+          "message": "Too many verification attempts",
+          "retryAfter": 3600,
+          "statusCode": 429
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8",
+          "Retry-After": "3600"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.retryAfter": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 429
+      }
+    },
+    {
+      "description": "a request to check eligibility for an eligible device",
+      "providerStates": [
+        {
+          "name": "user has valid consent and eligible device"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": "application/json",
+          "Cookie": "connect.sid=s%3Asession-id-here"
+        },
+        "matchingRules": {
+          "header": {
+            "Cookie": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "GET",
+        "path": "/eligibility",
+        "query": {
+          "phoneNumber": [
+            "+33612345678"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "checkedAt": "2025-10-25T12:00:00.000Z",
+          "eligible": true,
+          "estimatedValue": 150,
+          "phoneNumber": "+33612345678",
+          "reasons": [
+            "SIM swap detected within 30 days"
+          ],
+          "signals": {
+            "reachability": {
+              "canReceiveSMS": true,
+              "status": "CONNECTED_SMS"
+            },
+            "roaming": {
+              "isRoaming": false
+            },
+            "simSwap": {
+              "date": "2025-10-15T10:30:00.000Z",
+              "daysAgo": 10,
+              "detected": true
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.checkedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.eligible": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.estimatedValue": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.phoneNumber": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.reasons": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.reasons[*]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.reachability.canReceiveSMS": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.reachability.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.roaming.isRoaming": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.simSwap.date": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.simSwap.daysAgo": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.simSwap.detected": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to check eligibility for ineligible device",
+      "providerStates": [
+        {
+          "name": "user has valid consent and ineligible device"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": "application/json",
+          "Cookie": "connect.sid=s%3Asession-id-here"
+        },
+        "matchingRules": {
+          "header": {
+            "Cookie": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "GET",
+        "path": "/eligibility",
+        "query": {
+          "phoneNumber": [
+            "+33698765432"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "checkedAt": "2025-10-25T12:00:00.000Z",
+          "eligible": false,
+          "estimatedValue": 0,
+          "phoneNumber": "+33698765432",
+          "reasons": [
+            "No recent SIM swap detected"
+          ],
+          "signals": {
+            "reachability": {
+              "canReceiveSMS": true,
+              "status": "CONNECTED_SMS"
+            },
+            "roaming": {
+              "isRoaming": false
+            },
+            "simSwap": {
+              "detected": false
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.checkedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.eligible": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.estimatedValue": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.phoneNumber": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.reasons": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.reasons[*]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.reachability.canReceiveSMS": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.reachability.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.roaming.isRoaming": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.simSwap.detected": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to get stored signals",
+      "providerStates": [
+        {
+          "name": "user has valid consent and stored signals exist"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": "application/json",
+          "Cookie": "connect.sid=s%3Asession-id-here"
+        },
+        "matchingRules": {
+          "header": {
+            "Cookie": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "GET",
+        "path": "/eligibility/signals",
+        "query": {
+          "phoneNumber": [
+            "+33612345678"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "lastChecked": "2025-10-25T11:00:00.000Z",
+          "phoneNumber": "+33612345678",
+          "signals": {
+            "reachability": {
+              "canReceiveSMS": true,
+              "status": "CONNECTED_SMS"
+            },
+            "roaming": {
+              "isRoaming": false
+            },
+            "simSwap": {
+              "date": "2025-10-15T10:30:00.000Z",
+              "daysAgo": 10,
+              "detected": true
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.lastChecked": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.phoneNumber": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.reachability.canReceiveSMS": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.reachability.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.roaming.isRoaming": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.simSwap.date": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.simSwap.daysAgo": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.signals.simSwap.detected": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to revoke consent",
+      "providerStates": [
+        {
+          "name": "user has active consent"
+        }
+      ],
+      "request": {
+        "body": {
+          "consentId": "consent_123"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Cookie": "connect.sid=s%3Asession-id-here"
+        },
+        "matchingRules": {
+          "header": {
+            "Cookie": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/consents/revoke"
+      },
+      "response": {
+        "body": {
+          "message": "Consent revoked successfully",
+          "revokedAt": "2025-10-25T12:30:00.000Z",
+          "success": true
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.revokedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.success": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to revoke non-existent consent",
+      "providerStates": [
+        {
+          "name": "consent does not exist"
+        }
+      ],
+      "request": {
+        "body": {
+          "consentId": "consent_nonexistent"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Cookie": "connect.sid=s%3Asession-id-here"
+        },
+        "matchingRules": {
+          "header": {
+            "Cookie": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/consents/revoke"
+      },
+      "response": {
+        "body": {
+          "error": "Not Found",
+          "message": "Consent not found",
+          "statusCode": 404
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 404
+      }
+    },
+    {
+      "description": "a request to send verification code",
+      "providerStates": [
+        {
+          "name": "user has valid consent and phone number is reachable"
+        }
+      ],
+      "request": {
+        "body": {
+          "phoneNumber": "+33612345678"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Cookie": "connect.sid=s%3Asession-id-here"
+        },
+        "matchingRules": {
+          "header": {
+            "Cookie": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/verify/number"
+      },
+      "response": {
+        "body": {
+          "attemptsRemaining": 3,
+          "expiresAt": "2025-10-25T12:10:00.000Z",
+          "message": "Verification code sent",
+          "success": true,
+          "verificationId": "verify_123abc"
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.attemptsRemaining": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.expiresAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.success": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.verificationId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to start consent flow",
+      "providerStates": [
+        {
+          "name": "Orange OAuth provider is available"
+        }
+      ],
+      "request": {
+        "body": {
+          "phoneNumber": "+33612345678",
+          "purpose": "eligibility_check"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/consents/start"
+      },
+      "response": {
+        "body": {
+          "authorizationUrl": "https://api.orange.com/oauth2/authorize?client_id=xyz&state=abc123",
+          "expiresAt": "2025-10-25T12:10:00.000Z",
+          "state": "abc123"
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.authorizationUrl": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.expiresAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.state": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to verify correct code",
+      "providerStates": [
+        {
+          "name": "valid verification code exists"
+        }
+      ],
+      "request": {
+        "body": {
+          "code": "123456",
+          "verificationId": "verify_123abc"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Cookie": "connect.sid=s%3Asession-id-here"
+        },
+        "matchingRules": {
+          "header": {
+            "Cookie": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/verify/number"
+      },
+      "response": {
+        "body": {
+          "phoneNumber": "+33612345678",
+          "success": true,
+          "verified": true,
+          "verifiedAt": "2025-10-25T12:05:00.000Z"
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.phoneNumber": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.success": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.verified": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.verifiedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request with expired verification code",
+      "providerStates": [
+        {
+          "name": "verification code has expired"
+        }
+      ],
+      "request": {
+        "body": {
+          "code": "123456",
+          "verificationId": "verify_expired"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Cookie": "connect.sid=s%3Asession-id-here"
+        },
+        "matchingRules": {
+          "header": {
+            "Cookie": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/verify/number"
+      },
+      "response": {
+        "body": {
+          "error": "Bad Request",
+          "message": "Verification code has expired",
+          "statusCode": 400,
+          "verified": false
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.verified": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 400
+      }
+    },
+    {
+      "description": "a request with incorrect code",
+      "providerStates": [
+        {
+          "name": "verification code exists but code is incorrect"
+        }
+      ],
+      "request": {
+        "body": {
+          "code": "999999",
+          "verificationId": "verify_123abc"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Cookie": "connect.sid=s%3Asession-id-here"
+        },
+        "matchingRules": {
+          "header": {
+            "Cookie": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/verify/number"
+      },
+      "response": {
+        "body": {
+          "attemptsRemaining": 2,
+          "error": "Bad Request",
+          "message": "Invalid verification code",
+          "statusCode": 400,
+          "verified": false
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.attemptsRemaining": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.verified": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 400
+      }
+    },
+    {
+      "description": "a request with invalid phone number",
+      "providerStates": [
+        {
+          "name": "request has invalid phone number format"
+        }
+      ],
+      "request": {
+        "body": {
+          "phoneNumber": "invalid",
+          "purpose": "eligibility_check"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/consents/start"
+      },
+      "response": {
+        "body": {
+          "error": "Bad Request",
+          "message": "Invalid phone number format",
+          "statusCode": 400
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 400
+      }
+    },
+    {
+      "description": "a request with non-existent verification ID",
+      "providerStates": [
+        {
+          "name": "verification ID does not exist"
+        }
+      ],
+      "request": {
+        "body": {
+          "code": "123456",
+          "verificationId": "verify_nonexistent"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+          "Cookie": "connect.sid=s%3Asession-id-here"
+        },
+        "matchingRules": {
+          "header": {
+            "Cookie": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/verify/number"
+      },
+      "response": {
+        "body": {
+          "error": "Not Found",
+          "message": "Verification not found",
+          "statusCode": 404
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 404
+      }
+    },
+    {
+      "description": "a request without valid consent",
+      "providerStates": [
+        {
+          "name": "user has no valid consent"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/eligibility",
+        "query": {
+          "phoneNumber": [
+            "+33612345678"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "error": "User consent required",
+          "message": "Unauthorized",
+          "statusCode": 401
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 401
+      }
+    },
+    {
+      "description": "a verification request without consent",
+      "providerStates": [
+        {
+          "name": "user has no valid consent"
+        }
+      ],
+      "request": {
+        "body": {
+          "phoneNumber": "+33612345678"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/verify/number"
+      },
+      "response": {
+        "body": {
+          "error": "User consent required",
+          "message": "Unauthorized",
+          "statusCode": 401
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 401
+      }
+    },
+    {
+      "description": "an OAuth callback request",
+      "providerStates": [
+        {
+          "name": "valid OAuth callback with authorization code"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/consents/callback",
+        "query": {
+          "code": [
+            "auth_code_123"
+          ],
+          "state": [
+            "state_abc123"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "consentId": "consent_123",
+          "expiresAt": "2025-10-25T13:00:00.000Z",
+          "phoneNumber": "+33612345678",
+          "scopes": [
+            "eligibility:read",
+            "device:read"
+          ],
+          "success": true
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.consentId": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.expiresAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.phoneNumber": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.scopes": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.success": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "16.0.2"
+    },
+    "pactRust": {
+      "ffi": "0.4.28",
+      "models": "1.3.5"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "MyPhoenixPhone-Backend"
+  }
+}

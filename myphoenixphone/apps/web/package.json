@@ -8,7 +8,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint --max-warnings 0",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test:pact": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --config jest.config.pact.ts",
+    "test:pact:watch": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --config jest.config.pact.ts --watch",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@repo/ui": "*",
@@ -19,12 +26,18 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@jest/globals": "^30.2.0",
+    "@pact-foundation/pact": "^16.0.2",
+    "@playwright/test": "^1.56.1",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",
     "eslint": "^9.34.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
     "typescript": "5.9.2"
   }
 }
