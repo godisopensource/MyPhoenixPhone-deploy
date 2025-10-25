@@ -7,6 +7,14 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiOkResponse,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { EligibilityService } from './eligibility.service';
 import { ConsentGuard } from './consent.guard';
 import type { EligibilityEvaluation } from './eligibility-rules.service';
@@ -26,6 +34,7 @@ class EligibilityQueryDto {
  *   Requires valid consent (enforced by ConsentGuard)
  *   Returns eligibility evaluation with reasons and snapshot
  */
+@ApiTags('eligibility')
 @Controller('eligibility')
 export class EligibilityController {
   private readonly logger = new Logger(EligibilityController.name);
@@ -60,6 +69,39 @@ export class EligibilityController {
   @Get()
   @UseGuards(ConsentGuard)
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Check device eligibility',
+    description:
+      'Verifies if a device is eligible for the buyback program by checking SIM swap history and reachability status. Requires valid user consent.',
+  })
+  @ApiQuery({
+    name: 'phoneNumber',
+    required: true,
+    description: 'Phone number in E.164 format (e.g., +33612345678)',
+    example: '+33612345678',
+  })
+  @ApiOkResponse({
+    description: 'Eligibility evaluation completed successfully',
+    schema: {
+      example: {
+        eligible: true,
+        reasons: ['SIM_SWAP_RECENT', 'DEVICE_REACHABLE', 'MEETS_CRITERIA'],
+        snapshot: {
+          simSwap: {
+            swappedAt: '2025-10-16T10:30:00.000Z',
+            daysAgo: 5,
+          },
+          reachability: {
+            reachable: true,
+            connectivity: ['DATA'],
+          },
+        },
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Valid consent required - user has not granted consent',
+  })
   async checkEligibility(
     @Query() query: EligibilityQueryDto,
   ): Promise<EligibilityEvaluation> {
@@ -87,6 +129,20 @@ export class EligibilityController {
   @Get('signals')
   @UseGuards(ConsentGuard)
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get stored eligibility signals',
+    description:
+      'Retrieves stored eligibility signals for debugging and audit purposes. Requires valid consent.',
+  })
+  @ApiQuery({
+    name: 'phoneNumber',
+    required: true,
+    description: 'Phone number in E.164 format',
+    example: '+33612345678',
+  })
+  @ApiOkResponse({
+    description: 'Stored signals retrieved successfully',
+  })
   async getStoredSignals(@Query() query: EligibilityQueryDto) {
     this.logger.log(`Stored signals requested for phone number`);
 

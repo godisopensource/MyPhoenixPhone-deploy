@@ -8,33 +8,33 @@ datasource db {
 }
 
 model Consent {
-  id           String    @id @default(uuid())
-  msisdn_hash  String
-  scopes       String[]
-  proof        Json
-  created_at   DateTime  @default(now())
-  revoked_at   DateTime?
+  id          String    @id @default(uuid())
+  msisdn_hash String
+  scopes      String[]
+  proof       Json
+  created_at  DateTime  @default(now())
+  revoked_at  DateTime?
 
   @@index([msisdn_hash])
 }
 
 model EligibilitySignal {
-  id           String    @id @default(uuid())
-  msisdn_hash  String    @unique
+  id             String    @id @default(uuid())
+  msisdn_hash    String    @unique
   sim_swapped_at DateTime?
-  reachable    Boolean?
-  updated_at   DateTime  @updatedAt
+  reachable      Boolean?
+  updated_at     DateTime  @updatedAt
 
   @@index([msisdn_hash])
 }
 
 model Interaction {
-  id           String    @id @default(uuid())
-  msisdn_hash  String
-  channel      String
-  template_id  String?
-  meta         Json?
-  created_at   DateTime  @default(now())
+  id          String   @id @default(uuid())
+  msisdn_hash String
+  channel     String
+  template_id String?
+  meta        Json?
+  created_at  DateTime @default(now())
 
   @@index([msisdn_hash])
 }
@@ -42,12 +42,12 @@ model Interaction {
 // Dormant Device Detection Models
 
 model NetworkEvent {
-  id                    String    @id @default(uuid())
-  msisdn_hash           String
-  event_type            String    // 'sim_swap' | 'reachability_check'
-  payload               Json      // Full event payload matching dormant-event.schema.json
-  processed             Boolean   @default(false)
-  created_at            DateTime  @default(now())
+  id          String   @id @default(uuid())
+  msisdn_hash String
+  event_type  String // 'sim_swap' | 'reachability_check'
+  payload     Json // Full event payload matching dormant-event.schema.json
+  processed   Boolean  @default(false)
+  created_at  DateTime @default(now())
 
   @@index([msisdn_hash])
   @@index([processed, created_at])
@@ -55,108 +55,197 @@ model NetworkEvent {
 }
 
 model Lead {
-  id                    String    @id @default(uuid())
-  msisdn_hash           String
-  dormant_score         Float     // 0.0 to 1.0
-  eligible              Boolean
+  id                     String   @id @default(uuid())
+  msisdn_hash            String
+  dormant_score          Float // 0.0 to 1.0
+  eligible               Boolean
   activation_window_days Int
-  next_action           String    // 'send_nudge' | 'hold' | 'exclude' | 'expired'
-  exclusions            String[]  // Array of exclusion reasons
-  signals               Json      // Snapshot of signals used in scoring
-  
+  next_action            String // 'send_nudge' | 'hold' | 'exclude' | 'expired'
+  exclusions             String[] // Array of exclusion reasons
+  signals                Json // Snapshot of signals used in scoring
+
   // Contact tracking
-  contact_count         Int       @default(0)
-  last_contact_at       DateTime?
-  
+  contact_count   Int       @default(0)
+  last_contact_at DateTime?
+
   // Model/device info (captured on landing)
-  device_model          String?
-  device_imei           String?   // Encrypted or null after estimation
-  device_condition      Json?     // Questionnaire responses
-  imei_consent_at       DateTime?
-  
+  device_model     String?
+  device_imei      String? // Encrypted or null after estimation
+  device_condition Json? // Questionnaire responses
+  imei_consent_at  DateTime?
+
   // Pricing & handover
   estimated_value       Float?
-  handover_choice       String?   // 'ship' | 'store' | 'donate' | 'recycle'
+  handover_choice       String? // 'ship' | 'store' | 'donate' | 'recycle'
   handover_completed_at DateTime?
   converted_at          DateTime? // When user completed the full flow (got estimate + chose handover)
-  
+
   // Lifecycle
-  created_at            DateTime  @default(now())
-  updated_at            DateTime  @updatedAt
-  expires_at            DateTime  // TTL enforcement
-  
-  contact_attempts      ContactAttempt[]
-  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  expires_at DateTime // TTL enforcement
+
+  contact_attempts ContactAttempt[]
+
+  @@unique([msisdn_hash, created_at]) // Idempotency per day
   @@index([msisdn_hash])
   @@index([eligible, next_action])
   @@index([expires_at])
   @@index([created_at])
-  @@unique([msisdn_hash, created_at]) // Idempotency per day
 }
 
 model ContactAttempt {
-  id              String    @id @default(uuid())
-  lead_id         String
-  channel         String    // 'sms' | 'rcs' | 'push' | 'email'
-  template_variant String   // 'A' | 'B' | 'C' | 'D'
-  status          String    // 'sent' | 'delivered' | 'clicked' | 'failed'
-  clicked_at      DateTime?
-  created_at      DateTime  @default(now())
-  
-  lead            Lead      @relation(fields: [lead_id], references: [id], onDelete: Cascade)
-  
+  id               String    @id @default(uuid())
+  lead_id          String
+  channel          String // 'sms' | 'rcs' | 'push' | 'email'
+  template_variant String // 'A' | 'B' | 'C' | 'D'
+  status           String // 'sent' | 'delivered' | 'clicked' | 'failed'
+  clicked_at       DateTime?
+  created_at       DateTime  @default(now())
+
+  lead Lead @relation(fields: [lead_id], references: [id], onDelete: Cascade)
+
   @@index([lead_id])
   @@index([status, created_at])
 }
 
 model OptOut {
-  id              String    @id @default(uuid())
-  msisdn_hash     String    @unique
-  reason          String?
-  created_at      DateTime  @default(now())
-  
+  id          String   @id @default(uuid())
+  msisdn_hash String   @unique
+  reason      String?
+  created_at  DateTime @default(now())
+
   @@index([msisdn_hash])
 }
 
 // Campaign Management Models
 
 model Campaign {
-  id                String    @id @default(uuid())
-  name              String
-  description       String?
-  
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+
   // Audience targeting
-  target_filters    Json      // { status, tier, lastActiveBefore, etc. }
-  estimated_reach   Int?      // Calculated at creation
-  
+  target_filters  Json // { status, tier, lastActiveBefore, etc. }
+  estimated_reach Int? // Calculated at creation
+
   // Message configuration
-  template_id       String    // Reference to message template (A/B/C/D from DD-01)
-  template_variant  String?   // Optional A/B test variant
-  channel           String    @default("sms") // 'sms' | 'email' | 'rcs' | 'push'
-  
+  template_id      String // Reference to message template (A/B/C/D from DD-01)
+  template_variant String? // Optional A/B test variant
+  channel          String  @default("sms") // 'sms' | 'email' | 'rcs' | 'push'
+
   // Scheduling
-  scheduled_at      DateTime? // If null, send immediately
-  sent_at           DateTime? // When campaign actually started
-  completed_at      DateTime? // When all messages sent
-  
+  scheduled_at DateTime? // If null, send immediately
+  sent_at      DateTime? // When campaign actually started
+  completed_at DateTime? // When all messages sent
+
   // Throttling
-  max_per_hour      Int       @default(100) // Rate limiting
-  batch_size        Int       @default(10)  // Messages per batch
-  
+  max_per_hour Int @default(100) // Rate limiting
+  batch_size   Int @default(10) // Messages per batch
+
   // Status
-  status            String    @default("draft") // 'draft' | 'scheduled' | 'sending' | 'completed' | 'cancelled'
-  
+  status String @default("draft") // 'draft' | 'scheduled' | 'sending' | 'completed' | 'cancelled'
+
   // Statistics
-  total_sent        Int       @default(0)
-  total_delivered   Int       @default(0)
-  total_clicked     Int       @default(0)
-  total_converted   Int       @default(0)
-  
+  total_sent      Int @default(0)
+  total_delivered Int @default(0)
+  total_clicked   Int @default(0)
+  total_converted Int @default(0)
+
   // Metadata
-  created_by        String?   // Admin user ID
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-  
+  created_by String? // Admin user ID
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
   @@index([status, scheduled_at])
   @@index([created_at])
+}
+
+// DD-11: Cohort Management Models
+
+model Cohort {
+  id          String  @id @default(uuid())
+  name        String  @unique // 'high_value' | 'medium_value' | 'low_value' | 'at_risk' | 'dormant' etc.
+  description String?
+
+  // RFM Scoring (Recency, Frequency, Monetary)
+  recency_min   Float? // Days since last activity (lower is better)
+  recency_max   Float?
+  frequency_min Int? // Number of interactions
+  frequency_max Int?
+  monetary_min  Float? // Estimated device value
+  monetary_max  Float?
+
+  // Additional filters
+  dormant_score_min Float? // 0.0 to 1.0
+  dormant_score_max Float?
+  eligible_only     Boolean @default(false)
+
+  // Statistics (denormalized for performance)
+  member_count        Int       @default(0)
+  avg_dormant_score   Float?
+  avg_estimated_value Float?
+  last_refresh_at     DateTime?
+
+  // Metadata
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  cohort_members CohortMember[]
+
+  @@index([name])
+  @@index([is_active, last_refresh_at])
+}
+
+model CohortMember {
+  id          String  @id @default(uuid())
+  cohort_id   String
+  msisdn_hash String
+  lead_id     String?
+
+  // Snapshot of metrics at time of assignment
+  recency       Float? // Days since last activity
+  frequency     Int? // Number of interactions
+  monetary      Float? // Estimated device value
+  dormant_score Float?
+
+  // Lifecycle
+  assigned_at DateTime  @default(now())
+  removed_at  DateTime? // If user moves to different cohort
+
+  cohort Cohort @relation(fields: [cohort_id], references: [id], onDelete: Cascade)
+
+  @@unique([cohort_id, msisdn_hash, assigned_at]) // One user per cohort at a time
+  @@index([cohort_id])
+  @@index([msisdn_hash])
+  @@index([assigned_at])
+}
+
+model WorkerRun {
+  id          String @id @default(uuid())
+  worker_type String // 'dormant_detection' | 'cohort_builder' | 'daily_refresh'
+  status      String @default("running") // 'running' | 'completed' | 'failed'
+
+  // Execution details
+  started_at   DateTime  @default(now())
+  completed_at DateTime?
+  duration_ms  Int?
+
+  // Results
+  records_processed Int @default(0)
+  records_created   Int @default(0)
+  records_updated   Int @default(0)
+  records_failed    Int @default(0)
+
+  // Error tracking
+  error_message String?
+  error_stack   String?
+
+  // Metadata
+  trigger      String  @default("cron") // 'cron' | 'manual' | 'api'
+  triggered_by String? // Admin user ID if manual
+
+  @@index([worker_type, started_at])
+  @@index([status])
 }

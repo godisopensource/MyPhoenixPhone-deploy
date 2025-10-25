@@ -18,6 +18,7 @@ import { HandoverModule } from './handover/handover.module';
 import { PhoneModelsModule } from './phone-models/phone-models.module';
 import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
 import { CopyModule } from './copy/copy.module';
+import { WorkersModule } from './workers/workers.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CopyModule } from './copy/copy.module';
     PhoneModelsModule,
     FeatureFlagsModule,
     CopyModule,
+    WorkersModule,
   ],
   controllers: [AppController, MetricsController],
   providers: [AppService],

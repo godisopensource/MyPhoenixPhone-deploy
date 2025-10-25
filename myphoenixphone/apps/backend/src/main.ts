@@ -1,11 +1,44 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser = require('cookie-parser');
 import session = require('express-session');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableShutdownHooks();
+
+  // Swagger/OpenAPI configuration
+  const config = new DocumentBuilder()
+    .setTitle('MyPhoenixPhone API')
+    .setDescription(
+      'API for MyPhoenixPhone - Dormant device buyback platform using Orange Network APIs',
+    )
+    .setVersion('1.0')
+    .addTag('health', 'Health check endpoints')
+    .addTag('eligibility', 'Device eligibility verification')
+    .addTag('consent', 'User consent management')
+    .addTag('verification', 'SMS verification codes')
+    .addTag('pricing', 'Device pricing estimation')
+    .addTag('handover', 'Device handover methods (ship/store/donate)')
+    .addTag('phone-models', 'Phone model catalog')
+    .addTag('dormant', 'Dormant device detection and management')
+    .addTag('workers', 'Background workers and cohorts')
+    .addTag('campaign', 'Marketing campaigns')
+    .addTag('feature-flags', 'Feature flags and A/B testing')
+    .addTag('metrics', 'Prometheus metrics')
+    .addServer('http://localhost:3003', 'Development server')
+    .addServer('https://api.myphoenixphone.com', 'Production server')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+  
+  // Save OpenAPI spec to file for contract testing
+  const fs = require('fs');
+  const yaml = require('yaml');
+  const openApiYaml = yaml.stringify(document);
+  fs.writeFileSync('./openapi.yaml', openApiYaml);
 
   // Allow CORS for local development
   // Support multiple origins when running with Turbo (backend on 3000, frontend on 3001, etc.)

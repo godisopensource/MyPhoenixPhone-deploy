@@ -1,0 +1,644 @@
+openapi: 3.0.0
+paths:
+  /:
+    get:
+      operationId: AppController_getHello
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags:
+        - App
+  /metrics:
+    get:
+      operationId: MetricsController_getMetrics
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags:
+        - Metrics
+  /health:
+    get:
+      operationId: HealthController_getHealth
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags:
+        - Health
+  /eligibility:
+    get:
+      description: Verifies if a device is eligible for the buyback program by
+        checking SIM swap history and reachability status. Requires valid user
+        consent.
+      operationId: EligibilityController_checkEligibility
+      parameters:
+        - name: phoneNumber
+          required: true
+          in: query
+          description: Phone number in E.164 format (e.g., +33612345678)
+          schema:
+            example: "+33612345678"
+      responses:
+        "200":
+          description: Eligibility evaluation completed successfully
+          content:
+            application/json:
+              schema:
+                example:
+                  eligible: true
+                  reasons:
+                    - SIM_SWAP_RECENT
+                    - DEVICE_REACHABLE
+                    - MEETS_CRITERIA
+                  snapshot:
+                    simSwap:
+                      swappedAt: 2025-10-16T10:30:00.000Z
+                      daysAgo: 5
+                    reachability:
+                      reachable: true
+                      connectivity:
+                        - DATA
+        "401":
+          description: Valid consent required - user has not granted consent
+      summary: Check device eligibility
+      tags: &a1
+        - eligibility
+  /eligibility/signals:
+    get:
+      description: Retrieves stored eligibility signals for debugging and audit
+        purposes. Requires valid consent.
+      operationId: EligibilityController_getStoredSignals
+      parameters:
+        - name: phoneNumber
+          required: true
+          in: query
+          description: Phone number in E.164 format
+          schema:
+            example: "+33612345678"
+      responses:
+        "200":
+          description: Stored signals retrieved successfully
+      summary: Get stored eligibility signals
+      tags: *a1
+  /verify/number:
+    post:
+      operationId: VerificationController_verifyNumber
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyNumberDto"
+      responses:
+        "200":
+          description: ""
+      tags: &a2
+        - Verification
+  /verify/debug-number:
+    post:
+      operationId: VerificationController_debugVerifyNumber
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyNumberDto"
+      responses:
+        "200":
+          description: ""
+      tags: *a2
+  /consents/start:
+    post:
+      operationId: ConsentController_startConsent
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartConsentDto"
+      responses:
+        "201":
+          description: ""
+      tags: &a3
+        - Consent
+  /consents/callback:
+    get:
+      operationId: ConsentController_handleCallback
+      parameters:
+        - name: code
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: state
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: error
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: error_description
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a3
+  /consents/revoke:
+    post:
+      operationId: ConsentController_revokeConsent
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RevokeConsentDto"
+      responses:
+        "200":
+          description: ""
+      tags: *a3
+  /dormant/process:
+    post:
+      operationId: DormantController_processEvent
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: &a4
+        - Dormant
+  /dormant/collect:
+    post:
+      operationId: DormantController_collectAndProcess
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+  /dormant/leads/{id}:
+    get:
+      operationId: DormantController_getLead
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+  /dormant/eligible:
+    get:
+      operationId: DormantController_getEligibleLeads
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+  /dormant/leads:
+    get:
+      operationId: DormantController_queryLeads
+      parameters:
+        - name: status
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: tier
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: lastActiveBefore
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: lastActiveAfter
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: offset
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+  /dormant/stats:
+    get:
+      operationId: DormantController_getStats
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+  /dormant/maintenance/purge:
+    post:
+      operationId: DormantController_purgeExpired
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a4
+  /pricing/estimate:
+    post:
+      operationId: PricingController_estimateValue
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Function"
+      responses:
+        "201":
+          description: ""
+      tags:
+        - Pricing
+  /campaign:
+    post:
+      operationId: CampaignController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCampaignDto"
+      responses:
+        "201":
+          description: ""
+      tags: &a5
+        - Campaign
+    get:
+      operationId: CampaignController_findAll
+      parameters:
+        - name: status
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: offset
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a5
+  /campaign/{id}:
+    get:
+      operationId: CampaignController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a5
+    put:
+      operationId: CampaignController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCampaignDto"
+      responses:
+        "200":
+          description: ""
+      tags: *a5
+    delete:
+      operationId: CampaignController_delete
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "204":
+          description: ""
+      tags: *a5
+  /campaign/{id}/stats:
+    get:
+      operationId: CampaignController_getStats
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a5
+  /campaign/{id}/send:
+    post:
+      operationId: CampaignController_startSending
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "201":
+          description: ""
+      tags: *a5
+  /handover/ship:
+    post:
+      operationId: HandoverController_generateShippingLabel
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: &a6
+        - Handover
+  /handover/store:
+    post:
+      operationId: HandoverController_generateStoreDepositCode
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a6
+  /handover/donate:
+    post:
+      operationId: HandoverController_recordDonation
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a6
+  /handover/{leadId}/history:
+    get:
+      operationId: HandoverController_getHandoverHistory
+      parameters:
+        - name: leadId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a6
+  /handover/health:
+    get:
+      operationId: HandoverController_health
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a6
+  /phone-models:
+    get:
+      operationId: PhoneModelsController_getAll
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags:
+        - PhoneModels
+  /feature-flags:
+    get:
+      operationId: FeatureFlagsController_getAllFlags
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: &a7
+        - FeatureFlags
+  /feature-flags/{key}:
+    get:
+      operationId: FeatureFlagsController_getFlag
+      parameters:
+        - name: key
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a7
+    put:
+      operationId: FeatureFlagsController_updateFlag
+      parameters:
+        - name: key
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a7
+  /feature-flags/{key}/variant/{userId}:
+    get:
+      operationId: FeatureFlagsController_getVariantForUser
+      parameters:
+        - name: key
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: userId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a7
+  /workers/status:
+    get:
+      operationId: WorkersController_getStatus
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: &a8
+        - Workers
+  /workers/dormant/stats:
+    get:
+      operationId: WorkersController_getDormantStats
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a8
+  /workers/cohorts:
+    get:
+      operationId: WorkersController_getCohorts
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a8
+  /workers/cohorts/{name}/members:
+    get:
+      operationId: WorkersController_getCohortMembers
+      parameters:
+        - name: name
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: page
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a8
+  /workers/runs:
+    get:
+      operationId: WorkersController_getWorkerRuns
+      parameters:
+        - name: limit
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+      tags: *a8
+  /workers/stats:
+    get:
+      operationId: WorkersController_getWorkerStats
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a8
+  /workers/daily-refresh:
+    post:
+      operationId: WorkersController_triggerDailyRefresh
+      parameters:
+        - name: triggeredBy
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        "201":
+          description: ""
+      tags: *a8
+  /workers/dormant/detect:
+    post:
+      operationId: WorkersController_triggerDormantDetection
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a8
+  /workers/cohorts/rebuild:
+    post:
+      operationId: WorkersController_triggerCohortRebuild
+      parameters: []
+      responses:
+        "201":
+          description: ""
+      tags: *a8
+info:
+  title: MyPhoenixPhone API
+  description: API for MyPhoenixPhone - Dormant device buyback platform using
+    Orange Network APIs
+  version: "1.0"
+  contact: {}
+tags:
+  - name: health
+    description: Health check endpoints
+  - name: eligibility
+    description: Device eligibility verification
+  - name: consent
+    description: User consent management
+  - name: verification
+    description: SMS verification codes
+  - name: pricing
+    description: Device pricing estimation
+  - name: handover
+    description: Device handover methods (ship/store/donate)
+  - name: phone-models
+    description: Phone model catalog
+  - name: dormant
+    description: Dormant device detection and management
+  - name: workers
+    description: Background workers and cohorts
+  - name: campaign
+    description: Marketing campaigns
+  - name: feature-flags
+    description: Feature flags and A/B testing
+  - name: metrics
+    description: Prometheus metrics
+servers:
+  - url: http://localhost:3003
+    description: Development server
+  - url: https://api.myphoenixphone.com
+    description: Production server
+components:
+  schemas:
+    VerifyNumberDto:
+      type: object
+      properties: {}
+    StartConsentDto:
+      type: object
+      properties: {}
+    RevokeConsentDto:
+      type: object
+      properties: {}
+    Function:
+      type: object
+      properties: {}
+    CreateCampaignDto:
+      type: object
+      properties: {}
+    UpdateCampaignDto:
+      type: object
+      properties: {}
