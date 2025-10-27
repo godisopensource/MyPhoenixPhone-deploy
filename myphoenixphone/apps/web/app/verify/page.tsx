@@ -1,16 +1,20 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useDemoData } from "../hooks/useDemoData";
+import { DemoBanner } from "../components/DemoBanner";
 
 function validateMsisdn(msisdn: string) {
   return /^\+[1-9]\d{1,14}$/.test(msisdn);
 }
 
 export default function VerifyPage() {
+  const { isDemoMode, phoneNumber: demoPhoneNumber } = useDemoData();
   const [msisdn, setMsisdn] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [awaitingCode, setAwaitingCode] = useState(false);
   const [code, setCode] = useState("");
+  const [verificationCode, setVerificationCode] = useState<string | null>(null);
   const widgetRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<number | null>(null);
   const tokenRef = useRef<string | null>(null);
@@ -19,6 +23,13 @@ export default function VerifyPage() {
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
   const SITE_KEY = typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY : undefined;
+
+  // Pre-fill phone number when demo mode is active
+  useEffect(() => {
+    if (isDemoMode && demoPhoneNumber) {
+      setMsisdn(demoPhoneNumber);
+    }
+  }, [isDemoMode, demoPhoneNumber]);
 
   useEffect(() => {
     if (!SITE_KEY) return;
@@ -177,10 +188,16 @@ export default function VerifyPage() {
 
       if (res.ok) {
         const data = await res.json().catch(() => null);
-        // If this was the send-code step, backend responds { ok: true, codeSent: true }
+        // If this was the send-code step, backend responds { ok: true, codeSent: true, code?: string }
         if (!awaitingCode && data?.codeSent) {
           setAwaitingCode(true);
           setError(null);
+          
+          // In demo/playground mode, the backend may return the code
+          if (data.code) {
+            setVerificationCode(data.code);
+            console.log(`Demo verification code: ${data.code}`);
+          }
         } else {
           // verification completed - redirect with phone number in query params
           window.location.href = `/eligibility-result?phoneNumber=${encodeURIComponent(msisdn)}`;
@@ -197,7 +214,9 @@ export default function VerifyPage() {
   }
 
   return (
-    <div className="container-xxl py-5">
+    <>
+      <DemoBanner verificationCode={verificationCode} />
+      <div className="container-xxl py-5">
       <div className="row justify-content-center">
         <div className="col-md-6">
           <div className="card">
@@ -268,5 +287,6 @@ export default function VerifyPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

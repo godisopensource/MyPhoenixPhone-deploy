@@ -43,9 +43,9 @@ export class NumberVerificationService {
    * This initiates the verification flow
    *
    * @param phoneNumber - Phone number in E.164 format (e.g., +33612345678)
-   * @returns Promise that resolves when code is sent
+   * @returns Promise with the generated code (in playground/demo mode)
    */
-  async sendVerificationCode(phoneNumber: string): Promise<void> {
+  async sendVerificationCode(phoneNumber: string): Promise<string | undefined> {
     const useProxy =
       process.env.USE_MCP_PROXY === 'true' ||
       !!process.env.MCP_PROXY_URL ||
@@ -71,8 +71,20 @@ export class NumberVerificationService {
           `MCP Proxy send-code failed: ${res.status} - ${raw || res.statusText}`,
         );
       }
+      
+      // In playground/demo mode, try to extract the code from response headers
+      const codeHeader = res.headers.get('X-Verification-Code');
+      console.log(`[NumberVerificationService] MCP Proxy response headers: X-Verification-Code=${codeHeader}`);
+      
+      if (codeHeader) {
+        console.log(`[NumberVerificationService] Returning verification code: ${codeHeader}`);
+        return codeHeader;
+      }
+      
+      console.log(`[NumberVerificationService] No X-Verification-Code header found in MCP response`);
+      
       // 204 No Content expected
-      return;
+      return undefined;
     }
 
     // No proxy configured - call CAMARA directly
@@ -93,6 +105,8 @@ export class NumberVerificationService {
         `Number Verification send-code failed: ${response.status} - ${raw || response.statusText}`,
       );
     }
+    
+    return undefined;
   }
 
   /**
@@ -179,11 +193,11 @@ export class NumberVerificationService {
   async verifyNumber(
     phoneNumber: string,
     code?: string,
-  ): Promise<{ codeSent: boolean; verified?: boolean }> {
+  ): Promise<{ codeSent: boolean; verified?: boolean; code?: string }> {
     if (!code) {
       // Only send code
-      await this.sendVerificationCode(phoneNumber);
-      return { codeSent: true };
+      const generatedCode = await this.sendVerificationCode(phoneNumber);
+      return { codeSent: true, code: generatedCode };
     }
 
     // Verify with provided code

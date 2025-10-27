@@ -82,6 +82,15 @@ paths:
           description: Stored signals retrieved successfully
       summary: Get stored eligibility signals
       tags: *a1
+  /phone-models:
+    get:
+      operationId: PhoneModelsController_getAll
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags:
+        - PhoneModels
   /verify/number:
     post:
       operationId: VerificationController_verifyNumber
@@ -427,15 +436,6 @@ paths:
         "200":
           description: ""
       tags: *a6
-  /phone-models:
-    get:
-      operationId: PhoneModelsController_getAll
-      parameters: []
-      responses:
-        "200":
-          description: ""
-      tags:
-        - PhoneModels
   /feature-flags:
     get:
       operationId: FeatureFlagsController_getAllFlags

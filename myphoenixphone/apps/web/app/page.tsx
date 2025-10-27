@@ -1,9 +1,13 @@
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./page.module.css";
+import { DemoBanner } from "./components/DemoBanner";
 
 export default function Home() {
   return (
-    <div className={styles.page}>
+    <>
+      <DemoBanner />
+      
       <header className="navbar navbar-dark bg-dark" role="navigation">
         <div className="container-xxl">
           <div className="navbar-brand">
@@ -45,6 +49,6 @@ export default function Home() {
           <p className="mb-0 text-muted text-center">© 2025 MyPhoenixPhone — Powered by Orange</p>
         </div>
       </footer>
-    </div>
+    </>
   );
 }

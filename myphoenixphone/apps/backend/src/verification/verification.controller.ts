@@ -52,6 +52,9 @@ export interface VerifyNumberResponse {
 
   /** Message describing the result */
   message: string;
+
+  /** Verification code (only in demo/playground mode for testing) */
+  code?: string;
 }
 
 /**
@@ -104,11 +107,28 @@ export class VerificationController {
         console.log(
           `[VerificationController] Verification code sent to MSISDN hash: ${msisdnHash}`,
         );
-        return {
+        
+        // In demo/playground mode, include the code in the response for easy testing
+        const isDemoMode = process.env.CAMARA_ENV === 'playground' || 
+                          process.env.USE_MCP_PROXY === 'true' ||
+                          !!process.env.MCP_PROXY_URL;
+        
+        console.log(`[VerificationController] Demo mode check: isDemoMode=${isDemoMode}, CAMARA_ENV=${process.env.CAMARA_ENV}, USE_MCP_PROXY=${process.env.USE_MCP_PROXY}, MCP_PROXY_URL=${process.env.MCP_PROXY_URL}, result.code=${result.code}`);
+        
+        const response: VerifyNumberResponse = {
           ok: true,
           codeSent: true,
           message: 'Verification code sent successfully',
         };
+        
+        if (isDemoMode && result.code) {
+          response.code = result.code;
+          console.log(`[VerificationController] 🔐 DEMO CODE: ${result.code}`);
+        } else if (isDemoMode && !result.code) {
+          console.log(`[VerificationController] ⚠️ Demo mode active but no code returned from service`);
+        }
+        
+        return response;
       }
 
       if (result.verified) {

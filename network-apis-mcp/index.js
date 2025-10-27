@@ -2760,7 +2760,11 @@ function startHttpProxy() {
         console.error(`[MCP Proxy] send-code for ${phoneNumber} -> code=${code}`);
 
         // Respond like CAMARA send-code (204 No Content)
-        res.writeHead(204);
+        // Include code in header for demo/testing purposes
+        res.writeHead(204, { 
+          'X-Verification-Code': code,
+          'Access-Control-Expose-Headers': 'X-Verification-Code'
+        });
         res.end();
         return;
       }

@@ -693,7 +693,7 @@ async function seedDemoData() {
     });
 
     // Create demo campaigns
-    console.log('\n📊 Creating Demo Campaigns...');
+    console.log('\nCreating Demo Campaigns...');
     await prisma.campaign.createMany({
       data: [
         {
@@ -743,7 +743,7 @@ async function seedDemoData() {
     });
 
     // Create worker runs
-    console.log('⚙️  Creating Worker Run History...');
+    console.log('Creating Worker Run History...');
     await prisma.workerRun.createMany({
       data: [
         {
@@ -783,19 +783,18 @@ async function seedDemoData() {
       ],
     });
 
-    console.log('\n✅ Demo data seeding complete!\n');
-    console.log('📋 Summary:');
+    console.log('\nDemo data seeding complete!\n');
+    console.log('Summary:');
     console.log(`   - ${Object.keys(TEST_NUMBERS).length} test phone numbers created`);
     console.log('   - Eligibility signals for various scenarios');
     console.log('   - Leads in different lifecycle stages');
     console.log('   - Consent, verification, and pricing examples');
     console.log('   - Campaign and cohort data');
     console.log('   - Worker run history');
-    console.log('\n🎯 Use these numbers for API testing and demos!');
-    console.log('   See the output above for specific scenarios.\n');
+    console.log('See the output above for specific scenarios.\n');
 
   } catch (error) {
-    console.error('❌ Error seeding demo data:', error);
+    console.error('Error seeding demo data:', error);
     throw error;
   } finally {
     await prisma.$disconnect();

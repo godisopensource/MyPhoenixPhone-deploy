@@ -10,6 +10,7 @@ import { StorageModule } from '../storage/storage.module';
 import { SimSwapService } from '../camara/sim-swap.service';
 import { ReachabilityService } from '../camara/reachability.service';
 import { OAuth2ClientService } from '../camara/oauth2-client.service';
+import { PhoneModelsModule } from '../phone-models/phone-models.module';
 
 /**
  * Eligibility module - orchestrates eligibility checks using network signals
@@ -23,7 +24,7 @@ import { OAuth2ClientService } from '../camara/oauth2-client.service';
  * - Signal storage (repository)
  */
 @Module({
-  imports: [PrismaModule, StorageModule],
+  imports: [PrismaModule, StorageModule, PhoneModelsModule],
   controllers: [EligibilityController],
   providers: [
     // Core services

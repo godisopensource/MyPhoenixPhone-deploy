@@ -98,13 +98,37 @@ npm run prisma:generate
 
 ### 5. Load Demo Data (Optional)
 
-For testing and demonstrations, load sample data:
+For testing and demonstrations, load sample data.
+
+IMPORTANT: The Orange Network APIs playground used for demos enforces a quota on the number of phone numbers that can exist in the account. The current demo setup uses 10 playground slots. Before running the seeder you must:
+
+- start the local MCP playground proxy (see `/MCP_SETUP.md`)
+- ensure the 10 demo phone numbers are present in the playground (see `/myphoenixphone/scripts/create-playground-phones.ts`)
+
+Run the Prisma demo seeder after MCP playground phone numbers are configured:
 
 ```sh
 npm run seed:demo
 ```
 
-This creates 20 test phone numbers with various scenarios (dormant devices, active users, different eligibility states, etc.). See the console output for specific test numbers.
+Notes:
+- The seeder populates the local PostgreSQL database (Prisma). It does NOT automatically create phone numbers in the Orange playground — those must be created/updated via the MCP tools prior to running the seeder.
+- We use the following 10 playground numbers for demo scenarios (source: `myphoenixphone/scripts/create-playground-phones.ts`):
+
+   1. +33699901001 — Candidat Parfait
+   2. +33699901002 — SIM Swap Récent
+   3. +33699901003 — Utilisateur Actif
+   4. +33699901004 — Avec Consentement
+   5. +33699901005 — Vérifié par SMS
+   6. +33699901006 — Avec Tarification
+   7. +33699901007 — Livraison Choisie
+   8. +33699901008 — A Refusé (Opt-Out)
+   9. +33699901009 — En Campagne
+ 10. +33699901010 — Multi-Contacts
+
+See `/ACTIONS_DEMO.md` for the step-by-step MCP actions (create/update/delete) used to configure each playground number's metadata (SIM swap date, reachability, location, roaming).
+
+**📚 Demo Mode Guide**: See `apps/web/DEMO_MODE.md` for instructions on using the interactive demo mode in the web app.
 
 ### 6. Start Development Servers
 
