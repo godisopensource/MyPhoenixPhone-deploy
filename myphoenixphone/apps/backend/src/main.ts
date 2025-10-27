@@ -33,7 +33,7 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-  
+
   // Save OpenAPI spec to file for contract testing
   const fs = require('fs');
   const yaml = require('yaml');

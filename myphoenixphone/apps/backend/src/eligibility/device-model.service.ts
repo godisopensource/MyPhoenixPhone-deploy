@@ -62,19 +62,19 @@ export class DeviceModelService {
   private loadEligibleModels(): void {
     try {
       const models = this.phoneModelsService.getAll();
-      
+
       // Transform flat list to grouped structure
       this.eligibleModels = {};
       for (const model of models) {
         if (!this.eligibleModels[model.brand]) {
           this.eligibleModels[model.brand] = [];
         }
-        
+
         // Check if model already exists in the brand's list
         const existingModel = this.eligibleModels[model.brand].find(
           (m) => m.model === model.model,
         );
-        
+
         if (existingModel) {
           // Add storage variant if not already present
           if (!existingModel.variants.includes(model.storage)) {

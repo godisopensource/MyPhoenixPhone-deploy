@@ -11,7 +11,10 @@ export class FeatureFlagsController {
   }
 
   @Get(':key')
-  getFlag(@Param('key') key: string): { enabled: boolean; variant?: string | null } {
+  getFlag(@Param('key') key: string): {
+    enabled: boolean;
+    variant?: string | null;
+  } {
     return {
       enabled: this.featureFlagsService.isEnabled(key),
       variant: this.featureFlagsService.getVariant(key),

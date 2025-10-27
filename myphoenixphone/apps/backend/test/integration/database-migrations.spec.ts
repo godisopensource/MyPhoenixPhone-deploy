@@ -1,13 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
+import {
+  PostgreSqlContainer,
+  StartedPostgreSqlContainer,
+} from '@testcontainers/postgresql';
 import { PrismaClient } from '@prisma/client';
 import { execSync } from 'child_process';
 import * as path from 'path';
 
 /**
  * Integration tests for Prisma database migrations
- * 
+ *
  * These tests use testcontainers to spin up a real PostgreSQL database
  * and verify that migrations work correctly, including:
  * - Migration up/down cycles
@@ -59,7 +62,7 @@ describe('Database Migrations (Integration)', () => {
     test('should successfully run all migrations', async () => {
       // Run migrations
       const migrationsPath = path.join(__dirname, '../../prisma/migrations');
-      
+
       try {
         execSync('npx prisma migrate deploy', {
           env: { ...process.env, DATABASE_URL: databaseUrl },
@@ -74,8 +77,8 @@ describe('Database Migrations (Integration)', () => {
         SELECT tablename FROM pg_tables WHERE schemaname = 'public'
       `;
 
-      const tableNames = tables.map(t => t.tablename);
-      
+      const tableNames = tables.map((t) => t.tablename);
+
       // Expected tables from schema
       const expectedTables = [
         'Consent',
@@ -101,7 +104,9 @@ describe('Database Migrations (Integration)', () => {
 
     test('should create indexes correctly', async () => {
       // Query indexes
-      const indexes = await prisma.$queryRaw<Array<{ indexname: string; tablename: string }>>`
+      const indexes = await prisma.$queryRaw<
+        Array<{ indexname: string; tablename: string }>
+      >`
         SELECT indexname, tablename 
         FROM pg_indexes 
         WHERE schemaname = 'public' 
@@ -111,20 +116,25 @@ describe('Database Migrations (Integration)', () => {
       console.log('📊 Indexes created:', indexes.length);
 
       // Verify critical indexes exist
-      const indexNames = indexes.map(i => i.indexname);
-      
+      const indexNames = indexes.map((i) => i.indexname);
+
       // Check for msisdn_hash indexes (frequently queried)
-      const msisdnIndexes = indexes.filter(i => 
-        i.indexname.toLowerCase().includes('msisdn')
+      const msisdnIndexes = indexes.filter((i) =>
+        i.indexname.toLowerCase().includes('msisdn'),
       );
 
       expect(msisdnIndexes.length).toBeGreaterThan(0);
-      console.log('✅ MSISDN indexes:', msisdnIndexes.map(i => i.indexname));
+      console.log(
+        '✅ MSISDN indexes:',
+        msisdnIndexes.map((i) => i.indexname),
+      );
     });
 
     test('should have correct table schemas', async () => {
       // Verify Consent table schema
-      const consentColumns = await prisma.$queryRaw<Array<{ column_name: string; data_type: string; is_nullable: string }>>`
+      const consentColumns = await prisma.$queryRaw<
+        Array<{ column_name: string; data_type: string; is_nullable: string }>
+      >`
         SELECT column_name, data_type, is_nullable
         FROM information_schema.columns
         WHERE table_name = 'Consent'
@@ -133,13 +143,35 @@ describe('Database Migrations (Integration)', () => {
 
       expect(consentColumns).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ column_name: 'id', data_type: 'text', is_nullable: 'NO' }),
-          expect.objectContaining({ column_name: 'msisdn_hash', data_type: 'text', is_nullable: 'NO' }),
-          expect.objectContaining({ column_name: 'scopes', data_type: 'ARRAY', is_nullable: 'NO' }),
-          expect.objectContaining({ column_name: 'proof', data_type: 'jsonb', is_nullable: 'NO' }),
-          expect.objectContaining({ column_name: 'created_at', is_nullable: 'NO' }),
-          expect.objectContaining({ column_name: 'revoked_at', is_nullable: 'YES' }),
-        ])
+          expect.objectContaining({
+            column_name: 'id',
+            data_type: 'text',
+            is_nullable: 'NO',
+          }),
+          expect.objectContaining({
+            column_name: 'msisdn_hash',
+            data_type: 'text',
+            is_nullable: 'NO',
+          }),
+          expect.objectContaining({
+            column_name: 'scopes',
+            data_type: 'ARRAY',
+            is_nullable: 'NO',
+          }),
+          expect.objectContaining({
+            column_name: 'proof',
+            data_type: 'jsonb',
+            is_nullable: 'NO',
+          }),
+          expect.objectContaining({
+            column_name: 'created_at',
+            is_nullable: 'NO',
+          }),
+          expect.objectContaining({
+            column_name: 'revoked_at',
+            is_nullable: 'YES',
+          }),
+        ]),
       );
 
       console.log('✅ Consent table schema verified');
@@ -175,10 +207,12 @@ describe('Database Migrations (Integration)', () => {
             sim_swapped_at: new Date(),
             reachable: false,
           },
-        })
+        }),
       ).rejects.toThrow(/Unique constraint failed/);
 
-      console.log('✅ Unique constraint enforced on EligibilitySignal.msisdn_hash');
+      console.log(
+        '✅ Unique constraint enforced on EligibilitySignal.msisdn_hash',
+      );
     });
 
     test('should enforce unique constraint on OptOut.msisdn_hash', async () => {
@@ -199,7 +233,7 @@ describe('Database Migrations (Integration)', () => {
             msisdn_hash: msisdnHash,
             reason: 'Duplicate',
           },
-        })
+        }),
       ).rejects.toThrow(/Unique constraint failed/);
 
       console.log('✅ Unique constraint enforced on OptOut.msisdn_hash');
@@ -223,7 +257,7 @@ describe('Database Migrations (Integration)', () => {
             name: cohortName,
             description: 'Duplicate',
           },
-        })
+        }),
       ).rejects.toThrow(/Unique constraint failed/);
 
       console.log('✅ Unique constraint enforced on Cohort.name');
@@ -262,10 +296,12 @@ describe('Database Migrations (Integration)', () => {
             signals: {},
             expires_at: new Date('2025-02-01'),
           },
-        })
+        }),
       ).rejects.toThrow(/Unique constraint failed/);
 
-      console.log('✅ Unique constraint enforced on Lead (msisdn_hash, created_at)');
+      console.log(
+        '✅ Unique constraint enforced on Lead (msisdn_hash, created_at)',
+      );
     });
 
     test('should enforce unique constraint on CohortMember (cohort_id, msisdn_hash, assigned_at)', async () => {
@@ -297,7 +333,7 @@ describe('Database Migrations (Integration)', () => {
             msisdn_hash: msisdnHash,
             assigned_at: assignedAt,
           },
-        })
+        }),
       ).rejects.toThrow(/Unique constraint failed/);
 
       console.log('✅ Unique constraint enforced on CohortMember');
@@ -325,10 +361,12 @@ describe('Database Migrations (Integration)', () => {
             template_variant: 'A',
             status: 'sent',
           },
-        })
+        }),
       ).rejects.toThrow(/Foreign key constraint failed/);
 
-      console.log('✅ Foreign key constraint enforced on ContactAttempt.lead_id');
+      console.log(
+        '✅ Foreign key constraint enforced on ContactAttempt.lead_id',
+      );
     });
 
     test('should cascade delete ContactAttempts when Lead is deleted', async () => {
@@ -394,10 +432,12 @@ describe('Database Migrations (Integration)', () => {
             cohort_id: nonExistentCohortId,
             msisdn_hash: 'test-hash',
           },
-        })
+        }),
       ).rejects.toThrow(/Foreign key constraint failed/);
 
-      console.log('✅ Foreign key constraint enforced on CohortMember.cohort_id');
+      console.log(
+        '✅ Foreign key constraint enforced on CohortMember.cohort_id',
+      );
     });
 
     test('should cascade delete CohortMembers when Cohort is deleted', async () => {
@@ -467,7 +507,7 @@ describe('Database Migrations (Integration)', () => {
 
       // ID should be a valid UUID
       expect(consent.id).toMatch(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
       );
 
       console.log('✅ UUID auto-generated:', consent.id);
@@ -520,7 +560,7 @@ describe('Database Migrations (Integration)', () => {
       const originalUpdatedAt = lead.updated_at;
 
       // Wait a moment
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Update record
       const updatedLead = await prisma.lead.update({
@@ -530,7 +570,7 @@ describe('Database Migrations (Integration)', () => {
 
       // updated_at should have changed
       expect(updatedLead.updated_at.getTime()).toBeGreaterThan(
-        originalUpdatedAt.getTime()
+        originalUpdatedAt.getTime(),
       );
 
       console.log('✅ updated_at changed on update:', {

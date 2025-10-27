@@ -29,10 +29,6 @@ import { SimSwapService } from '../camara/sim-swap.service';
     WorkersScheduler,
   ],
   controllers: [WorkersController],
-  exports: [
-    DormantDetectionService,
-    CohortBuilderService,
-    DailyRefreshService,
-  ],
+  exports: [DormantDetectionService, CohortBuilderService, DailyRefreshService],
 })
 export class WorkersModule {}

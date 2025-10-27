@@ -4,10 +4,10 @@ import { Prisma } from '@prisma/client';
 
 /**
  * Cohort Builder Service
- * 
+ *
  * Implements RFM (Recency, Frequency, Monetary) analysis to segment users
  * into cohorts for targeted campaigns.
- * 
+ *
  * Cohorts:
  * - high_value: Recent activity, high frequency, high estimated value
  * - medium_value: Moderate on all dimensions
@@ -54,7 +54,9 @@ export class CohortBuilderService {
         },
       });
 
-      this.logger.log(`Analyzing ${leads.length} active leads for cohort assignment`);
+      this.logger.log(
+        `Analyzing ${leads.length} active leads for cohort assignment`,
+      );
 
       let membersAssigned = 0;
 
@@ -109,7 +111,8 @@ export class CohortBuilderService {
     const cohortDefs = [
       {
         name: 'high_value',
-        description: 'Recent activity, high frequency, high estimated value (>€150)',
+        description:
+          'Recent activity, high frequency, high estimated value (>€150)',
         recency_max: 14,
         frequency_min: 3,
         monetary_min: 150,
@@ -171,8 +174,7 @@ export class CohortBuilderService {
     monetary: number;
   } {
     // Recency: days since last contact or creation
-    const lastContact =
-      lead.contact_attempts[0]?.created_at || lead.created_at;
+    const lastContact = lead.contact_attempts[0]?.created_at || lead.created_at;
     const recency =
       (Date.now() - lastContact.getTime()) / (1000 * 60 * 60 * 24);
 

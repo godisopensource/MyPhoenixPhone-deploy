@@ -5,9 +5,9 @@ import { DailyRefreshService } from './daily-refresh.service';
 
 /**
  * Workers Controller
- * 
+ *
  * Provides monitoring and manual trigger endpoints for background workers.
- * 
+ *
  * Endpoints:
  * - GET /workers/status - Overall worker health
  * - GET /workers/dormant/stats - Dormant detection statistics

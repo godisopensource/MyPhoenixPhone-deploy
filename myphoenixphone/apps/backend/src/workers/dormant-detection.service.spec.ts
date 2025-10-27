@@ -61,7 +61,9 @@ describe('DormantDetectionService', () => {
       jest.spyOn(prisma.networkEvent, 'findMany').mockResolvedValue(mockEvents);
       jest.spyOn(prisma.lead, 'findFirst').mockResolvedValue(null);
       jest.spyOn(prisma.lead, 'create').mockResolvedValue({} as any);
-      jest.spyOn(prisma.networkEvent, 'updateMany').mockResolvedValue({} as any);
+      jest
+        .spyOn(prisma.networkEvent, 'updateMany')
+        .mockResolvedValue({} as any);
 
       const result = await service.detectDormantDevices();
 
@@ -89,10 +91,16 @@ describe('DormantDetectionService', () => {
         expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       };
 
-      jest.spyOn(prisma.networkEvent, 'findMany').mockResolvedValue([mockEvent]);
-      jest.spyOn(prisma.lead, 'findFirst').mockResolvedValue(existingLead as any);
+      jest
+        .spyOn(prisma.networkEvent, 'findMany')
+        .mockResolvedValue([mockEvent]);
+      jest
+        .spyOn(prisma.lead, 'findFirst')
+        .mockResolvedValue(existingLead as any);
       jest.spyOn(prisma.lead, 'update').mockResolvedValue({} as any);
-      jest.spyOn(prisma.networkEvent, 'updateMany').mockResolvedValue({} as any);
+      jest
+        .spyOn(prisma.networkEvent, 'updateMany')
+        .mockResolvedValue({} as any);
 
       const result = await service.detectDormantDevices();
 
@@ -121,14 +129,18 @@ describe('DormantDetectionService', () => {
 
       jest.spyOn(prisma.networkEvent, 'findMany').mockResolvedValue(mockEvents);
       jest.spyOn(prisma.lead, 'findFirst').mockResolvedValue(null);
-      
+
       let capturedScore: number = 0;
-      jest.spyOn(prisma.lead, 'create').mockImplementation(async (data: any) => {
-        capturedScore = data.data.dormant_score;
-        return {} as any;
-      });
-      
-      jest.spyOn(prisma.networkEvent, 'updateMany').mockResolvedValue({} as any);
+      jest
+        .spyOn(prisma.lead, 'create')
+        .mockImplementation(async (data: any) => {
+          capturedScore = data.data.dormant_score;
+          return {} as any;
+        });
+
+      jest
+        .spyOn(prisma.networkEvent, 'updateMany')
+        .mockResolvedValue({} as any);
 
       await service.detectDormantDevices();
 
@@ -140,9 +152,10 @@ describe('DormantDetectionService', () => {
 
   describe('getDormantStats', () => {
     it('should return dormant statistics', async () => {
-      jest.spyOn(prisma.lead, 'count')
+      jest
+        .spyOn(prisma.lead, 'count')
         .mockResolvedValueOnce(100) // total
-        .mockResolvedValueOnce(60)  // eligible
+        .mockResolvedValueOnce(60) // eligible
         .mockResolvedValueOnce(20); // pending nudges
 
       jest.spyOn(prisma.lead, 'aggregate').mockResolvedValue({

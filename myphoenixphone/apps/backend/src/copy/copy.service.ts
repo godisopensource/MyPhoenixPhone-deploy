@@ -54,7 +54,7 @@ const COPIES: Record<
     email: {
       fr: {
         subject: 'Donnez une seconde vie à votre téléphone',
-        body: 'Bonjour,\n\nVous possédez un ancien smartphone qui dort dans un tiroir ?\n\nOrange vous propose de le reprendre dans le cadre de son programme de reconditionnement.\n\nCliquez ici pour obtenir une estimation en quelques clics : {url}\n\nCordialement,\nL\'équipe Orange',
+        body: "Bonjour,\n\nVous possédez un ancien smartphone qui dort dans un tiroir ?\n\nOrange vous propose de le reprendre dans le cadre de son programme de reconditionnement.\n\nCliquez ici pour obtenir une estimation en quelques clics : {url}\n\nCordialement,\nL'équipe Orange",
         cta: 'Estimer mon appareil',
       },
       en: {
@@ -76,13 +76,13 @@ const COPIES: Record<
     },
     rcs: {
       fr: {
-        subject: 'Votre téléphone vaut de l\'argent',
+        subject: "Votre téléphone vaut de l'argent",
         body: 'Ne laissez pas dormir de la valeur dans un tiroir. Obtenez immédiatement une offre de reprise.',
         cta: 'Voir ma reprise',
       },
       en: {
         subject: 'Your phone is worth money',
-        body: 'Don\'t let value sleep in a drawer. Get an instant trade-in offer.',
+        body: "Don't let value sleep in a drawer. Get an instant trade-in offer.",
         cta: 'See my trade-in',
       },
     },
@@ -90,7 +90,7 @@ const COPIES: Record<
       fr: {
         subject: 'Transformez votre ancien mobile en €',
         body: 'Estimation immédiate. Reprise garantie.',
-        cta: 'J\'estime',
+        cta: "J'estime",
       },
       en: {
         subject: 'Turn your old mobile into €',
@@ -100,13 +100,13 @@ const COPIES: Record<
     },
     email: {
       fr: {
-        subject: 'Reprise immédiate : votre téléphone vaut de l\'argent',
-        body: 'Bonjour,\n\nVotre ancien smartphone a de la valeur. Ne le laissez pas dormir !\n\nOrange vous garantit une reprise rapide et transparente.\n\n✓ Estimation en 2 minutes\n✓ Plusieurs options de remise\n✓ Processus simple et sécurisé\n\nDémarrez maintenant : {url}\n\nL\'équipe Orange',
+        subject: "Reprise immédiate : votre téléphone vaut de l'argent",
+        body: "Bonjour,\n\nVotre ancien smartphone a de la valeur. Ne le laissez pas dormir !\n\nOrange vous garantit une reprise rapide et transparente.\n\n✓ Estimation en 2 minutes\n✓ Plusieurs options de remise\n✓ Processus simple et sécurisé\n\nDémarrez maintenant : {url}\n\nL'équipe Orange",
         cta: 'Estimer maintenant',
       },
       en: {
         subject: 'Instant trade-in: your phone is worth money',
-        body: 'Hello,\n\nYour old smartphone has value. Don\'t let it sleep!\n\nOrange guarantees a fast and transparent trade-in.\n\n✓ 2-minute estimate\n✓ Multiple drop-off options\n✓ Simple and secure process\n\nStart now: {url}\n\nThe Orange Team',
+        body: "Hello,\n\nYour old smartphone has value. Don't let it sleep!\n\nOrange guarantees a fast and transparent trade-in.\n\n✓ 2-minute estimate\n✓ Multiple drop-off options\n✓ Simple and secure process\n\nStart now: {url}\n\nThe Orange Team",
         cta: 'Estimate now',
       },
     },
@@ -115,7 +115,7 @@ const COPIES: Record<
     // Ton plus empathique / environnemental
     sms: {
       fr: {
-        body: 'Participez à l\'économie circulaire : donnez une 2e vie à votre téléphone avec Orange. Estimation gratuite : {url}',
+        body: "Participez à l'économie circulaire : donnez une 2e vie à votre téléphone avec Orange. Estimation gratuite : {url}",
       },
       en: {
         body: 'Join the circular economy: give your phone a 2nd life with Orange. Free estimate: {url}',
@@ -148,12 +148,12 @@ const COPIES: Record<
     email: {
       fr: {
         subject: 'Donnez une seconde vie à votre téléphone, pour la planète',
-        body: 'Bonjour,\n\nChaque année, des millions de smartphones finissent dans des tiroirs.\n\nEnsemble, changeons les choses. Orange s\'engage dans l\'économie circulaire et vous propose de reprendre votre ancien appareil.\n\n🌍 Réduisez votre empreinte environnementale\n♻️ Soutenez le reconditionnement\n🤝 Bénéficiez d\'un geste commercial\n\nCommencez votre estimation : {url}\n\nMerci pour votre engagement,\nL\'équipe Orange',
+        body: "Bonjour,\n\nChaque année, des millions de smartphones finissent dans des tiroirs.\n\nEnsemble, changeons les choses. Orange s'engage dans l'économie circulaire et vous propose de reprendre votre ancien appareil.\n\n🌍 Réduisez votre empreinte environnementale\n♻️ Soutenez le reconditionnement\n🤝 Bénéficiez d'un geste commercial\n\nCommencez votre estimation : {url}\n\nMerci pour votre engagement,\nL'équipe Orange",
         cta: 'Je participe',
       },
       en: {
         subject: 'Give your phone a second life, for the planet',
-        body: 'Hello,\n\nEvery year, millions of smartphones end up in drawers.\n\nTogether, let\'s change things. Orange is committed to the circular economy and offers to take back your old device.\n\n🌍 Reduce your environmental footprint\n♻️ Support refurbishment\n🤝 Benefit from a commercial gesture\n\nStart your estimate: {url}\n\nThank you for your commitment,\nThe Orange Team',
+        body: "Hello,\n\nEvery year, millions of smartphones end up in drawers.\n\nTogether, let's change things. Orange is committed to the circular economy and offers to take back your old device.\n\n🌍 Reduce your environmental footprint\n♻️ Support refurbishment\n🤝 Benefit from a commercial gesture\n\nStart your estimate: {url}\n\nThank you for your commitment,\nThe Orange Team",
         cta: 'I participate',
       },
     },

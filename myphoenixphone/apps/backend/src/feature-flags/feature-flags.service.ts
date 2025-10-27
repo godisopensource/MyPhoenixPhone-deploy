@@ -31,7 +31,8 @@ export class FeatureFlagsService {
     this.flags.set('geofencing_enabled', {
       key: 'geofencing_enabled',
       enabled: true,
-      description: 'Activer la vérification de géolocalisation pour dépôt boutique',
+      description:
+        'Activer la vérification de géolocalisation pour dépôt boutique',
     });
 
     this.flags.set('sms_throttling', {
@@ -73,7 +74,7 @@ export class FeatureFlagsService {
       const hash = this.simpleHash(userId);
       let cumulative = 0;
       const variants = Object.entries(flag.variants);
-      
+
       for (const [variant, weight] of variants) {
         cumulative += weight;
         if (hash < cumulative) {

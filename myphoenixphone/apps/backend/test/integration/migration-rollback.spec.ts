@@ -1,4 +1,7 @@
-import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
+import {
+  PostgreSqlContainer,
+  StartedPostgreSqlContainer,
+} from '@testcontainers/postgresql';
 import { PrismaClient } from '@prisma/client';
 import { execSync } from 'child_process';
 import * as fs from 'fs';
@@ -6,7 +9,7 @@ import * as path from 'path';
 
 /**
  * Integration tests for Prisma migration rollback scenarios
- * 
+ *
  * Tests the ability to rollback migrations and verify database state
  * remains consistent after rollback operations.
  */
@@ -53,13 +56,18 @@ describe('Database Migration Rollback (Integration)', () => {
       });
 
       // Verify migrations table exists
-      const migrations = await prisma.$queryRaw<Array<{ migration_name: string }>>`
+      const migrations = await prisma.$queryRaw<
+        Array<{ migration_name: string }>
+      >`
         SELECT migration_name FROM _prisma_migrations ORDER BY finished_at
       `;
 
       expect(migrations.length).toBeGreaterThan(0);
       console.log('✅ Migrations deployed:', migrations.length);
-      console.log('📝 Migration names:', migrations.map(m => m.migration_name));
+      console.log(
+        '📝 Migration names:',
+        migrations.map((m) => m.migration_name),
+      );
     });
 
     test('should be able to reset database', async () => {
@@ -154,7 +162,9 @@ describe('Database Migration Rollback (Integration)', () => {
         expect(true).toBe(true);
         console.log('✅ Migrations are idempotent');
       } catch (error) {
-        throw new Error(`Migration deploy should be idempotent: ${error.message}`);
+        throw new Error(
+          `Migration deploy should be idempotent: ${error.message}`,
+        );
       }
     });
 
@@ -254,7 +264,9 @@ describe('Database Migration Rollback (Integration)', () => {
 
     test('should preserve indexes after reset', async () => {
       // Check indexes exist
-      const indexes = await prisma.$queryRaw<Array<{ indexname: string; tablename: string }>>`
+      const indexes = await prisma.$queryRaw<
+        Array<{ indexname: string; tablename: string }>
+      >`
         SELECT indexname, tablename 
         FROM pg_indexes 
         WHERE schemaname = 'public'
@@ -264,7 +276,7 @@ describe('Database Migration Rollback (Integration)', () => {
       expect(indexes.length).toBeGreaterThan(0);
 
       // Verify critical indexes
-      const leadIndexes = indexes.filter(i => i.tablename === 'Lead');
+      const leadIndexes = indexes.filter((i) => i.tablename === 'Lead');
       expect(leadIndexes.length).toBeGreaterThan(0);
 
       console.log('✅ Indexes preserved:', indexes.length);
@@ -288,7 +300,7 @@ describe('Database Migration Rollback (Integration)', () => {
             msisdn_hash: msisdnHash,
             reachable: false,
           },
-        })
+        }),
       ).rejects.toThrow(/Unique constraint failed/);
 
       console.log('✅ Constraints preserved after reset');
@@ -304,14 +316,16 @@ describe('Database Migration Rollback (Integration)', () => {
       });
 
       // Verify schema matches expectations
-      const leadColumns = await prisma.$queryRaw<Array<{ column_name: string }>>`
+      const leadColumns = await prisma.$queryRaw<
+        Array<{ column_name: string }>
+      >`
         SELECT column_name 
         FROM information_schema.columns
         WHERE table_name = 'Lead'
         ORDER BY ordinal_position
       `;
 
-      const columnNames = leadColumns.map(c => c.column_name);
+      const columnNames = leadColumns.map((c) => c.column_name);
 
       // Check for expected columns
       expect(columnNames).toContain('msisdn_hash');
@@ -353,13 +367,15 @@ describe('Database Migration Rollback (Integration)', () => {
 
       // Verify expected relationships
       const contactAttemptFK = foreignKeys.find(
-        fk => fk.table_name === 'ContactAttempt' && fk.column_name === 'lead_id'
+        (fk) =>
+          fk.table_name === 'ContactAttempt' && fk.column_name === 'lead_id',
       );
       expect(contactAttemptFK).toBeDefined();
       expect(contactAttemptFK?.foreign_table_name).toBe('Lead');
 
       const cohortMemberFK = foreignKeys.find(
-        fk => fk.table_name === 'CohortMember' && fk.column_name === 'cohort_id'
+        (fk) =>
+          fk.table_name === 'CohortMember' && fk.column_name === 'cohort_id',
       );
       expect(cohortMemberFK).toBeDefined();
       expect(cohortMemberFK?.foreign_table_name).toBe('Cohort');

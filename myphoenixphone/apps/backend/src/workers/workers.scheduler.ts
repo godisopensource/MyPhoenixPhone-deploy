@@ -4,9 +4,9 @@ import { DailyRefreshService } from './daily-refresh.service';
 
 /**
  * Workers Scheduler
- * 
+ *
  * Manages cron-based scheduling for background workers.
- * 
+ *
  * Schedule:
  * - Daily Refresh: Every day at 3:00 AM (Europe/Paris timezone)
  */
@@ -25,7 +25,7 @@ export class WorkersScheduler {
   })
   async handleDailyRefresh() {
     this.logger.log('Cron triggered: daily-refresh');
-    
+
     try {
       const result = await this.dailyRefresh.runDailyRefresh('cron');
       this.logger.log(

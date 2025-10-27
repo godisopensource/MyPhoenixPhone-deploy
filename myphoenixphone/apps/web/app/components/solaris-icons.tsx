@@ -87,8 +87,9 @@ export const TruckIcon: React.FC<IconProps> = ({ className, width = 20, height =
 );
 
 export const HeartIcon: React.FC<IconProps> = ({ className, width = 16, height = 16, fill = 'currentColor', ariaHidden = true }) => (
-  <svg className={className} width={width} height={height} viewBox="0 0 16 16" fill={fill} aria-hidden={ariaHidden}>
-    <path d="M8 2.748-.717-5.6C5.6-1.522 8 1.15 8 1.15s2.4-2.672 5.717-3.902C14.9-.904 16 1.042 16 2.748 16 6.5 8 13 8 13s-8-6.5-8-10.252C0 1.042 1.1-.904 2.283-1.302 5.6 0.928 8 2.748 8 2.748z" />
+  <svg className={className} width={width} height={height} viewBox="0 0 24 24" fill={fill} aria-hidden={ariaHidden}>
+    {/* Standard rounded heart path for consistent rendering */}
+    <path d="M12.1 21.35l-1.1-1.02C5.14 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.14 6.86-8.9 11.83l-1 1.02z" style={{fillRule: 'nonzero'}} />
   </svg>
 );
 
@@ -117,6 +118,18 @@ export const BellIcon: React.FC<IconProps> = ({ className, width = 16, height = 
   </svg>
 );
 
+export const PhoneIcon: React.FC<IconProps> = ({ className, width = 16, height = 16, fill = 'currentColor', ariaHidden = true }) => (
+  <svg className={className} width={width} height={height} viewBox="0 0 16 16" fill={fill} aria-hidden={ariaHidden}>
+    <path d="M4 1a1 1 0 011-1h6a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V1zm2 12a1 1 0 102 0 1 1 0 00-2 0z" />
+  </svg>
+);
+
+export const ShieldIcon: React.FC<IconProps> = ({ className, width = 16, height = 16, fill = 'currentColor', ariaHidden = true }) => (
+  <svg className={className} width={width} height={height} viewBox="0 0 16 16" fill={fill} aria-hidden={ariaHidden}>
+    <path d="M8 0L1 3v5c0 5 7 8 7 8s7-3 7-8V3L8 0zm-.5 13.5c-3.5-1-5.5-4-5.5-6.5V4l5-2v11.5z" />
+  </svg>
+);
+
 export default {
   CheckIcon,
   InfoIcon,
@@ -134,4 +147,6 @@ export default {
   UsersIcon,
   SearchIcon,
   BellIcon,
+  PhoneIcon,
+  ShieldIcon,
 };

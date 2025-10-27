@@ -4,16 +4,16 @@ import { Prisma } from '@prisma/client';
 
 /**
  * Dormant Detection Service
- * 
+ *
  * Analyzes NetworkEvent data to calculate dormant probability scores
  * and identifies high-value dormant users ready for outreach.
- * 
+ *
  * Scoring Algorithm:
  * - SIM swap detected: +0.4 (strong signal)
  * - Device unreachable: +0.3 (moderate signal)
  * - No recent activity: +0.2 (weak signal)
  * - Time decay: older events get lower weight
- * 
+ *
  * Max score: 1.0 (highly dormant)
  * Min score: 0.0 (active user)
  */
@@ -142,7 +142,8 @@ export class DormantDetectionService {
     const now = Date.now();
 
     for (const event of events) {
-      const ageInDays = (now - event.created_at.getTime()) / (1000 * 60 * 60 * 24);
+      const ageInDays =
+        (now - event.created_at.getTime()) / (1000 * 60 * 60 * 24);
       const timeDecay = Math.max(0, 1 - ageInDays / 90); // Decay over 90 days
 
       if (event.event_type === 'sim_swap') {

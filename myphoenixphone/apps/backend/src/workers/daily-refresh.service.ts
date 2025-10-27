@@ -8,14 +8,14 @@ import { CohortBuilderService } from './cohort-builder.service';
 
 /**
  * Daily Refresh Worker
- * 
+ *
  * Scheduled task that runs daily at 3 AM to:
  * 1. Fetch fresh data from Orange Network APIs for active leads
  * 2. Update NetworkEvent records
  * 3. Trigger dormant detection
  * 4. Rebuild cohorts
  * 5. Log worker run metrics
- * 
+ *
  * This keeps our dormancy signals and cohort memberships up-to-date.
  */
 @Injectable()
@@ -34,7 +34,10 @@ export class DailyRefreshService {
   /**
    * Run the daily refresh workflow
    */
-  async runDailyRefresh(trigger: string = 'cron', triggeredBy?: string): Promise<{
+  async runDailyRefresh(
+    trigger: string = 'cron',
+    triggeredBy?: string,
+  ): Promise<{
     workerRunId: string;
     recordsProcessed: number;
     recordsCreated: number;
@@ -222,30 +225,36 @@ export class DailyRefreshService {
     last_run_at: Date | null;
     last_success_at: Date | null;
   }> {
-    const [totalRuns, successfulRuns, failedRuns, avgDuration, lastRun, lastSuccess] =
-      await Promise.all([
-        this.db.workerRun.count({ where: { worker_type: 'daily_refresh' } }),
-        this.db.workerRun.count({
-          where: { worker_type: 'daily_refresh', status: 'completed' },
-        }),
-        this.db.workerRun.count({
-          where: { worker_type: 'daily_refresh', status: 'failed' },
-        }),
-        this.db.workerRun.aggregate({
-          where: { worker_type: 'daily_refresh', status: 'completed' },
-          _avg: { duration_ms: true },
-        }),
-        this.db.workerRun.findFirst({
-          where: { worker_type: 'daily_refresh' },
-          orderBy: { started_at: 'desc' },
-          select: { started_at: true },
-        }),
-        this.db.workerRun.findFirst({
-          where: { worker_type: 'daily_refresh', status: 'completed' },
-          orderBy: { completed_at: 'desc' },
-          select: { completed_at: true },
-        }),
-      ]);
+    const [
+      totalRuns,
+      successfulRuns,
+      failedRuns,
+      avgDuration,
+      lastRun,
+      lastSuccess,
+    ] = await Promise.all([
+      this.db.workerRun.count({ where: { worker_type: 'daily_refresh' } }),
+      this.db.workerRun.count({
+        where: { worker_type: 'daily_refresh', status: 'completed' },
+      }),
+      this.db.workerRun.count({
+        where: { worker_type: 'daily_refresh', status: 'failed' },
+      }),
+      this.db.workerRun.aggregate({
+        where: { worker_type: 'daily_refresh', status: 'completed' },
+        _avg: { duration_ms: true },
+      }),
+      this.db.workerRun.findFirst({
+        where: { worker_type: 'daily_refresh' },
+        orderBy: { started_at: 'desc' },
+        select: { started_at: true },
+      }),
+      this.db.workerRun.findFirst({
+        where: { worker_type: 'daily_refresh', status: 'completed' },
+        orderBy: { completed_at: 'desc' },
+        select: { completed_at: true },
+      }),
+    ]);
 
     return {
       total_runs: totalRuns,

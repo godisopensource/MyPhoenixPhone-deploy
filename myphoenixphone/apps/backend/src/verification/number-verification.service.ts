@@ -71,18 +71,24 @@ export class NumberVerificationService {
           `MCP Proxy send-code failed: ${res.status} - ${raw || res.statusText}`,
         );
       }
-      
+
       // In playground/demo mode, try to extract the code from response headers
       const codeHeader = res.headers.get('X-Verification-Code');
-      console.log(`[NumberVerificationService] MCP Proxy response headers: X-Verification-Code=${codeHeader}`);
-      
+      console.log(
+        `[NumberVerificationService] MCP Proxy response headers: X-Verification-Code=${codeHeader}`,
+      );
+
       if (codeHeader) {
-        console.log(`[NumberVerificationService] Returning verification code: ${codeHeader}`);
+        console.log(
+          `[NumberVerificationService] Returning verification code: ${codeHeader}`,
+        );
         return codeHeader;
       }
-      
-      console.log(`[NumberVerificationService] No X-Verification-Code header found in MCP response`);
-      
+
+      console.log(
+        `[NumberVerificationService] No X-Verification-Code header found in MCP response`,
+      );
+
       // 204 No Content expected
       return undefined;
     }
@@ -105,7 +111,7 @@ export class NumberVerificationService {
         `Number Verification send-code failed: ${response.status} - ${raw || response.statusText}`,
       );
     }
-    
+
     return undefined;
   }
 
