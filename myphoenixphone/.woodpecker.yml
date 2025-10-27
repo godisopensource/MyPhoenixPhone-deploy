@@ -47,15 +47,3 @@ steps:
     commands:
       - npm run -w apps/web build
     depends_on: [ install ]
-
-  - name: lint-frontend
-    image: node:20-alpine
-    commands:
-      - npm run -w apps/frontend lint || echo "frontend lint not configured; skipping"
-    depends_on: [ install ]
-
-  - name: build-frontend
-    image: node:20-alpine
-    commands:
-      - npm run -w apps/frontend build
-    depends_on: [ install ]

@@ -2,7 +2,7 @@
 
 # Pact Contract Testing Workflow
 # This script runs the complete contract testing flow:
-# 1. Generate contracts from consumer tests (frontend)
+# 1. Generate contracts from consumer tests (web app)
 # 2. Start backend server
 # 3. Verify backend against consumer contracts
 
@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 
 # Step 1: Run consumer tests to generate pact files
 echo ""
-echo -e "${YELLOW}Step 1: Running consumer tests (frontend)...${NC}"
+echo -e "${YELLOW}Step 1: Running consumer tests (web app)...${NC}"
 cd apps/web
 npm run test:pact
 
