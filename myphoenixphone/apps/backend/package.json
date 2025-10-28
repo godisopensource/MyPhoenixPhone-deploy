@@ -10,6 +10,8 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
+    "predev": "prisma generate --schema ./prisma/schema.prisma",
+    "prestart": "prisma generate --schema ./prisma/schema.prisma",
     "dev": "bash -lc 'export PORT=${PORT:-3003}; nest start --watch'",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",

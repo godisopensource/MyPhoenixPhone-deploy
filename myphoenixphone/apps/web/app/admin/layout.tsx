@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { InfoIcon, ShopIcon, CheckIcon, PrintIcon, UserIcon, BellIcon } from '../components/solaris-icons';
+import { AdminDemoBootstrap } from './AdminDemoBootstrap';
 
 export const metadata: Metadata = {
   title: 'Admin - Gestion des Campagnes - Orange',
@@ -87,7 +88,7 @@ export default function AdminLayout({
       </nav>
 
       {/* Main Content Area */}
-      <div className="flex-grow-1 bg-light">
+      <div className="flex-grow-1 bg-white">
         {/* Top Bar */}
         <header className="bg-white border-bottom py-3 px-4">
               <div className="d-flex justify-content-between align-items-center">
@@ -106,6 +107,8 @@ export default function AdminLayout({
 
         {/* Page Content */}
         <main className="p-4">
+          {/* Ensure demo mode is enabled client-side across all admin pages */}
+          <AdminDemoBootstrap />
           {children}
         </main>
       </div>

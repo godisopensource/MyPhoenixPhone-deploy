@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { useDemo } from '../../contexts/DemoContext';
+import { AdminDemoGuide } from '../../components/AdminDemoGuide';
 import { InfoIcon, BoxIcon, CrossIcon, CheckIcon, PrintIcon } from '../../components/solaris-icons';
 
 interface Template {
@@ -78,6 +81,8 @@ Cordialement,
 ];
 
 export default function TemplatesPage() {
+  const pathname = usePathname();
+  const { isDemoMode } = useDemo();
   const [templates, setTemplates] = useState<Template[]>(DEFAULT_TEMPLATES);
   const [loading, setLoading] = useState(false);
   const [filterChannel, setFilterChannel] = useState<string>('all');
@@ -168,6 +173,7 @@ export default function TemplatesPage() {
 
   return (
     <div>
+      {isDemoMode && <AdminDemoGuide key={pathname} />}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2 className="mb-1">Modèles de Messages</h2>

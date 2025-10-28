@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useDemo } from '../contexts/DemoContext';
+import { AdminDemoGuide } from '../components/AdminDemoGuide';
 import { BoxIcon, CheckIcon, InfoIcon, PrintIcon, UserIcon } from '../components/solaris-icons';
 
 interface DormantStats {
@@ -36,16 +38,55 @@ interface DormantStats {
 }
 
 export default function AdminDashboard() {
+  const { isDemoMode } = useDemo();
   const [stats, setStats] = useState<DormantStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStats();
-  }, []);
+    if (isDemoMode) {
+      // Use mock data in demo mode
+      setStats({
+        total_leads: 847,
+        by_status: {
+          eligible: 412,
+          contacted: 289,
+          responded: 156,
+          converted: 78,
+          expired: 45
+        },
+        by_tier: {
+          tier_0: 145,
+          tier_1: 198,
+          tier_2: 234,
+          tier_3: 156,
+          tier_4: 89,
+          tier_5: 25
+        },
+        value_distribution: {
+          total_potential_value: 156780,
+          average_value: 185,
+          median_value: 165
+        },
+        conversion_funnel: {
+          eligible: 412,
+          contacted: 289,
+          responded: 156,
+          converted: 78,
+          conversion_rate: 18.9
+        }
+      });
+      setLoading(false);
+    } else {
+      fetchStats();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDemoMode]);
 
   const fetchStats = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003';
+      const apiUrl = typeof window !== 'undefined' && window.location.origin.includes('localhost')
+        ? 'http://localhost:3003'
+        : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003');
       const response = await fetch(`${apiUrl}/dormant/stats`);
       const data = await response.json();
       setStats(data);
@@ -83,8 +124,11 @@ export default function AdminDashboard() {
   const percent = (n: number, total: number) => (total > 0 ? ((n / total) * 100).toFixed(1) : '0.0');
 
   return (
-    <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
+    <>
+      {isDemoMode && <AdminDemoGuide />}
+      
+      <div>
+        <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2 className="mb-1">Tableau de bord</h2>
           <p className="text-muted mb-0">Vue d'ensemble des leads dormants</p>
@@ -105,7 +149,7 @@ export default function AdminDashboard() {
                   <p className="text-muted mb-1 small">Total Leads</p>
                   <h3 className="mb-0">{totalLeads.toLocaleString()}</h3>
                 </div>
-                <div className="rounded-circle bg-primary bg-opacity-10 p-3">
+                <div className="rounded-circle p-3" style={{ backgroundColor: 'rgba(255, 121, 0, 0.1)' }}>
                   <CheckIcon width={24} height={24} fill="#ff7900" />
                 </div>
               </div>
@@ -119,11 +163,11 @@ export default function AdminDashboard() {
               <div className="d-flex justify-content-between align-items-start">
                 <div>
                   <p className="text-muted mb-1 small">Éligibles</p>
-                  <h3 className="mb-0 text-success">{byStatus.eligible.toLocaleString()}</h3>
+                  <h3 className="mb-0" style={{ color: '#50be87' }}>{byStatus.eligible.toLocaleString()}</h3>
                   <small className="text-muted">{percent(byStatus.eligible, totalLeads)}%</small>
                 </div>
-                <div className="rounded-circle bg-success bg-opacity-10 p-3">
-                  <CheckIcon width={24} height={24} fill="green" />
+                <div className="rounded-circle p-3" style={{ backgroundColor: 'rgba(80, 190, 135, 0.1)' }}>
+                  <CheckIcon width={24} height={24} fill="#50be87" />
                 </div>
               </div>
             </div>
@@ -136,11 +180,11 @@ export default function AdminDashboard() {
               <div className="d-flex justify-content-between align-items-start">
                 <div>
                   <p className="text-muted mb-1 small">Contactés</p>
-                  <h3 className="mb-0 text-info">{byStatus.contacted.toLocaleString()}</h3>
+                  <h3 className="mb-0" style={{ color: '#527edb' }}>{byStatus.contacted.toLocaleString()}</h3>
                   <small className="text-muted">Taux: {funnel.conversion_rate.toFixed(1)}%</small>
                 </div>
-                <div className="rounded-circle bg-info bg-opacity-10 p-3">
-                  <InfoIcon width={24} height={24} fill="blue" />
+                <div className="rounded-circle p-3" style={{ backgroundColor: 'rgba(82, 126, 219, 0.1)' }}>
+                  <InfoIcon width={24} height={24} fill="#527edb" />
                 </div>
               </div>
             </div>
@@ -158,7 +202,7 @@ export default function AdminDashboard() {
                   </h3>
                   <small className="text-muted">Moy: {valueDist.average_value}€</small>
                 </div>
-                <div className="rounded-circle bg-warning bg-opacity-10 p-3">
+                <div className="rounded-circle p-3" style={{ backgroundColor: 'rgba(255, 121, 0, 0.1)' }}>
                   <BoxIcon width={24} height={24} fill="#ff7900" />
                 </div>
               </div>
@@ -179,7 +223,7 @@ export default function AdminDashboard() {
                 {Object.entries(byTier).map(([tier, count]) => {
                   const tierNum = parseInt(tier.split('_')[1] || '0');
                   const percentage = totalLeads > 0 ? (count / totalLeads) * 100 : 0;
-                  const colors = ['#6c757d', '#0d6efd', '#0dcaf0', '#198754', '#ff7900', '#dc3545'];
+                  const colors = ['#6c757d', '#527edb', '#50be87', '#32c832', '#ff7900', '#cd3c14'];
                   
                   return (
                     <div key={tier} className="col-md-4">
@@ -218,7 +262,7 @@ export default function AdminDashboard() {
                   <small className="fw-bold">{funnel.eligible}</small>
                 </div>
                 <div className="progress" style={{ height: '8px' }}>
-                  <div className="progress-bar bg-success" style={{ width: '100%' }} />
+                  <div className="progress-bar" style={{ width: '100%', backgroundColor: '#50be87' }} />
                 </div>
               </div>
               
@@ -228,8 +272,11 @@ export default function AdminDashboard() {
                   <small className="fw-bold">{funnel.contacted}</small>
                 </div>
                 <div className="progress" style={{ height: '8px' }}>
-                  <div className="progress-bar bg-info" 
-                    style={{ width: `${(funnel.eligible > 0 ? (funnel.contacted / funnel.eligible) * 100 : 0)}%` }} 
+                  <div className="progress-bar" 
+                    style={{ 
+                      width: `${(funnel.eligible > 0 ? (funnel.contacted / funnel.eligible) * 100 : 0)}%`,
+                      backgroundColor: '#527edb'
+                    }} 
                   />
                 </div>
               </div>
@@ -295,5 +342,6 @@ export default function AdminDashboard() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { useDemo } from '../../contexts/DemoContext';
+import { AdminDemoGuide } from '../../components/AdminDemoGuide';
 import { SearchIcon, UsersIcon } from '../../components/solaris-icons';
 
 interface Lead {
@@ -17,6 +20,8 @@ interface Lead {
 }
 
 export default function LeadsPage() {
+  const pathname = usePathname();
+  const { isDemoMode } = useDemo();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -26,13 +31,138 @@ export default function LeadsPage() {
   const [pagination, setPagination] = useState({ page: 1, total: 0, perPage: 50 });
 
   useEffect(() => {
-    fetchLeads();
-  }, [filterStatus, filterTier, searchTerm, sortBy, pagination.page]);
+    if (isDemoMode) {
+      // Build a stable set of demo leads and apply filters/sorts client-side
+      const base: Lead[] = [
+        {
+          id: 'lead_demo_01',
+          msisdn_masked: '+33 6 ** ** 10 01',
+          dormant_score: 0.92,
+          eligible: true,
+          device_tier: 'flagship',
+          last_contact_at: undefined,
+          contact_count: 0,
+          converted: false,
+          created_at: new Date(Date.now() - 15 * 24 * 3600 * 1000).toISOString(),
+        },
+        {
+          id: 'lead_demo_02',
+          msisdn_masked: '+33 6 ** ** 10 02',
+          dormant_score: 0.68,
+          eligible: true,
+          device_tier: 'mid-range',
+          last_contact_at: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString(),
+          contact_count: 1,
+          converted: false,
+          created_at: new Date(Date.now() - 20 * 24 * 3600 * 1000).toISOString(),
+        },
+        {
+          id: 'lead_demo_03',
+          msisdn_masked: '+33 6 ** ** 10 03',
+          dormant_score: 0.81,
+          eligible: true,
+          device_tier: 'flagship',
+          last_contact_at: new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString(),
+          contact_count: 2,
+          converted: true,
+          converted_at: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(),
+          created_at: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString(),
+        },
+        {
+          id: 'lead_demo_04',
+          msisdn_masked: '+33 6 ** ** 10 04',
+          dormant_score: 0.35,
+          eligible: false,
+          device_tier: 'budget',
+          last_contact_at: undefined,
+          contact_count: 0,
+          converted: false,
+          created_at: new Date(Date.now() - 5 * 24 * 3600 * 1000).toISOString(),
+        },
+        {
+          id: 'lead_demo_05',
+          msisdn_masked: '+33 6 ** ** 10 05',
+          dormant_score: 0.57,
+          eligible: false,
+          device_tier: 'mid-range',
+          last_contact_at: new Date(Date.now() - 1 * 24 * 3600 * 1000).toISOString(),
+          contact_count: 1,
+          converted: false,
+          created_at: new Date(Date.now() - 8 * 24 * 3600 * 1000).toISOString(),
+        },
+        {
+          id: 'lead_demo_06',
+          msisdn_masked: '+33 6 ** ** 10 06',
+          dormant_score: 0.23,
+          eligible: false,
+          device_tier: 'budget',
+          last_contact_at: undefined,
+          contact_count: 0,
+          converted: false,
+          created_at: new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString(),
+        },
+        {
+          id: 'lead_demo_07',
+          msisdn_masked: '+33 6 ** ** 10 07',
+          dormant_score: 0.74,
+          eligible: true,
+          device_tier: 'mid-range',
+          last_contact_at: new Date(Date.now() - 9 * 24 * 3600 * 1000).toISOString(),
+          contact_count: 3,
+          converted: false,
+          created_at: new Date(Date.now() - 18 * 24 * 3600 * 1000).toISOString(),
+        },
+        {
+          id: 'lead_demo_08',
+          msisdn_masked: '+33 6 ** ** 10 08',
+          dormant_score: 0.88,
+          eligible: true,
+          device_tier: 'flagship',
+          last_contact_at: new Date(Date.now() - 12 * 24 * 3600 * 1000).toISOString(),
+          contact_count: 1,
+          converted: false,
+          created_at: new Date(Date.now() - 25 * 24 * 3600 * 1000).toISOString(),
+        },
+      ];
+
+      // Filters
+      let filtered = base;
+      if (filterStatus !== 'all') {
+        if (filterStatus === 'dormant') filtered = filtered.filter(l => l.eligible && !l.converted);
+        if (filterStatus === 'converted') filtered = filtered.filter(l => l.converted);
+        if (filterStatus === 'contacted') filtered = filtered.filter(l => l.contact_count > 0 && !l.converted);
+      }
+      if (filterTier !== 'all') filtered = filtered.filter(l => l.device_tier === filterTier);
+      if (searchTerm) filtered = filtered.filter(l => l.msisdn_masked.includes(searchTerm));
+
+      // Sort
+      const sorters: Record<string, (a: Lead, b: Lead) => number> = {
+        'score-desc': (a, b) => b.dormant_score - a.dormant_score,
+        'score-asc': (a, b) => a.dormant_score - b.dormant_score,
+        'recent': (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        'oldest': (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+      };
+      filtered = [...filtered].sort(sorters[sortBy] || sorters['score-desc']);
+
+      // Pagination
+      const total = filtered.length;
+      const start = (pagination.page - 1) * pagination.perPage;
+      const pageItems = filtered.slice(start, start + pagination.perPage);
+
+      setLeads(pageItems);
+      setPagination(prev => ({ ...prev, total }));
+      setLoading(false);
+    } else {
+      fetchLeads();
+    }
+  }, [filterStatus, filterTier, searchTerm, sortBy, pagination.page, isDemoMode]);
 
   const fetchLeads = async () => {
     try {
       setLoading(true);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003';
+      const apiUrl = typeof window !== 'undefined' && window.location.origin.includes('localhost')
+        ? 'http://localhost:3003'
+        : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003');
       const params = new URLSearchParams();
 
       // Build query parameters
@@ -93,6 +223,7 @@ export default function LeadsPage() {
 
   return (
     <div>
+      {isDemoMode && <AdminDemoGuide key={pathname} />}
       <div className="mb-4">
         <div>
           <h2 className="mb-1">Gestion des Leads</h2>

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import "boosted/dist/css/boosted.min.css";
 import "boosted/dist/css/orange-helvetica.min.css";
 import "./globals.css";
@@ -18,12 +17,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+        <script 
+          src="https://cdn.jsdelivr.net/npm/boosted@5.3.7/dist/js/boosted.bundle.min.js"
+          async
+        />
+      </head>
       <body>
         <DemoProvider>
           {children}
           <DemoModeSelector />
         </DemoProvider>
-        <Script src="https://cdn.jsdelivr.net/npm/boosted@5.3.7/dist/js/boosted.bundle.min.js" strategy="afterInteractive" />
       </body>
     </html>
   );

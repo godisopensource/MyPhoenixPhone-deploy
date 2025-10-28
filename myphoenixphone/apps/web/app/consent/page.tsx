@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { Header } from "../components/Header";
+import { Footer } from "../components/Footer";
 
 export default function ConsentPage() {
   const [loading, setLoading] = useState(false);
@@ -31,7 +33,9 @@ export default function ConsentPage() {
   }
 
   return (
-    <div className="container-xxl py-5">
+    <>
+      <Header />
+      <div className="container-xxl py-5 bg-white">
       <div className="row justify-content-center">
         <div className="col-md-8">
           <div className="card">
@@ -53,5 +57,7 @@ export default function ConsentPage() {
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 }

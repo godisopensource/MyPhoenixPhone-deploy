@@ -76,8 +76,16 @@ export class EligibilityService {
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
         )[0];
 
-      const proof = latestConsent?.proof as any;
-      const deviceSelection = proof?.device_selection || null;
+      const proofUnknown = latestConsent?.proof as unknown;
+      let deviceSelection: any = null;
+      if (
+        proofUnknown &&
+        typeof proofUnknown === 'object' &&
+        !Array.isArray(proofUnknown) &&
+        'device_selection' in (proofUnknown as Record<string, unknown>)
+      ) {
+        deviceSelection = (proofUnknown as any).device_selection;
+      }
       this.logger.debug(`Device selection: ${JSON.stringify(deviceSelection)}`);
 
       // Validate device model if provided
@@ -86,7 +94,9 @@ export class EligibilityService {
         | null = null;
       if (deviceSelection) {
         deviceValidation =
-          this.deviceModelService.validateDeviceSelection(deviceSelection);
+          await this.deviceModelService.validateDeviceSelection(
+            deviceSelection,
+          );
         this.logger.debug(
           `Device validation: ${JSON.stringify(deviceValidation)}`,
         );

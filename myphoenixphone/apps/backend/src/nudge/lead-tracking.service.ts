@@ -13,6 +13,16 @@ export class LeadTrackingService {
   constructor(private prisma: PrismaService) {}
 
   /**
+   * Ensure a Prisma JsonValue is treated as a plain object
+   */
+  private asJsonObject(value: unknown): Record<string, any> {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return value as Record<string, any>;
+    }
+    return {};
+  }
+
+  /**
    * Génère un lead ID unique (UUID v4)
    */
   generateLeadId(): string {
@@ -46,8 +56,10 @@ export class LeadTrackingService {
     if (existingLead) {
       // Update: ajouter le nouveau lead_id (pour traçabilité multi-campagnes)
       // On stocke le lead_id dans les signals JSON pour garder l'historique
-      const signals = (existingLead.signals as any) || {};
-      const leadIds = signals.lead_ids || [];
+      const signalsObj = this.asJsonObject(existingLead.signals);
+      const leadIds: any[] = Array.isArray(signalsObj.lead_ids)
+        ? [...signalsObj.lead_ids]
+        : [];
       leadIds.push({
         id: leadId,
         campaign_id: campaignId,
@@ -58,11 +70,11 @@ export class LeadTrackingService {
         where: { id: existingLead.id }, // Use unique ID field
         data: {
           signals: {
-            ...signals,
+            ...signalsObj,
             lead_ids: leadIds,
             last_lead_id: leadId, // dernier lead_id généré
             last_campaign_id: campaignId,
-          }, // Cast to any for Prisma Json type
+          } as any, // Cast to any for Prisma Json type
         },
       });
     } else {
@@ -110,9 +122,11 @@ export class LeadTrackingService {
     // Fallback: recherche dans l'historique lead_ids
     const allLeads = await this.prisma.lead.findMany();
     for (const lead of allLeads) {
-      const signals = (lead.signals as any) || {};
-      const leadIds = signals.lead_ids || [];
-      if (leadIds.some((item: any) => item.id === leadId)) {
+      const signalsObj = this.asJsonObject(lead.signals);
+      const leadIds: any[] = Array.isArray(signalsObj.lead_ids)
+        ? signalsObj.lead_ids
+        : [];
+      if (leadIds.some((item: any) => item?.id === leadId)) {
         return lead;
       }
     }

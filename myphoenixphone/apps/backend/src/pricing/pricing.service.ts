@@ -1,13 +1,12 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { PhoneModelsService } from '../phone-models/phone-models.service';
 import type {
   DeviceConditionDto,
   PricingEstimateResponse,
 } from './dto/pricing.dto';
 
 /**
- * Phone model data structure from eligible-phone-models.json
+ * Phone model data structure (from PhoneModelsService)
  */
 interface PhoneModel {
   id: string;
@@ -16,8 +15,8 @@ interface PhoneModel {
   storage: string;
   keywords: string[];
   avg_price_tier: number; // 0-5
-  release_year: number;
-  image_url: string;
+  release_year?: number;
+  image_url?: string;
 }
 
 /**
@@ -35,41 +34,30 @@ const PRICING_TIERS = {
 /**
  * Pricing Service - DD-07
  * Mock pricing estimation based on phone model tier and device condition.
- * Uses eligible-phone-models.json for model lookup and tiered valuation.
+ * Uses PhoneModelsService (DB-backed) for model lookup and tiered valuation.
  */
 @Injectable()
 export class PricingService {
   private readonly logger = new Logger(PricingService.name);
   private phoneModels: PhoneModel[] = [];
 
+  constructor(private readonly phoneModelsService: PhoneModelsService) {}
+
   async onModuleInit() {
     await this.loadPhoneModels();
   }
 
   /**
-   * Load phone models from public JSON file
+   * Load phone models from database via PhoneModelsService
    */
   private async loadPhoneModels(): Promise<void> {
     try {
-      // Try local copy first (for tests), then web app's public directory
-      let filePath = join(__dirname, './phone-models.json');
-      try {
-        await readFile(filePath, 'utf-8');
-      } catch {
-        // Fallback to web app public directory
-        filePath = join(
-          process.cwd(),
-          '../web/public/eligible-phone-models.json',
-        );
-      }
-
-      const data = await readFile(filePath, 'utf-8');
-      this.phoneModels = JSON.parse(data);
+      this.phoneModels = await this.phoneModelsService.getAll();
       this.logger.log(
-        `Loaded ${this.phoneModels.length} eligible phone models`,
+        `Loaded ${this.phoneModels.length} phone models from database`,
       );
     } catch (error) {
-      this.logger.error('Failed to load phone models', error);
+      this.logger.error('Failed to load phone models from database', error);
       throw error;
     }
   }

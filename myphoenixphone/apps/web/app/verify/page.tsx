@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useDemoData } from "../hooks/useDemoData";
 import { DemoBanner } from "../components/DemoBanner";
+import { Header } from "../components/Header";
+import { Footer } from "../components/Footer";
 
 function validateMsisdn(msisdn: string) {
   return /^\+[1-9]\d{1,14}$/.test(msisdn);
@@ -216,7 +218,8 @@ export default function VerifyPage() {
   return (
     <>
       <DemoBanner verificationCode={verificationCode} />
-      <div className="container-xxl py-5">
+      <Header />
+      <div className="container-xxl py-5 bg-white">
       <div className="row justify-content-center">
         <div className="col-md-6">
           <div className="card">
@@ -287,6 +290,7 @@ export default function VerifyPage() {
         </div>
       </div>
     </div>
+    <Footer />
     </>
   );
 }

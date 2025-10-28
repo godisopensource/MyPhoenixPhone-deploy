@@ -131,7 +131,7 @@ async function seedDemoData() {
     await prisma.eligibilitySignal.create({
       data: {
         msisdn_hash: perfectHash,
-        sim_swapped_at: daysAgo(45), // SIM swap 45 days ago
+        sim_swapped_at: daysAgo(28), // SIM swap 28 days ago - within eligibility window
         reachable: false, // Device unreachable
       },
     });
@@ -144,15 +144,15 @@ async function seedDemoData() {
         next_action: 'send_nudge',
         exclusions: [],
         signals: {
-          simSwap: { detected: true, daysAgo: 45 },
+          simSwap: { detected: true, daysAgo: 28 },
           reachability: { status: 'unreachable' },
-          dormantIndicators: ['no_network_activity', 'sim_swap_old'],
+          dormantIndicators: ['no_network_activity', 'sim_swap_recent'],
         },
         device_model: 'iPhone 13 Pro Max',
         device_condition: { screen: 'excellent', battery: 'good', functionality: 'perfect' },
         estimated_value: 450.00,
-        created_at: daysAgo(45),
-        expires_at: daysFromNow(45),
+        created_at: daysAgo(28),
+        expires_at: daysFromNow(62),
       },
     });
 

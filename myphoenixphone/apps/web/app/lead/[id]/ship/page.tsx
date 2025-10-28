@@ -1,8 +1,8 @@
- 'use client';
+"use client";
 
- import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { BoxIcon } from '../../../components/solaris-icons';
+import { useParams } from 'next/navigation';
 
  interface ShippingLabel {
    tracking_number: string;
@@ -12,21 +12,20 @@ import { BoxIcon } from '../../../components/solaris-icons';
    carrier: string;
  }
 
- export default function ShipPage({ params }: { params: Promise<{ id: string }> }) {
-   const [leadId, setLeadId] = useState<string>('');
+ export default function ShipPage() {
+   const params = useParams();
+   const leadId = Array.isArray(params?.id) ? (params.id as string[])[0] : ((params?.id as string) || '');
    const [label, setLabel] = useState<ShippingLabel | null>(null);
    const [loading, setLoading] = useState(false);
    const [error, setError] = useState<string | null>(null);
-
-   useEffect(() => {
-     params.then(p => setLeadId(p.id));
-   }, [params]);
 
    const generate = async () => {
      setLoading(true);
      setError(null);
      try {
-       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003';
+       const apiUrl = typeof window !== 'undefined'
+         ? (window.location.origin.includes('localhost') ? 'http://localhost:3003' : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003')
+         : 'http://localhost:3003';
        const res = await fetch(`${apiUrl}/handover/ship`, {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
@@ -74,64 +73,72 @@ import { BoxIcon } from '../../../components/solaris-icons';
    };
 
    return (
-     <main className="container py-5">
+     <main className="container py-5 bg-white">
       <div className="text-center mb-4">
-        <h1 style={{ color: '#ff7900' }}>
-          <BoxIcon width={28} height={28} className="me-2" />
-          Envoi gratuit
-        </h1>
-        <p className="text-muted">Recevez une étiquette Colissimo prépayée</p>
-      </div>
+          <h1 className="h2">
+            <i className="bi bi-truck me-2" aria-hidden="true"></i>
+            Envoi gratuit
+          </h1>
+          <p className="text-muted">Recevez une étiquette Colissimo prépayée</p>
+        </div>
 
        {error && <div className="alert alert-danger"><strong>Erreur :</strong> {error}</div>}
 
        {!label ? (
          <section className="mx-auto" style={{ maxWidth: 680 }}>
            <h2 className="h5">Comment procéder</h2>
-           <ol>
-             <li>Générez votre étiquette</li>
-             <li>Imprimez l'étiquette (A4)</li>
-             <li>Fixez-la sur le colis</li>
-             <li>Déposez en point Colissimo</li>
+           <ol className="list-group list-group-numbered">
+             <li className="list-group-item">Générez votre étiquette</li>
+             <li className="list-group-item">Imprimez l'étiquette (A4)</li>
+             <li className="list-group-item">Fixez-la sur le colis</li>
+             <li className="list-group-item">Déposez en point Colissimo</li>
            </ol>
            <div className="mt-3 d-grid">
-             <button className="btn btn-primary" style={{ background: '#ff7900', borderColor: '#ff7900' }} onClick={generate} disabled={loading || !leadId}>
-               {loading ? 'Génération...' : 'Générer mon étiquette'}
+             <button className="btn btn-primary btn-lg" onClick={generate} disabled={loading || !leadId}>
+               {loading ? 'Génération…' : 'Générer mon étiquette'}
              </button>
            </div>
          </section>
        ) : (
          <section className="mx-auto" style={{ maxWidth: 680 }}>
-           <div className="alert alert-success">✓ Étiquette générée avec succès</div>
-           <p><strong>Numéro de suivi:</strong> <code style={{ color: '#ff7900' }}>{label.tracking_number}</code></p>
-           <p className="text-muted small">Valide jusqu'au: {new Date(label.expiry_date).toLocaleDateString('fr-FR')}</p>
-           
+           <div className="alert alert-success" role="alert">
+             <i className="bi bi-check-circle-fill me-2" aria-hidden="true"></i>
+             Étiquette générée avec succès
+           </div>
+           <p><strong>Numéro de suivi :</strong> <code className="text-warning" style={{ color: 'inherit' }}>{label.tracking_number}</code></p>
+           <p className="text-muted small">Valide jusqu’au : {new Date(label.expiry_date).toLocaleDateString('fr-FR')}</p>
+
            {label.label_base64 && (
-             <div className="border rounded p-2 mb-3" style={{ backgroundColor: '#f8f9fa' }}>
-               <iframe 
-                 src={`data:application/pdf;base64,${label.label_base64}`} 
-                 style={{ width: '100%', height: 420, border: 'none' }} 
+             <div className="border rounded p-2 mb-3 bg-white">
+               <iframe
+                 src={`data:application/pdf;base64,${label.label_base64}`}
+                 style={{ width: '100%', height: 420, border: 'none' }}
                  title="Étiquette Colissimo"
                />
                <p className="text-muted small mt-2 mb-0">
-                 Si l'aperçu ne s'affiche pas, utilisez le bouton "Télécharger PDF" ci-dessous.
+                 Si l’aperçu ne s’affiche pas, utilisez « Télécharger PDF ».
                </p>
              </div>
            )}
-           
+
            <div className="mt-3 d-flex gap-2">
-             <button className="btn btn-primary" style={{ background: '#ff7900', borderColor: '#ff7900' }} onClick={() => window.print()}>
-               🖨️ Imprimer
+             <button className="btn btn-primary" onClick={() => window.print()}>
+               <i className="bi bi-printer me-2" aria-hidden="true"></i>
+               Imprimer
              </button>
              <button className="btn btn-outline-secondary" onClick={downloadPdf}>
-               📥 Télécharger PDF
+               <i className="bi bi-download me-2" aria-hidden="true"></i>
+               Télécharger PDF
              </button>
            </div>
          </section>
        )}
 
        <div className="text-center mt-4">
-         <Link href={`/lead/${leadId}`} className="btn btn-link">← Retour</Link>
+         <Link href={`/lead/${leadId}`} className="btn btn-link">
+           <i className="bi bi-arrow-left me-1" aria-hidden="true"></i>
+           Retour
+         </Link>
        </div>
      </main>
    );

@@ -16,7 +16,7 @@ const TEST_NUMBERS = [
   {
     phone: '+33699901001',
     name: 'Candidat Parfait',
-    simSwap: '2025-09-29T10:00:00.000Z', // 28 days ago from Oct 27, 2025
+    simSwap: '2025-09-30T10:00:00.000Z', // 28 days ago from Oct 28, 2025
     reachable: 'NOT_CONNECTED',
     roaming: false,
     location: { lat: 48.8566, lon: 2.3522, radius: 5000 },

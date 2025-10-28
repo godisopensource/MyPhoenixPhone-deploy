@@ -1,13 +1,20 @@
 'use client';
 
 import React, { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useDemo, DEMO_SCENARIOS, DemoScenario } from '../contexts/DemoContext';
 
 export function DemoModeSelector() {
+  const pathname = usePathname();
   const { isDemoMode, currentScenario, setDemoMode, selectScenario, clearScenario } = useDemo();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+
+  // Don't show on homepage (it has its own demo button) or admin pages
+  if (pathname === '/' || pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   // Get unique tags
   const allTags = Array.from(new Set(DEMO_SCENARIOS.flatMap(s => s.tags))).sort();

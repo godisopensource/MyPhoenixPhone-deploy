@@ -1,6 +1,9 @@
+'use client';
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
-import { DemoBanner } from "./components/DemoBanner";
+import { useDemo } from "./contexts/DemoContext";
 import { 
   ShieldIcon, 
   PhoneIcon, 
@@ -14,10 +17,46 @@ import {
 } from "./components/solaris-icons";
 
 export default function Home() {
+  const router = useRouter();
+  const { isDemoMode, setDemoMode, selectScenario } = useDemo();
+
+  const handleNavigateWithScenario = (path: string, scenarioId: string) => {
+    selectScenario(scenarioId);
+    
+    // Close modal programmatically if Bootstrap is loaded
+    const modal = document.getElementById('demoNavigationModal');
+    if (modal) {
+      // Try Bootstrap API first
+      if (typeof window !== 'undefined' && (window as any).bootstrap?.Modal) {
+        const bootstrapModal = (window as any).bootstrap.Modal.getInstance(modal);
+        if (bootstrapModal) {
+          bootstrapModal.hide();
+        }
+      } else {
+        // Fallback: manually close modal
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+        modal.style.display = 'none';
+        
+        // Remove backdrop
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+          backdrop.remove();
+        }
+        
+        // Remove modal-open class from body
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      }
+    }
+    
+    // Navigate
+    setTimeout(() => router.push(path), 100);
+  };
+
   return (
     <>
-      <DemoBanner />
-      
       <header className="bg-dark" role="navigation">
         <div className="container-xxl">
           {/* First line: Logo + Brand */}
@@ -74,13 +113,15 @@ export default function Home() {
               </li>
             </ul>
             
-            <Link 
-              href="/estimation" 
-              className="text-decoration-none fw-bold"
-              style={{ color: '#ff7900', fontSize: '0.875rem' }}
-            >
-              Commencer →
-            </Link>
+            <div className="d-flex gap-2 align-items-center">
+              <Link 
+                href="/estimation" 
+                className="text-decoration-none fw-bold"
+                style={{ color: '#ff7900', fontSize: '0.875rem' }}
+              >
+                Commencer →
+              </Link>
+            </div>
           </nav>
         </div>
       </header>
@@ -134,9 +175,9 @@ export default function Home() {
         </section>
 
         {/* Problem Statement - Infographic */}
-        <section className="py-0">
+        <section className="py-0 bg-white">
           <div className="container-xxl">
-            <div style={{ position: 'relative', height: 420, margin: '0' }}>
+            <div style={{ position: 'relative', height: 420, overflow: 'hidden' }}>
               <div style={{
                 position: 'absolute',
                 inset: 0,
@@ -183,7 +224,7 @@ export default function Home() {
                   <h2 className="h2 fw-bold mb-4">
                     MyPhoenixPhone s'inscrit dans la continuité du programme RE
                   </h2>
-                  <p className="mb-4">
+                  <p className="mb-4" style={{ color: '#000' }}>
                     Orange s'engage pour une consommation plus responsable avec le programme RE 
                     (Reprise, Reconditionnement, Recyclage). MyPhoenixPhone utilise les 
                     <strong> Orange Network APIs</strong> pour rendre ce programme encore plus efficace 
@@ -197,7 +238,7 @@ export default function Home() {
                       <CheckCircleIcon width={24} height={24} fill="#50be87" className="flex-shrink-0 mt-1" />
                       <div>
                         <h3 className="h6 fw-bold mb-1">Détection intelligente</h3>
-                        <p className="text-muted small mb-0">
+                        <p className="small mb-0" style={{ color: '#000' }}>
                           Les Network APIs détectent automatiquement les changements de mobile, 
                           lignes inactives ou changements de SIM pour identifier le moment idéal.
                         </p>
@@ -209,7 +250,7 @@ export default function Home() {
                       <CheckCircleIcon width={24} height={24} fill="#50be87" className="flex-shrink-0 mt-1" />
                       <div>
                         <h3 className="h6 fw-bold mb-1">Contact proactif</h3>
-                        <p className="text-muted small mb-0">
+                        <p className="small mb-0" style={{ color: '#000' }}>
                           Plus besoin d'attendre la bonne volonté du client : nous le contactons 
                           au moment opportun avec une offre personnalisée.
                         </p>
@@ -221,7 +262,7 @@ export default function Home() {
                       <CheckCircleIcon width={24} height={24} fill="#50be87" className="flex-shrink-0 mt-1" />
                       <div>
                         <h3 className="h6 fw-bold mb-1">Impact amplifié</h3>
-                        <p className="text-muted small mb-0">
+                        <p className="small mb-0" style={{ color: '#000' }}>
                           En multipliant les reprises, nous augmentons le taux de reconditionnement 
                           et réduisons les déchets électroniques.
                         </p>
@@ -626,6 +667,109 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Demo Navigation Modal */}
+      <div className="modal fade" id="demoNavigationModal" tabIndex={-1} aria-labelledby="demoNavigationModalLabel" aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title h5" id="demoNavigationModalLabel">
+                <i className="bi bi-play-circle me-2" style={{ color: '#ff7900' }}></i>
+                Mode Démonstration
+              </h1>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Close">
+                <span className="visually-hidden">Close</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p className="text-muted mb-4">
+                Découvrez les différentes fonctionnalités de MyPhoenixPhone avec des scénarios de démonstration pré-configurés.
+              </p>
+              
+              <div className="list-group list-group-flush">
+                <button
+                  type="button"
+                  className="list-group-item list-group-item-action d-flex align-items-start text-start"
+                  onClick={() => handleNavigateWithScenario('/verify', 'perfect-candidate')}
+                >
+                  <div className="me-3 mt-1">
+                    <ShieldIcon width={24} height={24} fill="#ff7900" />
+                  </div>
+                  <div className="flex-grow-1">
+                    <h6 className="mb-1">Vérifier l'éligibilité d'un client</h6>
+                    <p className="mb-0 small text-muted">
+                      Utilisez le scénario "Candidat Parfait" (+33699901001) pour tester la vérification par SMS. Les APIs CAMARA détectent un téléphone dormant éligible au programme de rachat.
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className="list-group-item list-group-item-action d-flex align-items-start text-start"
+                  onClick={() => handleNavigateWithScenario('/estimation', 'with-pricing')}
+                >
+                  <div className="me-3 mt-1">
+                    <PhoneIcon width={24} height={24} fill="#ff7900" />
+                  </div>
+                  <div className="flex-grow-1">
+                    <h6 className="mb-1">Estimer la reprise d'un appareil</h6>
+                    <p className="mb-0 small text-muted">
+                      Pré-remplissage avec "iPhone 13 Pro Max 256GB en excellent état". Découvrez le calcul de la valeur de reprise basé sur le modèle, l'état et les prix du marché.
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  className="list-group-item list-group-item-action d-flex align-items-start text-start"
+                  onClick={() => handleNavigateWithScenario('/admin', 'in-campaign')}
+                >
+                  <div className="me-3 mt-1">
+                    <UsersIcon width={24} height={24} fill="#ff7900" />
+                  </div>
+                  <div className="flex-grow-1">
+                    <h6 className="mb-1">Piloter les campagnes de rachat</h6>
+                    <p className="mb-0 small text-muted">
+                      Consultez les métriques réelles issues du seed : leads détectés via Network APIs, taux de conversion, valeur moyenne par appareil. Gérez les campagnes SMS de sensibilisation.
+                    </p>
+                  </div>
+                </button>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating Demo Mode Button */}
+      <div className="position-fixed bottom-0 end-0 p-3" style={{ zIndex: 1050 }}>
+        {isDemoMode ? (
+          <button
+            type="button"
+            className="btn btn-warning btn-lg"
+            onClick={() => setDemoMode(false)}
+            title="Quitter le mode démo"
+          >
+            <i className="bi bi-x-circle me-2"></i>
+            <span>Quitter le mode démo</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="btn btn-warning btn-lg"
+            data-bs-toggle="modal"
+            data-bs-target="#demoNavigationModal"
+            title="Activer le mode démo"
+          >
+            <i className="bi bi-play-circle me-2"></i>
+            <span>Mode Démo</span>
+          </button>
+        )}
+      </div>
     </>
   );
 }

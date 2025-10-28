@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
-import type { Consent } from '@prisma/client';
 import { Counter } from 'prom-client';
 import { metricsRegistry } from '../metrics/metrics.middleware';
 

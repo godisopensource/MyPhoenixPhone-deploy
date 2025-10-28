@@ -249,3 +249,24 @@ model WorkerRun {
   @@index([worker_type, started_at])
   @@index([status])
 }
+
+// Phone Models for Device Recognition & Valuation
+
+model PhoneModel {
+  id              String   @id @default(uuid())
+  brand           String // 'Apple' | 'Samsung' | 'Google' etc.
+  model           String // 'iPhone 13 Pro' | 'Galaxy S23' etc.
+  storage         String // '128GB' | '256GB' | '512GB' etc.
+  keywords        String[] // Search keywords for device recognition
+  avg_price_tier  Int // 1-5, price tier for quick filtering
+  release_year    Int?
+  image_url       String? // Optional product image
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([brand, model, storage]) // One entry per variant
+  @@index([brand])
+  @@index([avg_price_tier])
+  @@index([release_year])
+}

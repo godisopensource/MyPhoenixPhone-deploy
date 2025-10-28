@@ -1,13 +1,7 @@
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --foreground: #000000;
+  color-scheme: light;
 }
 
 html,
@@ -42,19 +36,11 @@ a {
   text-decoration: none;
 }
 
-.imgDark {
-  display: none;
+/* Force text colors for Safari/Webkit compatibility */
+.text-muted {
+  color: #000000 !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-
-  .imgLight {
-    display: none;
-  }
-  .imgDark {
-    display: unset;
-  }
+p, h1, h2, h3, h4, h5, h6, div {
+  color: inherit;
 }

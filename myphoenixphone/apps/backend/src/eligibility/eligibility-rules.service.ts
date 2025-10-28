@@ -51,6 +51,7 @@ export interface EligibilityEvaluation {
  * Configurable eligibility rules
  */
 export interface EligibilityConfig {
+  simSwapMinDays: number; // SIM swap at least this many days ago = eligible
   simSwapMaxDays: number; // SIM swap within this many days = eligible
   requireReachable: boolean; // Must be reachable to be eligible
   requireUnreachable: boolean; // Must be unreachable to be eligible (alternative criterion)
@@ -68,8 +69,12 @@ export class EligibilityRulesService {
   constructor() {
     // Load configuration from environment variables with defaults
     this.config = {
+      simSwapMinDays: parseInt(
+        process.env.ELIGIBILITY_SIM_SWAP_MIN_DAYS || '30',
+        10,
+      ),
       simSwapMaxDays: parseInt(
-        process.env.ELIGIBILITY_SIM_SWAP_MAX_DAYS || '30',
+        process.env.ELIGIBILITY_SIM_SWAP_MAX_DAYS || '90',
         10,
       ),
       requireReachable: process.env.ELIGIBILITY_REQUIRE_REACHABLE === 'true',
@@ -78,7 +83,7 @@ export class EligibilityRulesService {
     };
 
     this.logger.log(
-      `Eligibility rules configured: simSwapMaxDays=${this.config.simSwapMaxDays}, ` +
+      `Eligibility rules configured: simSwapMinDays=${this.config.simSwapMinDays}, simSwapMaxDays=${this.config.simSwapMaxDays}, ` +
         `requireReachable=${this.config.requireReachable}, requireUnreachable=${this.config.requireUnreachable}`,
     );
   }
@@ -167,13 +172,17 @@ export class EligibilityRulesService {
     snapshot.swappedAt = simSwap.swappedAt;
     snapshot.daysAgo = daysAgo;
 
-    // Check if swap is recent (within threshold)
-    const isRecentSwap = daysAgo <= this.config.simSwapMaxDays;
+    // Check if swap is in eligibility window (minDays <= daysAgo <= maxDays)
+    const isRecentSwap =
+      daysAgo >= this.config.simSwapMinDays &&
+      daysAgo <= this.config.simSwapMaxDays;
 
     if (isRecentSwap) {
       reasons.push(EligibilityReason.SIM_SWAP_RECENT);
+    } else if (daysAgo < this.config.simSwapMinDays) {
+      reasons.push(EligibilityReason.SIM_SWAP_OLD); // Too recent (reusing OLD as "not in window")
     } else {
-      reasons.push(EligibilityReason.SIM_SWAP_OLD);
+      reasons.push(EligibilityReason.SIM_SWAP_OLD); // Too old
     }
 
     return { reasons, snapshot, isRecentSwap };

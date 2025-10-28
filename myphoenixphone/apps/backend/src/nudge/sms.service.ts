@@ -55,7 +55,7 @@ export class OrangeSmsService {
     }
 
     // 2. Récupérer les leads ciblés via les filtres
-    const targetFilters = campaign.target_filters as any;
+    const targetFilters = campaign.target_filters;
     const leads = await this.getTargetedLeads(targetFilters);
 
     this.logger.log(`Found ${leads.length} leads for campaign ${campaignId}`);

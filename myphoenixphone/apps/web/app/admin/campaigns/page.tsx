@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useDemo } from '../../contexts/DemoContext';
+import { AdminDemoGuide } from '../../components/AdminDemoGuide';
 import { InfoIcon, BoxIcon, TruckIcon, CrossIcon, CheckIcon, PrintIcon } from '../../components/solaris-icons';
 
 interface Campaign {
@@ -22,18 +25,85 @@ interface Campaign {
 }
 
 export default function CampaignsPage() {
+  const pathname = usePathname();
+  const { isDemoMode } = useDemo();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
   useEffect(() => {
-    fetchCampaigns();
-  }, [filterStatus]);
+    if (isDemoMode) {
+      // Provide deterministic mock campaigns in demo mode and avoid backend calls
+      const mock: Campaign[] = [
+        {
+          id: 'cmp_demo_01',
+          name: 'Relance haut potentiel',
+          description: 'Ciblage tier 4-5, inactifs 90j+',
+          status: 'scheduled',
+          channel: 'sms',
+          estimated_reach: 1200,
+          total_sent: 0,
+          total_delivered: 0,
+          total_clicked: 0,
+          total_converted: 0,
+          scheduled_at: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
+          created_at: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(),
+        },
+        {
+          id: 'cmp_demo_02',
+          name: 'Test A/B message estimation',
+          description: 'Comparaison wording court vs long',
+          status: 'sending',
+          channel: 'sms',
+          estimated_reach: 850,
+          total_sent: 420,
+          total_delivered: 400,
+          total_clicked: 132,
+          total_converted: 48,
+          sent_at: new Date(Date.now() - 6 * 3600 * 1000).toISOString(),
+          created_at: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString(),
+        },
+        {
+          id: 'cmp_demo_03',
+          name: 'Fin de mois - reprise mobile',
+          status: 'completed',
+          channel: 'sms',
+          estimated_reach: 2000,
+          total_sent: 2000,
+          total_delivered: 1950,
+          total_clicked: 510,
+          total_converted: 160,
+          completed_at: new Date(Date.now() - 10 * 24 * 3600 * 1000).toISOString(),
+          created_at: new Date(Date.now() - 12 * 24 * 3600 * 1000).toISOString(),
+        },
+        {
+          id: 'cmp_demo_04',
+          name: 'Nouveaux dormants détectés',
+          description: 'Cohorte hebdo tier 2-3',
+          status: 'draft',
+          channel: 'sms',
+          estimated_reach: 640,
+          total_sent: 0,
+          total_delivered: 0,
+          total_clicked: 0,
+          total_converted: 0,
+          created_at: new Date().toISOString(),
+        },
+      ];
+      const filtered = filterStatus === 'all' ? mock : mock.filter(c => c.status === filterStatus);
+      setCampaigns(filtered);
+      setLoading(false);
+    } else {
+      fetchCampaigns();
+    }
+  }, [filterStatus, isDemoMode]);
 
   const fetchCampaigns = async () => {
     try {
       setLoading(true);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003';
+      const apiUrl = typeof window !== 'undefined' && window.location.origin.includes('localhost')
+        ? 'http://localhost:3003'
+        : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003');
       const params = new URLSearchParams();
       if (filterStatus !== 'all') {
         params.append('status', filterStatus);
@@ -54,16 +124,16 @@ export default function CampaignsPage() {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003';
-      const response = await fetch(`${apiUrl}/campaign/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        fetchCampaigns(); // Refresh list
-      } else {
-        alert('Erreur lors de la suppression');
+      if (isDemoMode) {
+        // Update local mock state in demo mode
+        setCampaigns(prev => prev.filter(c => c.id !== id));
+        return;
       }
+      const apiUrl = typeof window !== 'undefined' && window.location.origin.includes('localhost')
+        ? 'http://localhost:3003'
+        : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003');
+      const response = await fetch(`${apiUrl}/campaign/${id}`, { method: 'DELETE' });
+      if (response.ok) fetchCampaigns(); else alert('Erreur lors de la suppression');
     } catch (error) {
       console.error('Failed to delete campaign:', error);
       alert('Erreur lors de la suppression');
@@ -76,18 +146,18 @@ export default function CampaignsPage() {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003';
-      const response = await fetch(`${apiUrl}/campaign/${id}/send`, {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        fetchCampaigns(); // Refresh list
-        alert('Campagne lancée avec succès !');
-      } else {
-        const error = await response.json();
-        alert(`Erreur: ${error.message}`);
+      if (isDemoMode) {
+        // Simulate a send: update status locally
+        setCampaigns(prev => prev.map(c => c.id === id ? { ...c, status: 'sending', total_sent: Math.max(c.total_sent, 100) } : c));
+        alert('Campagne (démo) lancée avec succès !');
+        return;
       }
+      const apiUrl = typeof window !== 'undefined' && window.location.origin.includes('localhost')
+        ? 'http://localhost:3003'
+        : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003');
+      const response = await fetch(`${apiUrl}/campaign/${id}/send`, { method: 'POST' });
+      if (response.ok) { fetchCampaigns(); alert('Campagne lancée avec succès !'); }
+      else { const error = await response.json(); alert(`Erreur: ${error.message}`); }
     } catch (error) {
       console.error('Failed to send campaign:', error);
       alert('Erreur lors du lancement');
@@ -118,6 +188,7 @@ export default function CampaignsPage() {
 
   return (
     <div>
+      {isDemoMode && <AdminDemoGuide key={pathname} />}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2 className="mb-1">Campagnes de Nudge</h2>

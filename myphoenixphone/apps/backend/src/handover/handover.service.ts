@@ -182,6 +182,24 @@ export class HandoverService {
     });
 
     if (!lead) {
+      // In DEV, tolerate missing demo leads so the flow keeps working
+      if (this.isDev) {
+        this.logger.warn(
+          `[DEV MODE] Lead ${leadId} not found in DB, returning mock handover record without persistence`,
+        );
+        return {
+          id: leadId,
+          converted: true,
+          converted_at: new Date(),
+          signals: {
+            handover: {
+              type: handoverType,
+              ...data,
+              recorded_at: new Date().toISOString(),
+            },
+          },
+        };
+      }
       throw new Error(`Lead ${leadId} not found`);
     }
 

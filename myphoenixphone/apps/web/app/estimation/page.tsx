@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDemoData } from '../hooks/useDemoData';
 import { DemoBanner } from '../components/DemoBanner';
+import { Header } from '../components/Header';
+import { Footer } from '../components/Footer';
 import ModelSelector from '../lead/[id]/components/ModelSelector';
 import ConditionForm from '../lead/[id]/components/ConditionForm';
 import ConsentCheckbox from '../lead/[id]/components/ConsentCheckbox';
@@ -36,6 +38,34 @@ export default function EstimationPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [leadId] = useState<string>('demo-lead');
+
+  // Pre-fill demo data when entering demo mode
+  useEffect(() => {
+    if (isDemoMode && !selectedPhone) {
+      // Pre-select iPhone 13 Pro Max 256GB in excellent condition
+      // Use a model that exists in the backend catalog to avoid 404s
+      const demoPhone: PhoneModel = {
+        id: 'demo-iphone-14-pro-128',
+        brand: 'Apple',
+        model: 'iPhone 14 Pro',
+        storage: '128GB',
+      };
+      setSelectedPhone(demoPhone);
+      
+      const demoCondition: DeviceCondition = {
+        screen: 'perfect',
+        battery: 'excellent',
+        damage: [],
+        unlocked: true,
+        accessories: true
+      };
+      setCondition(demoCondition);
+      
+      // Skip to consent step
+      setStep(3);
+      setHasConsent(false); // User still needs to accept
+    }
+  }, [isDemoMode, selectedPhone]);
 
   const handlePhoneSelect = (phone: PhoneModel) => {
     setSelectedPhone(phone);
@@ -74,7 +104,14 @@ export default function EstimationPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get estimate');
+        // Provide a clearer message when the model isn't found in catalog
+        if (response.status === 404) {
+          throw new Error(
+            "Modèle non reconnu par l'estimateur. Sélectionnez un modèle proche dans la liste (ex: iPhone 14 Pro 128GB), puis réessayez."
+          );
+        }
+        const details = await response.text().catch(() => '');
+        throw new Error(`Échec de l'estimation (HTTP ${response.status}). ${details}`.trim());
       }
 
       const data = await response.json();
@@ -99,25 +136,9 @@ export default function EstimationPage() {
   return (
     <>
       <DemoBanner />
-      
-      <header className="navbar navbar-dark bg-dark" role="navigation">
-        <div className="container-xxl">
-          <div className="navbar-brand">
-            <a href="/" className="d-flex align-items-center text-decoration-none">
-              <img
-                src="https://boosted.orange.com/docs/5.3/assets/brand/orange-logo.svg"
-                width={50}
-                height={50}
-                alt="Orange"
-                loading="lazy"
-              />
-              <span className="ms-3 h4 text-white mb-0">MyPhoenixPhone</span>
-            </a>
-          </div>
-        </div>
-      </header>
+      <Header />
 
-      <main className="container py-5">
+      <main className="container py-5 bg-white">
         {/* Hero Section */}
         <div className="text-center mb-5">
           <h1 className="display-5 fw-bold mb-3" style={{ color: '#ff7900' }}>
@@ -131,6 +152,24 @@ export default function EstimationPage() {
             <small>Estimation gratuite et sans engagement</small>
           </div>
         </div>
+
+        {/* Demo Mode Indicator */}
+        {isDemoMode && (
+          <div className="row justify-content-center mb-4">
+            <div className="col-lg-8">
+              <div className="alert alert-warning d-flex align-items-start" role="alert">
+                <i className="bi bi-info-circle-fill me-3 mt-1" style={{ fontSize: '1.25rem', color: '#ff7900' }}></i>
+                <div>
+                  <h6 className="alert-heading mb-2">Mode Démonstration Actif</h6>
+                  <p className="mb-0 small">
+                    Ce scénario pré-remplit un <strong>iPhone 13 Pro Max 256GB en excellent état</strong>. 
+                    Vous pouvez modifier le modèle et l'état, ou accepter le consentement pour voir l'estimation de reprise.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Progress Indicator */}
         <div className="row justify-content-center mb-5">
@@ -327,23 +366,7 @@ export default function EstimationPage() {
         )}
       </main>
 
-      <footer className="footer bg-dark mt-5">
-        <div className="container-xxl py-4">
-          <div className="row">
-            <div className="col-md-6 mb-3 mb-md-0">
-              <p className="mb-2 text-white fw-bold">MyPhoenixPhone</p>
-              <p className="mb-0 text-muted small">
-                Propulsé par Orange Network APIs
-              </p>
-            </div>
-            <div className="col-md-6 text-md-end">
-              <p className="mb-0 text-muted small">
-                © 2025 Orange. Tous droits réservés.
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }

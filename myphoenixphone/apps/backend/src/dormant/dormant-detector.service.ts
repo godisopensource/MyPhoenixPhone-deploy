@@ -545,11 +545,19 @@ export class DormantDetectorService {
     const values: number[] = [];
 
     allLeads.forEach((lead) => {
-      const signals = lead.signals as any;
-      const tier = signals?.device_tier ?? 0;
-      const value = signals?.estimated_value ?? 0;
+      // signals is a JSON column; narrow to expected shape defensively
+      type LeadSignals = { device_tier?: number; estimated_value?: number };
+      const signals = lead.signals as unknown as LeadSignals;
+      const rawTier = signals?.device_tier ?? 0;
+      const value = Number(signals?.estimated_value ?? 0) || 0;
 
-      by_tier[`tier_${tier as 0 | 1 | 2 | 3 | 4 | 5}`]++;
+      // Clamp tier to 0-5 to avoid invalid keys
+      const tier = Math.max(
+        0,
+        Math.min(5, Math.round(Number(rawTier) || 0)),
+      ) as 0 | 1 | 2 | 3 | 4 | 5;
+
+      by_tier[`tier_${tier}`]++;
       total_value += value;
       if (value > 0) values.push(value);
     });

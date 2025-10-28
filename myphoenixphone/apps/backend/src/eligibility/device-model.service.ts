@@ -51,17 +51,16 @@ export interface DeviceModelValidation {
 export class DeviceModelService {
   private readonly logger = new Logger(DeviceModelService.name);
   private eligibleModels: EligiblePhoneModels = {};
+  private isInitialized = false;
 
-  constructor(private readonly phoneModelsService: PhoneModelsService) {
-    this.loadEligibleModels();
-  }
+  constructor(private readonly phoneModelsService: PhoneModelsService) {}
 
   /**
    * Load eligible phone models from PhoneModelsService (DB-backed)
    */
-  private loadEligibleModels(): void {
+  private async loadEligibleModels(): Promise<void> {
     try {
-      const models = this.phoneModelsService.getAll();
+      const models = await this.phoneModelsService.getAll();
 
       // Transform flat list to grouped structure
       this.eligibleModels = {};
@@ -107,23 +106,38 @@ export class DeviceModelService {
   }
 
   /**
+   * Ensure models are loaded before use
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (!this.isInitialized) {
+      await this.loadEligibleModels();
+      this.isInitialized = true;
+    }
+  }
+
+  /**
    * Get all eligible manufacturers
    */
-  getManufacturers(): string[] {
+  async getManufacturers(): Promise<string[]> {
+    await this.ensureInitialized();
     return Object.keys(this.eligibleModels);
   }
 
   /**
    * Get models for a specific manufacturer
    */
-  getModelsForManufacturer(manufacturer: string): DeviceModelEntry[] {
+  async getModelsForManufacturer(
+    manufacturer: string,
+  ): Promise<DeviceModelEntry[]> {
+    await this.ensureInitialized();
     return this.eligibleModels[manufacturer] || [];
   }
 
   /**
    * Get all eligible models (for frontend consumption)
    */
-  getAllEligibleModels(): EligiblePhoneModels {
+  async getAllEligibleModels(): Promise<EligiblePhoneModels> {
+    await this.ensureInitialized();
     return this.eligibleModels;
   }
 
@@ -136,7 +150,10 @@ export class DeviceModelService {
    * - If "unknown_model" + brand in list → suggest visit store
    * - If "unknown_model" + brand not in list → not eligible, suggest donation
    */
-  validateDeviceSelection(selection: DeviceSelection): DeviceModelValidation {
+  async validateDeviceSelection(
+    selection: DeviceSelection,
+  ): Promise<DeviceModelValidation> {
+    await this.ensureInitialized();
     this.logger.debug(
       `Validating device selection: ${JSON.stringify(selection)}`,
     );

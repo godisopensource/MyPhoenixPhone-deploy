@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
-import { Prisma } from '@prisma/client';
 
 /**
  * Dormant Detection Service
@@ -71,7 +70,8 @@ export class DormantDetectionService {
               where: { id: existingLead.id },
               data: {
                 dormant_score: score,
-                signals: signals as Prisma.InputJsonValue,
+                // Store extracted signals snapshot (JSON)
+                signals: signals as any,
                 eligible: score >= 0.6, // Threshold for eligibility
                 next_action: this.determineNextAction(score, existingLead),
                 updated_at: new Date(),
@@ -87,7 +87,8 @@ export class DormantDetectionService {
               data: {
                 msisdn_hash: msisdnHash,
                 dormant_score: score,
-                signals: signals as Prisma.InputJsonValue,
+                // Store extracted signals snapshot (JSON)
+                signals: signals as any,
                 eligible: score >= 0.6,
                 activation_window_days: 30,
                 next_action: score >= 0.6 ? 'send_nudge' : 'hold',

@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
+import { PrismaService } from '../database/prisma.service';
 
 export type PhoneModel = {
   id: string;
@@ -16,66 +15,92 @@ export type PhoneModel = {
 @Injectable()
 export class PhoneModelsService {
   private readonly logger = new Logger(PhoneModelsService.name);
-  private cache: PhoneModel[] | null = null;
 
-  getAll(): PhoneModel[] {
-    if (this.cache) return this.cache;
+  constructor(private readonly prisma: PrismaService) {}
 
+  async getAll(): Promise<PhoneModel[]> {
     try {
-      // Try multiple paths to find the phone models JSON file
-      const possiblePaths = [
-        // From backend working directory to web public folder (monorepo structure)
-        path.resolve(
-          process.cwd(),
-          '..',
-          'web',
-          'public',
-          'eligible-phone-models.json',
-        ),
-        // From repo root
-        path.resolve(
-          process.cwd(),
-          'apps',
-          'web',
-          'public',
-          'eligible-phone-models.json',
-        ),
-        // If running from apps/backend
-        path.resolve(
-          process.cwd(),
-          '..',
-          '..',
-          'apps',
-          'web',
-          'public',
-          'eligible-phone-models.json',
-        ),
-      ];
+      const models = await this.prisma.phoneModel.findMany({
+        orderBy: [
+          { avg_price_tier: 'desc' },
+          { brand: 'asc' },
+          { model: 'asc' },
+        ],
+      });
 
-      let filePath: string | null = null;
-      for (const tryPath of possiblePaths) {
-        if (fs.existsSync(tryPath)) {
-          filePath = tryPath;
-          this.logger.log(`Found phone models file at: ${tryPath}`);
-          break;
-        }
-      }
+      this.logger.log(`Loaded ${models.length} phone models from database`);
 
-      if (!filePath) {
-        this.logger.error(
-          `Phone models file not found. Tried: ${possiblePaths.join(', ')}`,
-        );
-        this.logger.error(`Current working directory: ${process.cwd()}`);
-        return [];
-      }
-
-      const raw = fs.readFileSync(filePath, 'utf-8');
-      const parsed = JSON.parse(raw) as PhoneModel[];
-      this.cache = parsed;
-      this.logger.log(`Loaded ${parsed.length} phone models from ${filePath}`);
-      return parsed;
+      return models.map((m) => ({
+        id: m.id,
+        brand: m.brand,
+        model: m.model,
+        storage: m.storage,
+        keywords: m.keywords,
+        avg_price_tier: m.avg_price_tier,
+        release_year: m.release_year ?? undefined,
+        image_url: m.image_url ?? undefined,
+      }));
     } catch (err) {
-      this.logger.error('Failed to load phone models file', err);
+      this.logger.error('Failed to load phone models from database', err);
+      return [];
+    }
+  }
+
+  async findById(id: string): Promise<PhoneModel | null> {
+    try {
+      const model = await this.prisma.phoneModel.findUnique({
+        where: { id },
+      });
+
+      if (!model) return null;
+
+      return {
+        id: model.id,
+        brand: model.brand,
+        model: model.model,
+        storage: model.storage,
+        keywords: model.keywords,
+        avg_price_tier: model.avg_price_tier,
+        release_year: model.release_year ?? undefined,
+        image_url: model.image_url ?? undefined,
+      };
+    } catch (err) {
+      this.logger.error(`Failed to find phone model by id: ${id}`, err);
+      return null;
+    }
+  }
+
+  async search(query: string): Promise<PhoneModel[]> {
+    try {
+      const lowerQuery = query.toLowerCase();
+
+      const models = await this.prisma.phoneModel.findMany({
+        where: {
+          OR: [
+            { brand: { contains: lowerQuery, mode: 'insensitive' } },
+            { model: { contains: lowerQuery, mode: 'insensitive' } },
+            { keywords: { has: lowerQuery } },
+          ],
+        },
+        orderBy: [{ avg_price_tier: 'desc' }, { brand: 'asc' }],
+        take: 20, // Limit results
+      });
+
+      return models.map((m) => ({
+        id: m.id,
+        brand: m.brand,
+        model: m.model,
+        storage: m.storage,
+        keywords: m.keywords,
+        avg_price_tier: m.avg_price_tier,
+        release_year: m.release_year ?? undefined,
+        image_url: m.image_url ?? undefined,
+      }));
+    } catch (err) {
+      this.logger.error(
+        `Failed to search phone models with query: ${query}`,
+        err,
+      );
       return [];
     }
   }
