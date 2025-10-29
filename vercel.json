@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm install",
+  "installCommand": "rm -f /vercel/path0/node_modules/.bin/node || true && npm install",
   "buildCommand": "npm --prefix myphoenixphone run -w apps/backend build && npm --prefix myphoenixphone run -w apps/web build",
   "outputDirectory": "myphoenixphone/apps/web/.next"
 }
