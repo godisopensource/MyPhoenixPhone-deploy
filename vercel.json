@@ -7,6 +7,15 @@
       "use": "@vercel/next"
     },
     {
+      "src": "api/mcp-proxy.js",
+      "use": "@vercel/node",
+      "config": {
+        "runtime": "nodejs20.x",
+        "memory": 128,
+        "maxDuration": 10
+      }
+    },
+    {
       "src": "myphoenixphone/apps/backend/api/**/*.ts",
       "use": "@vercel/node",
       "config": {

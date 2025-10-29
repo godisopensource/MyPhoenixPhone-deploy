@@ -2,7 +2,7 @@
  * Vercel serverless function for Orange Network APIs MCP Proxy
  * Provides HTTP endpoints for number verification that the backend can call
  * 
- * This file is at /api/mcp.js so Vercel automatically creates a /api/mcp endpoint
+ * This file is at /api/mcp-proxy.js so Vercel creates a /api/mcp-proxy endpoint
  */
 
 const API_BASE_URL = process.env.API_BASE_URL || 'https://api.orange.com/camara/playground';
@@ -84,12 +84,12 @@ module.exports = async function handler(req, res) {
   const { query } = req;
   const path = query.path ? query.path.join('/') : '';
   
-  // Health check - /api/mcp or /api/mcp?path=health
+  // Health check - /api/mcp-proxy or /api/mcp-proxy?path=health
   if (!path || path === 'health') {
     res.status(200).json({ 
       status: 'ok', 
       service: 'mcp-proxy',
-      endpoint: '/api/mcp',
+      endpoint: '/api/mcp-proxy',
       usage: 'Use ?path=number-verification/v0.3/verify-with-code/send-code for verification'
     });
     return;
