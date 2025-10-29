@@ -36,6 +36,6 @@
     { "src": "/api-json", "dest": "apps/backend/api/index.ts" },
     { "src": "/api", "dest": "apps/backend/api/index.ts" },
     { "src": "/api/(.*)", "dest": "apps/backend/api/index.ts" },
-    { "src": "/(.*)", "dest": "apps/web/$1" }
+    { "src": "/(.*)", "dest": "apps/web" }
   ]
 }

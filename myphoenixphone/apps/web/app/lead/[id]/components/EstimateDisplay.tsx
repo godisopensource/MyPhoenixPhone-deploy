@@ -132,7 +132,12 @@ export default function EstimateDisplay({ estimate, phone, onReset, leadId }: Pr
               </div>
 
               <div className="col-md-4 mb-3">
-                <button className="btn btn-outline-secondary w-100 h-100">
+                <a
+                  href="https://emmaus-connect.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline-secondary w-100 h-100 text-decoration-none"
+                >
                   <div className="py-3">
                     <div className="fs-4 mb-2">
                       <HeartIcon width={28} height={28} className="" />
@@ -142,7 +147,7 @@ export default function EstimateDisplay({ estimate, phone, onReset, leadId }: Pr
                       Offrir à une association (Emmaüs Connect)
                     </small>
                   </div>
-                </button>
+                </a>
               </div>
             </div>
 

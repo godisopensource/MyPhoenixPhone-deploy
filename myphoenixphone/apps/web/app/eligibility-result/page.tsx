@@ -39,8 +39,12 @@ function EligibilityResultContent() {
           return;
         }
 
+        const apiUrl = (typeof window !== 'undefined' && window.location.origin.includes('localhost'))
+          ? 'http://localhost:3003'
+          : (process.env.NEXT_PUBLIC_API_URL || '/api');
+
         const res = await fetch(
-          `http://localhost:3003/eligibility?phoneNumber=${encodeURIComponent(phoneNumber)}`,
+          `${apiUrl}/eligibility?phoneNumber=${encodeURIComponent(phoneNumber)}`,
           { credentials: "include" }
         );
         
