@@ -1,6 +1,1 @@
-{
-  "buildCommand": "cd myphoenixphone && npm run -w apps/backend build && npm run -w apps/web build",
-  "installCommand": "npm ci && cd myphoenixphone && npm ci",
-  "outputDirectory": "myphoenixphone/apps/web/.next",
-  "devCommand": "cd myphoenixphone/apps/web && npm run dev"
-}
+{}
