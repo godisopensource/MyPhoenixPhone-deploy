@@ -12,6 +12,82 @@ export type PhoneModel = {
   image_url?: string;
 };
 
+// Minimal fallback catalog to enable demo when DATABASE_URL is not configured
+const FALLBACK_MODELS: PhoneModel[] = [
+  {
+    id: 'apple-iphone-14-pro-128',
+    brand: 'Apple',
+    model: 'iPhone 14 Pro',
+    storage: '128GB',
+    keywords: ['apple', 'iphone', '14', 'pro', '128'],
+    avg_price_tier: 5,
+  },
+  {
+    id: 'apple-iphone-13-pro-max-256',
+    brand: 'Apple',
+    model: 'iPhone 13 Pro Max',
+    storage: '256GB',
+    keywords: ['apple', 'iphone', '13', 'pro', 'max', '256'],
+    avg_price_tier: 4,
+  },
+  {
+    id: 'samsung-galaxy-s22-128',
+    brand: 'Samsung',
+    model: 'Galaxy S22',
+    storage: '128GB',
+    keywords: ['samsung', 'galaxy', 's22', '128'],
+    avg_price_tier: 4,
+  },
+  {
+    id: 'samsung-galaxy-s21-128',
+    brand: 'Samsung',
+    model: 'Galaxy S21',
+    storage: '128GB',
+    keywords: ['samsung', 'galaxy', 's21', '128'],
+    avg_price_tier: 3,
+  },
+  {
+    id: 'google-pixel-7-128',
+    brand: 'Google',
+    model: 'Pixel 7',
+    storage: '128GB',
+    keywords: ['google', 'pixel', '7', '128'],
+    avg_price_tier: 3,
+  },
+  {
+    id: 'oneplus-9-pro-256',
+    brand: 'OnePlus',
+    model: '9 Pro',
+    storage: '256GB',
+    keywords: ['oneplus', '9', 'pro', '256'],
+    avg_price_tier: 3,
+  },
+  {
+    id: 'xiaomi-mi-11-128',
+    brand: 'Xiaomi',
+    model: 'Mi 11',
+    storage: '128GB',
+    keywords: ['xiaomi', 'mi', '11', '128'],
+    avg_price_tier: 2,
+  },
+  {
+    id: 'huawei-p30-128',
+    brand: 'Huawei',
+    model: 'P30',
+    storage: '128GB',
+    keywords: ['huawei', 'p30', '128'],
+    avg_price_tier: 2,
+  },
+  {
+    id: 'apple-iphone-11-64',
+    brand: 'Apple',
+    model: 'iPhone 11',
+    storage: '64GB',
+    keywords: ['apple', 'iphone', '11', '64'],
+    avg_price_tier: 2,
+  }
+];
+
 @Injectable()
 export class PhoneModelsService {
   private readonly logger = new Logger(PhoneModelsService.name);
@@ -20,6 +96,14 @@ export class PhoneModelsService {
 
   async getAll(): Promise<PhoneModel[]> {
     try {
+      // Fallback to in-memory catalog when DB is not configured
+      if (!process.env.DATABASE_URL) {
+        this.logger.warn(
+          'DATABASE_URL is not set. Returning fallback phone models catalog for demo.',
+        );
+        return FALLBACK_MODELS;
+      }
+
       const models = await this.prisma.phoneModel.findMany({
         orderBy: [
           { avg_price_tier: 'desc' },
@@ -42,7 +126,8 @@ export class PhoneModelsService {
       }));
     } catch (err) {
       this.logger.error('Failed to load phone models from database', err);
-      return [];
+      // Graceful fallback for demo if DB is unreachable
+      return FALLBACK_MODELS;
     }
   }
 
