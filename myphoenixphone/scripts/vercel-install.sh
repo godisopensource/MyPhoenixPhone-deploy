@@ -5,7 +5,11 @@ set -euo pipefail
 rm -f /vercel/path0/node_modules/.bin/node || true
 
 # We're already in myphoenixphone when this script is used, so install here
-npm install --include=dev
+echo "Installing dependencies with devDependencies..."
+npm ci --include=dev 2>&1 || npm install --include=dev 2>&1
 
 # Ensure prisma client is generated for the backend workspace
-npm --prefix myphoenixphone --workspace apps/backend exec prisma generate --schema ./prisma/schema.prisma || true
+echo "Generating Prisma client..."
+npm --prefix myphoenixphone --workspace apps/backend exec prisma generate --schema ./prisma/schema.prisma 2>&1 || true
+
+echo "Install script complete"
