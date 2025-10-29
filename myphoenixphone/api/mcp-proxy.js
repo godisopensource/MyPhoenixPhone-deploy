@@ -68,12 +68,21 @@ async function makeCAMARARequest(endpoint, options = {}) {
     }
   });
   if (!response.ok) {
-    const text = await response.text().catch(() => '');
-    console.error('[MCP Proxy] CAMARA request failed', {
-      url,
-      status: response.status,
-      body: text?.slice(0, 500),
-    });
+    try {
+      const copy = response.clone();
+      const text = await copy.text().catch(() => '');
+      console.error('[MCP Proxy] CAMARA request failed', {
+        url,
+        status: response.status,
+        body: text ? text.slice(0, 500) : undefined,
+      });
+    } catch (e) {
+      console.error('[MCP Proxy] CAMARA request failed (no body to log)', {
+        url,
+        status: response.status,
+        error: e?.message,
+      });
+    }
   }
   return response;
 }
