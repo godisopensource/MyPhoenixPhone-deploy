@@ -87,22 +87,41 @@ async function makeCAMARARequest(endpoint, options = {}) {
   return response;
 }
 
-async function postWithFallback(res, primaryEndpoint, fallbackEndpoint, bodyObj) {
-  const targetUrl = `${API_BASE_URL}${CAMARA_RESOURCE_PREFIX}${primaryEndpoint}`;
-  res.setHeader('X-Proxy-Target-Url', targetUrl);
-  let response = await makeCAMARARequest(primaryEndpoint, {
-    method: 'POST',
-    body: JSON.stringify(bodyObj),
-  });
-  if (response.status === 404 && fallbackEndpoint) {
-    const fallbackUrl = `${API_BASE_URL}${CAMARA_RESOURCE_PREFIX}${fallbackEndpoint}`;
-    res.setHeader('X-Proxy-Target-Url-Fallback', fallbackUrl);
-    response = await makeCAMARARequest(fallbackEndpoint, {
+async function postWithFallback(res, endpoints, bodyObj) {
+  let lastResponse = null;
+  for (let i = 0; i < endpoints.length; i++) {
+    const ep = endpoints[i];
+    const targetUrl = `${API_BASE_URL}${CAMARA_RESOURCE_PREFIX}${ep}`;
+    const headerName = i === 0 ? 'X-Proxy-Target-Url' : `X-Proxy-Target-Url-${i+1}`;
+    res.setHeader(headerName, targetUrl);
+    const response = await makeCAMARARequest(ep, {
       method: 'POST',
       body: JSON.stringify(bodyObj),
     });
+
+    // If OK or No Content, stop here
+    if (response.ok || response.status === 204) {
+      return response;
+    }
+
+    // If 404 or 400 with "unhandled path", try next endpoint
+    if (response.status === 404 || response.status === 400) {
+      try {
+        const copy = response.clone();
+        const txt = await copy.text().catch(() => '');
+        if (txt && /unhandled path/i.test(txt)) {
+          lastResponse = response;
+          continue; // try next
+        }
+      } catch (_) {
+        // fall through
+      }
+    }
+
+    // For other errors, return immediately
+    return response;
   }
-  return response;
+  return lastResponse;
 }
 
 module.exports = async function handler(req, res) {
@@ -145,12 +164,12 @@ module.exports = async function handler(req, res) {
   if (path === 'number-verification/v0.3/verify-with-code/send-code' && req.method === 'POST') {
     try {
       const requestData = req.body;
-      const response = await postWithFallback(
-        res,
+      const response = await postWithFallback(res, [
         '/number-verification/v0.3/verify-with-code/send-code',
         '/number-verification/v0.3/verify-with-code/sms/send-code',
-        requestData,
-      );
+        '/number-verification/v0.3/verify-code/send-code',
+        '/number-verification/v0.3/verify-code/sms/send-code',
+      ], requestData);
 
       const verificationCode = response.headers.get('X-Verification-Code');
 
@@ -179,12 +198,12 @@ module.exports = async function handler(req, res) {
   if (path === 'number-verification/v0.3/verify-with-code/verify' && req.method === 'POST') {
     try {
       const requestData = req.body;
-      const response = await postWithFallback(
-        res,
+      const response = await postWithFallback(res, [
         '/number-verification/v0.3/verify-with-code/verify',
         '/number-verification/v0.3/verify-with-code/sms/verify',
-        requestData,
-      );
+        '/number-verification/v0.3/verify-code/verify',
+        '/number-verification/v0.3/verify-code/sms/verify',
+      ], requestData);
 
       const responseText = await response.text();
       res.status(response.status).send(responseText);
