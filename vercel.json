@@ -26,7 +26,7 @@
     }
   ],
   "routes": [
-    { "src": "/api/mcp", "dest": "/api/mcp.js" },
+    { "src": "/api/mcp-proxy", "dest": "/api/mcp-proxy.js" },
     { "src": "/docs", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
     { "src": "/docs/(.*)", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
     { "src": "/docs-json", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
