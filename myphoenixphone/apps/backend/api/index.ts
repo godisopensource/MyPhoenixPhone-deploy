@@ -124,18 +124,25 @@ export default async function handler(req: any, res: any) {
   if (!server) {
     server = await (serverInitPromise ?? (serverInitPromise = createNestServer()));
   }
-  // If routed through Vercel as /api/... ensure Express sees routes without /api prefix
+  
+  // URL rewriting for different route patterns:
+  // - /api/* routes come from frontend API calls
+  // - /docs routes come from direct Swagger UI access
   try {
     if (typeof req.url === 'string') {
+      // Strip /api prefix for backend routes
       if (req.url === '/api') {
         req.url = '/';
       } else if (req.url.startsWith('/api/')) {
-        req.url = req.url.substring(4);
+        req.url = req.url.substring(4); // Remove '/api'
       }
+      // /docs routes are already correct (Swagger mounted at 'docs')
+      // No transformation needed for /docs, /docs-json, etc.
     }
   } catch (_) {
-    // ignore
+    // ignore URL parse errors
   }
+  
   // Express instance is callable as a handler
   return server(req, res);
 }
