@@ -81,7 +81,17 @@ module.exports = async function handler(req, res) {
   }
 
   const { query } = req;
-  const path = query.path ? query.path.join('/') : '';
+  const rawPath = query.path;
+  let path = '';
+  if (Array.isArray(rawPath)) {
+    path = rawPath.join('/');
+  } else if (typeof rawPath === 'string') {
+    try {
+      path = decodeURIComponent(rawPath);
+    } catch (_) {
+      path = rawPath;
+    }
+  }
 
   // Health check - /api/mcp-proxy or /api/mcp-proxy?path=health
   if (!path || path === 'health') {
