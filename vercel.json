@@ -1,5 +1,5 @@
 {
   "installCommand": "bash -c 'cd /vercel/path0/myphoenixphone && npm install --include=dev && npm --workspace apps/backend exec prisma generate --schema ./prisma/schema.prisma'",
-  "buildCommand": "bash -c 'cd /vercel/path0/myphoenixphone && npm run -w apps/backend build && npm run -w apps/web build && ln -s /vercel/path0/myphoenixphone/apps/web/.next /vercel/path0/.next'",
+  "buildCommand": "bash -c 'cd /vercel/path0/myphoenixphone && npm run -w apps/backend build && npm run -w apps/web build && cp -r /vercel/path0/myphoenixphone/apps/web/.next /vercel/path0/.next'",
   "outputDirectory": ".next"
 }
