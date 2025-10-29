@@ -1,42 +1,11 @@
 {
   "version": 2,
   "installCommand": "npm install --include=dev && npm --prefix myphoenixphone install --include=dev",
-  "builds": [
+  "buildCommand": "cd myphoenixphone && npm run -w apps/backend build && npm run -w apps/web build",
+  "rewrites": [
     {
-      "src": "myphoenixphone/apps/web/next.config.mjs",
-      "use": "@vercel/next"
-    },
-    {
-      "src": "myphoenixphone/apps/backend/api/**/*.ts",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "myphoenixphone/node_modules/.prisma/**",
-          "myphoenixphone/apps/backend/node_modules/.prisma/**",
-          "myphoenixphone/apps/backend/prisma/**"
-        ]
-      }
-    }
-  ],
-  "functions": {
-    "myphoenixphone/apps/backend/api/**/*.ts": {
-      "runtime": "nodejs20.x",
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  },
-  "routes": [
-    {
-      "src": "/api",
-      "dest": "myphoenixphone/apps/backend/api/index.ts"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "myphoenixphone/apps/backend/api/index.ts"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "myphoenixphone/apps/web/$1"
+      "source": "/api/:path*",
+      "destination": "/api"
     }
   ]
 }
