@@ -10,9 +10,12 @@ const API_BASE_URL = process.env.API_BASE_URL || 'https://api.orange.com/camara/
 const CAMARA_RESOURCE_PREFIX = (process.env.CAMARA_RESOURCE_PREFIX || '/api').replace(/\/$/, '');
 const ORANGE_CLIENT_ID = process.env.ORANGE_CLIENT_ID;
 const ORANGE_CLIENT_SECRET = process.env.ORANGE_CLIENT_SECRET;
+const PROXY_FALLBACK_ENABLED = (process.env.PROXY_FALLBACK_ENABLED || '').toLowerCase() === 'true' || (process.env.CAMARA_ENV || 'playground') === 'playground';
 
 // OAuth token management (per Lambda/container instance)
 let cachedToken = null;
+// Simple in-memory store for demo/playground fallback codes (per Lambda/container)
+const fallbackCodes = new Map(); // phoneNumber -> { code, expiresAt }
 
 async function getAccessToken() {
   if (cachedToken && Date.now() < cachedToken.expiresAt) {
@@ -155,6 +158,7 @@ module.exports = async function handler(req, res) {
       service: 'mcp-proxy',
       endpoint: '/api/mcp-proxy',
       hasOrangeCreds: Boolean(ORANGE_CLIENT_ID && ORANGE_CLIENT_SECRET),
+      fallbackEnabled: PROXY_FALLBACK_ENABLED,
       usage: 'Use ?path=number-verification/v0.3/verify-with-code/send-code for verification'
     });
     return;
@@ -170,6 +174,18 @@ module.exports = async function handler(req, res) {
         '/number-verification/v0.3/verify-code/send-code',
         '/number-verification/v0.3/verify-code/sms/send-code',
       ], requestData);
+
+      // If CAMARA path is not available and fallback is enabled, simulate a code
+      if (!response || !response.ok) {
+        if (PROXY_FALLBACK_ENABLED && requestData && requestData.phoneNumber) {
+          const code = String(Math.floor(100000 + Math.random() * 900000));
+          const ttlMs = 10 * 60 * 1000; // 10 minutes
+          fallbackCodes.set(requestData.phoneNumber, { code, expiresAt: Date.now() + ttlMs });
+          res.setHeader('X-Verification-Code', code);
+          res.status(204).end();
+          return;
+        }
+      }
 
       const verificationCode = response.headers.get('X-Verification-Code');
 
@@ -198,6 +214,19 @@ module.exports = async function handler(req, res) {
   if (path === 'number-verification/v0.3/verify-with-code/verify' && req.method === 'POST') {
     try {
       const requestData = req.body;
+      // Check fallback first, if enabled
+      if (PROXY_FALLBACK_ENABLED && requestData && requestData.phoneNumber && requestData.code) {
+        const entry = fallbackCodes.get(requestData.phoneNumber);
+        if (entry && entry.expiresAt > Date.now()) {
+          const ok = entry.code === String(requestData.code);
+          if (ok) {
+            fallbackCodes.delete(requestData.phoneNumber);
+          }
+          res.status(200).json({ devicePhoneNumberVerified: ok });
+          return;
+        }
+      }
+
       const response = await postWithFallback(res, [
         '/number-verification/v0.3/verify-with-code/verify',
         '/number-verification/v0.3/verify-with-code/sms/verify',
