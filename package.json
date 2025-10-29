@@ -1,16 +1,8 @@
 {
-  "name": "myphoenixphone-deploy",
+  "name": "myphoenixphone-deploy-root",
   "private": true,
-  "license": "UNLICENSED",
   "engines": {
     "node": "20.x"
   },
-  "packageManager": "npm@10.8.2",
-  "scripts": {
-    "prebuild": "npm --prefix myphoenixphone install --include=dev",
-    "build": "npm --prefix myphoenixphone run build",
-    "dev": "npm --prefix myphoenixphone run dev",
-    "lint": "npm --prefix myphoenixphone run lint",
-    "format": "npm --prefix myphoenixphone run format"
-  }
+  "packageManager": "npm@10.8.2"
 }
