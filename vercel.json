@@ -1,5 +1,5 @@
 {
-  "installCommand": "rm -f /vercel/path0/node_modules/.bin/node || true && ( [ -f myphoenixphone/package.json ] && cd myphoenixphone || true ) && npm install --include=dev && npm --prefix myphoenixphone --workspace apps/backend exec prisma generate --schema ./prisma/schema.prisma",
+  "installCommand": "bash ./scripts/vercel-install.sh",
   "buildCommand": "npm --prefix myphoenixphone run -w apps/backend build && npm --prefix myphoenixphone run -w apps/web build",
   "outputDirectory": "myphoenixphone/apps/web/.next"
 }
