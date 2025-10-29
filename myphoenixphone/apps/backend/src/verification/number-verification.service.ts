@@ -18,7 +18,10 @@ export interface NumberVerificationResult {
 export class NumberVerificationService {
   private readonly baseUrl: string;
   // Simple in-memory store for demo/playground fallback codes (per Lambda/container)
-  private static fallbackCodes: Map<string, { code: string; expiresAt: number }> = new Map();
+  private static fallbackCodes: Map<
+    string,
+    { code: string; expiresAt: number }
+  > = new Map();
 
   constructor(private readonly oauth2Client: OAuth2ClientService) {
     const env = process.env.CAMARA_ENV || 'playground';
@@ -60,7 +63,10 @@ export class NumberVerificationService {
 
     // DEMO/PLAYGROUND FALLBACK: If in playground and no proxy configured (common on Vercel),
     // generate a one-time code and store it in-memory. This avoids external dependencies.
-    if (env === 'playground' && !(process.env.USE_MCP_PROXY === 'true' || !!process.env.MCP_PROXY_URL)) {
+    if (
+      env === 'playground' &&
+      !(process.env.USE_MCP_PROXY === 'true' || !!process.env.MCP_PROXY_URL)
+    ) {
       const code = String(Math.floor(100000 + Math.random() * 900000));
       const ttlMs = 10 * 60 * 1000; // 10 minutes
       NumberVerificationService.fallbackCodes.set(phoneNumber, {
@@ -152,7 +158,10 @@ export class NumberVerificationService {
     const requestBody = { phoneNumber, code };
 
     // DEMO/PLAYGROUND FALLBACK verification path
-    if (env === 'playground' && !(process.env.USE_MCP_PROXY === 'true' || !!process.env.MCP_PROXY_URL)) {
+    if (
+      env === 'playground' &&
+      !(process.env.USE_MCP_PROXY === 'true' || !!process.env.MCP_PROXY_URL)
+    ) {
       const entry = NumberVerificationService.fallbackCodes.get(phoneNumber);
       if (!entry || entry.expiresAt < Date.now()) {
         return { devicePhoneNumberVerified: false };

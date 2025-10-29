@@ -33,6 +33,18 @@ export class CaptchaGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
 
+    // Optional bypass for demo/playground environments. Use only for previews.
+    const bypassCaptcha =
+      process.env.CAPTCHA_BYPASS === 'true' ||
+      (!this.captchaSecretKey &&
+        (process.env.CAMARA_ENV || 'playground') === 'playground');
+    if (bypassCaptcha) {
+      console.warn(
+        '[CaptchaGuard] CAPTCHA_BYPASS active or no secret in playground - bypassing CAPTCHA validation',
+      );
+      return true;
+    }
+
     // Extract CAPTCHA token from request (body, query, or header)
     const token =
       request.body?.captchaToken ||

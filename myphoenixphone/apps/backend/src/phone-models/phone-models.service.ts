@@ -85,7 +85,7 @@ const FALLBACK_MODELS: PhoneModel[] = [
     storage: '64GB',
     keywords: ['apple', 'iphone', '11', '64'],
     avg_price_tier: 2,
-  }
+  },
 ];
 
 @Injectable()
