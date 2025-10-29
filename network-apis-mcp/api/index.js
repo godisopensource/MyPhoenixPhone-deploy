@@ -81,14 +81,14 @@ export default async function handler(req, res) {
 
   const { url, method } = req;
 
-  // Health check
-  if (url === '/mcp/health' && method === 'GET') {
+  // Strip /mcp prefix if present (for Vercel routing)
+  const cleanUrl = url.startsWith('/mcp') ? url.substring(4) : url;
+  
+  // Health check - handle both /mcp/health and /health
+  if ((cleanUrl === '/health' || url === '/mcp/health' || url === '/mcp') && method === 'GET') {
     res.status(200).json({ status: 'ok', service: 'mcp-proxy' });
     return;
   }
-
-  // Strip /mcp prefix if present (for Vercel routing)
-  const cleanUrl = url.startsWith('/mcp') ? url.substring(4) : url;
 
   // Number verification: send code
   if (cleanUrl === '/number-verification/v0.3/verify-with-code/send-code' && method === 'POST') {

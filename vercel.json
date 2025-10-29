@@ -39,6 +39,7 @@
     { "src": "/docs/(.*)", "dest": "myphoenixphone/apps/backend/api/index.ts" },
     { "src": "/docs-json", "dest": "myphoenixphone/apps/backend/api/index.ts" },
     { "src": "/api-json", "dest": "myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/mcp", "dest": "network-apis-mcp/api/index.js" },
     { "src": "/mcp/(.*)", "dest": "network-apis-mcp/api/index.js" },
     { "src": "/api", "dest": "myphoenixphone/apps/backend/api/index.ts" },
     { "src": "/api/(.*)", "dest": "myphoenixphone/apps/backend/api/index.ts" },
