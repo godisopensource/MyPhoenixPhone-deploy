@@ -12,7 +12,9 @@
           "apps/backend/node_modules/.prisma/**",
           "apps/backend/node_modules/@prisma/**",
           "node_modules/.prisma/**",
-          "node_modules/@prisma/**"
+          "node_modules/@prisma/**",
+          "apps/backend/node_modules/swagger-ui-dist/**",
+          "node_modules/swagger-ui-dist/**"
         ],
         "runtime": "nodejs20.x",
         "memory": 1024,
@@ -21,6 +23,10 @@
     }
   ],
   "routes": [
+    { "src": "/docs", "dest": "apps/backend/api/index.ts" },
+    { "src": "/docs/(.*)", "dest": "apps/backend/api/index.ts" },
+    { "src": "/docs-json", "dest": "apps/backend/api/index.ts" },
+    { "src": "/api-json", "dest": "apps/backend/api/index.ts" },
     { "src": "/api", "dest": "apps/backend/api/index.ts" },
     { "src": "/api/(.*)", "dest": "apps/backend/api/index.ts" },
     { "src": "/(.*)", "dest": "apps/web/$1" }

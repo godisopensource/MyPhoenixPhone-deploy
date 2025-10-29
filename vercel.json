@@ -1,5 +1,47 @@
 {
-  "installCommand": "bash -c 'cd /vercel/path0/myphoenixphone && npm install --include=dev && npm --workspace apps/backend exec prisma generate --schema ./prisma/schema.prisma'",
-  "buildCommand": "bash -c 'cd /vercel/path0/myphoenixphone && npm run -w apps/backend build && npm run -w apps/web build && cp -r /vercel/path0/myphoenixphone/apps/web/.next /vercel/path0/.next'",
-  "outputDirectory": ".next"
+  "version": 2,
+  "installCommand": "bash -c 'cd /vercel/path0/myphoenixphone && npm install --include=dev && npm --workspace apps/backend exec prisma generate --schema ./prisma/schema.prisma && cd /vercel/path0/network-apis-mcp && npm install'",
+  "builds": [
+    {
+      "src": "myphoenixphone/apps/web/package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "myphoenixphone/apps/backend/api/**/*.ts",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "myphoenixphone/apps/backend/prisma/**",
+          "myphoenixphone/apps/backend/node_modules/.prisma/**",
+          "myphoenixphone/apps/backend/node_modules/@prisma/**",
+          "myphoenixphone/node_modules/.prisma/**",
+          "myphoenixphone/node_modules/@prisma/**",
+          "myphoenixphone/apps/backend/node_modules/swagger-ui-dist/**",
+          "myphoenixphone/node_modules/swagger-ui-dist/**"
+        ],
+        "runtime": "nodejs20.x",
+        "memory": 1024,
+        "maxDuration": 10
+      }
+    },
+    {
+      "src": "network-apis-mcp/api/index.js",
+      "use": "@vercel/node",
+      "config": {
+        "runtime": "nodejs20.x",
+        "memory": 512,
+        "maxDuration": 10
+      }
+    }
+  ],
+  "routes": [
+    { "src": "/docs", "dest": "myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/docs/(.*)", "dest": "myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/docs-json", "dest": "myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/api-json", "dest": "myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/mcp/(.*)", "dest": "network-apis-mcp/api/index.js" },
+    { "src": "/api", "dest": "myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/api/(.*)", "dest": "myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/(.*)", "dest": "myphoenixphone/apps/web/$1" }
+  ]
 }
