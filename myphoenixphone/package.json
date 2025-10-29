@@ -10,7 +10,8 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "seed:demo": "npx tsx ./scripts/seed-demo-data.ts"
+    "seed:demo": "npx tsx ./scripts/seed-demo-data.ts",
+    "postinstall": "npm --workspace apps/backend exec prisma generate --schema ./prisma/schema.prisma"
   },
   "devDependencies": {
     "prettier": "^3.6.2",
