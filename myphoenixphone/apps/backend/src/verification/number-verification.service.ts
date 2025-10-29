@@ -81,7 +81,7 @@ export class NumberVerificationService {
       const baseUrl = proxyUrl.replace(/\/$/, '');
       const path = 'number-verification/v0.3/verify-with-code/send-code';
       const url = `${baseUrl}?path=${encodeURIComponent(path)}`;
-      
+
       const res = await fetch(url, {
         method: 'POST',
         headers: {
@@ -183,7 +183,7 @@ export class NumberVerificationService {
       const baseUrl = proxyUrl.replace(/\/$/, '');
       const path = 'number-verification/v0.3/verify-with-code/verify';
       const url = `${baseUrl}?path=${encodeURIComponent(path)}`;
-      
+
       const res = await fetch(url, {
         method: 'POST',
         headers: {

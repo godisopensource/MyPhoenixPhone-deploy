@@ -148,38 +148,18 @@ export default function VerifyPage() {
     }
     setLoading(true);
     try {
-      // ensure we have a captcha token if site key present
+      // Always fetch a fresh Turnstile token on each submit to avoid expiry/duplicate issues
       let captchaToken: string | null = null;
-      if (SITE_KEY) {
-        // try to use tokenRef if available
-        captchaToken = tokenRef.current;
-        // if missing, try to execute turnstile to get one (if API supports execute)
-        try {
-          // @ts-ignore
-          if (!captchaToken && (window as any).turnstile && widgetIdRef.current != null && typeof (window as any).turnstile.getResponse === 'function') {
-            // some turnstile integrations expose getResponse(widgetId)
-            // @ts-ignore
-            captchaToken = (window as any).turnstile.getResponse(widgetIdRef.current) || null;
-          }
-        } catch (e) {
-          // ignore
-        }
-      }
-
       const payload: any = { phoneNumber: msisdn };
       if (SITE_KEY) {
+        captchaToken = await getCaptchaToken();
         if (!captchaToken) {
-          // force a fresh token attempt
-          const t = await getCaptchaToken();
-          captchaToken = t;
-        }
-        if (!captchaToken) {
-          setError("Domaine non valide. Contactez l'administrateur du site si le problème persiste.");
+          setError("Veuillez compléter le contrôle de sécurité.");
           setLoading(false);
           return;
         }
+        payload.captchaToken = captchaToken;
       }
-      if (captchaToken) payload.captchaToken = captchaToken;
 
       // If we are awaiting a code, include it to verify; otherwise this call requests a code
       if (awaitingCode) payload.code = code;
@@ -189,12 +169,15 @@ export default function VerifyPage() {
           ? 'http://localhost:3003'
           : (process.env.NEXT_PUBLIC_API_URL || '/api');
 
-      const res = await fetch(`${apiUrl}/verify/number`, {
+      const doRequest = async (body: any) =>
+        fetch(`${apiUrl}/verify/number`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(payload),
+        body: JSON.stringify(body),
       });
+
+      let res = await doRequest(payload);
 
       if (res.ok) {
         const data = await res.json().catch(() => null);
@@ -213,8 +196,32 @@ export default function VerifyPage() {
           window.location.href = `/eligibility-result?phoneNumber=${encodeURIComponent(msisdn)}`;
         }
       } else {
+        // If captcha failed, try to get a new token and retry once
         const data = await res.json().catch(() => null);
-        setError(data?.message || "Verification failed");
+        const msg = data?.message || "Verification failed";
+        const isCaptchaError = msg.toLowerCase().includes('captcha');
+        if (SITE_KEY && isCaptchaError) {
+          const fresh = await getCaptchaToken();
+          if (fresh) {
+            const retryPayload = { ...payload, captchaToken: fresh };
+            res = await doRequest(retryPayload);
+            if (res.ok) {
+              const data2 = await res.json().catch(() => null);
+              if (!awaitingCode && data2?.codeSent) {
+                setAwaitingCode(true);
+                setError(null);
+                if (data2.code) {
+                  setVerificationCode(data2.code);
+                  console.log(`Demo verification code: ${data2.code}`);
+                }
+              } else {
+                window.location.href = `/eligibility-result?phoneNumber=${encodeURIComponent(msisdn)}`;
+              }
+              return;
+            }
+          }
+        }
+        setError(msg);
       }
     } catch (e) {
       setError("Network error when verifying number");
