@@ -68,7 +68,7 @@ async function makeCAMARARequest(endpoint, options = {}) {
   return response;
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -147,5 +147,5 @@ export default async function handler(req, res) {
   }
 
   // 404 for unknown routes
-  res.status(404).json({ error: 'Not Found' });
-}
+  res.status(404).json({ error: 'Not Found', url, cleanUrl, method });
+};
