@@ -1,5 +1,5 @@
 {
   "installCommand": "bash /vercel/path0/scripts/run-vercel-install.sh || bash /vercel/path0/myphoenixphone/scripts/run-vercel-install.sh",
-  "buildCommand": "cd myphoenixphone && npm run -w apps/backend build && npm run -w apps/web build",
+  "buildCommand": "cd /vercel/path0/myphoenixphone && npm run -w apps/backend build && npm run -w apps/web build",
   "outputDirectory": "myphoenixphone/apps/web/.next"
 }
