@@ -1,15 +1,30 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from '../src/app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+// Keep the same import style as in main.ts for compatibility with tsconfig
 import cookieParser = require('cookie-parser');
 import session = require('express-session');
 
-async function bootstrap() {
+/**
+ * Serverless entry for the NestJS backend when deployed on Vercel Node Functions.
+ *
+ * Notes:
+ * - We initialize the Nest app once per Lambda/container instance and reuse it across invocations.
+ * - We avoid writing files (like openapi.yaml) to the filesystem since it's read-only/ephemeral.
+ * - Swagger UI is mounted at /api/docs (this function is mounted under /api).
+ * - In-memory session store is fine for dev/preview; use a persistent store for production.
+ */
+
+let server: any;
+let serverInitPromise: Promise<any> | null = null;
+
+async function createNestServer() {
   const app = await NestFactory.create(AppModule);
+
   app.enableShutdownHooks();
 
   // Swagger/OpenAPI configuration
-  const config = new DocumentBuilder()
+  const swaggerConfig = new DocumentBuilder()
     .setTitle('MyPhoenixPhone API')
     .setDescription(
       'API for MyPhoenixPhone - Dormant device buyback platform using Orange Network APIs',
@@ -27,23 +42,13 @@ async function bootstrap() {
     .addTag('campaign', 'Marketing campaigns')
     .addTag('feature-flags', 'Feature flags and A/B testing')
     .addTag('metrics', 'Prometheus metrics')
-    .addServer('http://localhost:3003', 'Development server')
-    .addServer('https://api.myphoenixphone.com', 'Production server')
+    // Do not set explicit servers here; Vercel will handle the base URL
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  // Mount Swagger UI at /api/docs (since this function runs under /api on Vercel)
+  SwaggerModule.setup('docs', app, document);
 
-  // Save OpenAPI spec to file for contract testing
-  const fs = require('fs');
-  const yaml = require('yaml');
-  const openApiYaml = yaml.stringify(document);
-  fs.writeFileSync('./openapi.yaml', openApiYaml);
-
-
-  // Allow CORS for local development and configurable production origins
-
-  // Support multiple origins when running with Turbo (backend on 3000, frontend on 3001, etc.)
 
   // Configure comma-separated list in ALLOWED_ORIGINS. Same-origin on Vercel is allowed via VERCEL_URL.
   const extraOrigins = (process.env.ALLOWED_ORIGINS || '')
@@ -55,6 +60,7 @@ async function bootstrap() {
     : undefined;
 
   const allowedOrigins = [
+
     'http://localhost:3000',
 
     'http://localhost:3001',
@@ -71,10 +77,8 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, Postman, curl)
       if (!origin) return callback(null, true);
 
-      // In development, allow all localhost origins
       if (
         process.env.NODE_ENV !== 'production' &&
         origin.startsWith('http://localhost:')
@@ -82,7 +86,6 @@ async function bootstrap() {
         return callback(null, true);
       }
 
-      // Check allowed origins list
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -92,10 +95,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Cookie parser and session middleware are required to persist
-  // auth state/nonce across the redirect to/from Orange Authentication France.
-  // For development the in-memory session store is fine. In production,
-  // use a persistent store such as Redis (connect-redis) and set cookie.secure=true.
+  // Cookie parser and session middleware
   app.use(cookieParser());
   app.use(
     session({
@@ -103,7 +103,6 @@ async function bootstrap() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        // secure should be true in production when using HTTPS
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
         sameSite: 'lax',
@@ -111,7 +110,19 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
+  // Important: In serverless, call init() instead of listen()
+  await app.init();
+
+  // Get underlying Express instance to use as a Vercel handler
+  const expressInstance = app.getHttpAdapter().getInstance();
+
+  return expressInstance;
 }
 
-void bootstrap();
+export default async function handler(req: any, res: any) {
+  if (!server) {
+    server = await (serverInitPromise ?? (serverInitPromise = createNestServer()));
+  }
+  // Express instance is callable as a handler
+  return server(req, res);
+}
