@@ -27,9 +27,9 @@ export default function StorePage({}: {}) {
     setDepositCode(null);
 
     try {
-      const apiUrl = typeof window !== 'undefined'
-        ? (window.location.origin.includes('localhost') ? 'http://localhost:3003' : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003')
-        : 'http://localhost:3003';
+      const apiUrl = (typeof window !== 'undefined' && window.location.origin.includes('localhost'))
+        ? 'http://localhost:3003'
+        : (process.env.NEXT_PUBLIC_API_URL || '/api');
       let lat: number | undefined;
       let lon: number | undefined;
       try {

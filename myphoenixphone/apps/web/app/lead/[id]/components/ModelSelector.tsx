@@ -24,9 +24,9 @@ export default function ModelSelector({ onSelect }: Props) {
 
   useEffect(() => {
     // Load phone models from backend
-    const apiUrl = typeof window !== 'undefined' 
-      ? (window.location.origin.includes('localhost') ? 'http://localhost:3003' : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003')
-      : 'http://localhost:3003';
+    const apiUrl = (typeof window !== 'undefined' && window.location.origin.includes('localhost'))
+      ? 'http://localhost:3003'
+      : (process.env.NEXT_PUBLIC_API_URL || '/api');
     
     setLoading(true);
     setError(null);

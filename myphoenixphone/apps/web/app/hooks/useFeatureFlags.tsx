@@ -29,7 +29,9 @@ export function useFeatureFlag(flagKey: string, userId?: string): FlagResult {
   useEffect(() => {
     const fetchFlag = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003';
+        const apiUrl = (typeof window !== 'undefined' && window.location.origin.includes('localhost'))
+          ? 'http://localhost:3003'
+          : (process.env.NEXT_PUBLIC_API_URL || '/api');
         const endpoint = userId
           ? `${apiUrl}/feature-flags/${flagKey}/variant/${userId}`
           : `${apiUrl}/feature-flags/${flagKey}`;
@@ -71,7 +73,9 @@ export function useAllFeatureFlags() {
   useEffect(() => {
     const fetchFlags = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003';
+        const apiUrl = (typeof window !== 'undefined' && window.location.origin.includes('localhost'))
+          ? 'http://localhost:3003'
+          : (process.env.NEXT_PUBLIC_API_URL || '/api');
         const res = await fetch(`${apiUrl}/feature-flags`);
         if (!res.ok) throw new Error('Failed to fetch flags');
 

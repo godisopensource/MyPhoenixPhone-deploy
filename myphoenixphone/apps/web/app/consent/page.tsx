@@ -11,7 +11,10 @@ export default function ConsentPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:3003/consents/start", {
+      const apiUrl = (typeof window !== 'undefined' && window.location.origin.includes('localhost'))
+        ? 'http://localhost:3003'
+        : (process.env.NEXT_PUBLIC_API_URL || '/api');
+      const res = await fetch(`${apiUrl}/consents/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

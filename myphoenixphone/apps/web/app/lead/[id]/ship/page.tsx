@@ -23,9 +23,9 @@ import { useParams } from 'next/navigation';
      setLoading(true);
      setError(null);
      try {
-       const apiUrl = typeof window !== 'undefined'
-         ? (window.location.origin.includes('localhost') ? 'http://localhost:3003' : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003')
-         : 'http://localhost:3003';
+       const apiUrl = (typeof window !== 'undefined' && window.location.origin.includes('localhost'))
+         ? 'http://localhost:3003'
+         : (process.env.NEXT_PUBLIC_API_URL || '/api');
        const res = await fetch(`${apiUrl}/handover/ship`, {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },

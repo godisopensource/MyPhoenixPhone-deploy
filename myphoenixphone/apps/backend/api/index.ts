@@ -47,6 +47,7 @@ async function createNestServer() {
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   // Mount Swagger UI at /api/docs (since this function runs under /api on Vercel)
+  // Expose Swagger UI; we'll handle '/api/*' prefix via URL rewrite in handler below
   SwaggerModule.setup('docs', app, document);
 
 
@@ -122,6 +123,18 @@ async function createNestServer() {
 export default async function handler(req: any, res: any) {
   if (!server) {
     server = await (serverInitPromise ?? (serverInitPromise = createNestServer()));
+  }
+  // If routed through Vercel as /api/... ensure Express sees routes without /api prefix
+  try {
+    if (typeof req.url === 'string') {
+      if (req.url === '/api') {
+        req.url = '/';
+      } else if (req.url.startsWith('/api/')) {
+        req.url = req.url.substring(4);
+      }
+    }
+  } catch (_) {
+    // ignore
   }
   // Express instance is callable as a handler
   return server(req, res);
