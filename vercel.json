@@ -26,11 +26,19 @@
     }
   ],
   "routes": [
+    { "src": "/api/mcp", "dest": "/api/mcp.js" },
     { "src": "/docs", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
     { "src": "/docs/(.*)", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
     { "src": "/docs-json", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
     { "src": "/api-json", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
-    { "src": "/api", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/api/health", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/api/verify/(.*)", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/api/phone-models", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/api/pricing/(.*)", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/api/eligibility/(.*)", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/api/consents/(.*)", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/api/handover/(.*)", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
+    { "src": "/api/dormant/(.*)", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
     { "src": "/api/(.*)", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
     { "src": "/(.*)", "dest": "/myphoenixphone/apps/web/$1" }
   ]
