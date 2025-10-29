@@ -36,6 +36,7 @@
     { "src": "/api-json", "dest": "apps/backend/api/index.ts" },
     { "src": "/api", "dest": "apps/backend/api/index.ts" },
     { "src": "/api/(.*)", "dest": "apps/backend/api/index.ts" },
+    { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "apps/web" }
   ]
 }
