@@ -1,6 +1,25 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
+  "globalEnv": [
+    "DATABASE_URL",
+    "CAMARA_BASE_URL",
+    "CAMARA_CLIENT_ID",
+    "CAMARA_CLIENT_SECRET",
+    "CAMARA_TOKEN_URL",
+    "TURNSTILE_ENABLED",
+    "TURNSTILE_SECRET_KEY",
+    "TURNSTILE_VERIFY_URL",
+    "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+    "NEXT_PUBLIC_API_BASE_URL",
+    "PUBLIC_ORIGIN",
+    "ALLOWED_ORIGINS",
+    "DEV_WEB_ORIGIN",
+    "VERCEL_URL",
+    "NODE_ENV",
+    "PORT",
+    "SESSION_SECRET"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
