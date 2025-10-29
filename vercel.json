@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "installCommand": "bash -c 'cd /vercel/path0/myphoenixphone && npm install --include=dev && npm --workspace apps/backend exec prisma generate --schema ./prisma/schema.prisma && cd /vercel/path0/network-apis-mcp && npm install'",
+  "installCommand": "bash -c 'cd /vercel/path0/myphoenixphone && npm install --include=dev && npm --workspace apps/backend exec prisma generate --schema ./prisma/schema.prisma'",
   "builds": [
     {
       "src": "myphoenixphone/apps/web/package.json",
@@ -23,21 +23,9 @@
         "memory": 1024,
         "maxDuration": 10
       }
-    },
-    {
-      "src": "network-apis-mcp/api/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "runtime": "nodejs20.x",
-        "memory": 512,
-        "maxDuration": 10
-      }
     }
   ],
   "routes": [
-    { "src": "/mcp/health", "dest": "/network-apis-mcp/api/index.js" },
-    { "src": "/mcp/(.*)", "dest": "/network-apis-mcp/api/index.js" },
-    { "src": "/mcp", "dest": "/network-apis-mcp/api/index.js" },
     { "src": "/docs", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
     { "src": "/docs/(.*)", "dest": "/myphoenixphone/apps/backend/api/index.ts" },
     { "src": "/docs-json", "dest": "/myphoenixphone/apps/backend/api/index.ts" },

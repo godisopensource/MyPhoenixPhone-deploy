@@ -77,7 +77,11 @@ export class NumberVerificationService {
     }
 
     if (useProxy) {
-      const url = `${proxyUrl.replace(/\/$/, '')}/number-verification/v0.3/verify-with-code/send-code`;
+      // New Vercel serverless function format: /api/mcp?path=...
+      const baseUrl = proxyUrl.replace(/\/$/, '');
+      const path = 'number-verification/v0.3/verify-with-code/send-code';
+      const url = `${baseUrl}?path=${encodeURIComponent(path)}`;
+      
       const res = await fetch(url, {
         method: 'POST',
         headers: {
@@ -175,7 +179,11 @@ export class NumberVerificationService {
     }
 
     if (useProxy) {
-      const url = `${proxyUrl.replace(/\/$/, '')}/number-verification/v0.3/verify-with-code/verify`;
+      // New Vercel serverless function format: /api/mcp?path=...
+      const baseUrl = proxyUrl.replace(/\/$/, '');
+      const path = 'number-verification/v0.3/verify-with-code/verify';
+      const url = `${baseUrl}?path=${encodeURIComponent(path)}`;
+      
       const res = await fetch(url, {
         method: 'POST',
         headers: {
