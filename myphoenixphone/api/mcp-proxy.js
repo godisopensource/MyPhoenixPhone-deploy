@@ -56,7 +56,7 @@ async function getAccessToken() {
 
 async function makeCAMARARequest(endpoint, options = {}) {
   const accessToken = await getAccessToken();
-  const url = `${API_BASE_URL}/api${endpoint}`;
+  const url = `${API_BASE_URL}${endpoint}`;
   const response = await fetch(url, {
     ...options,
     headers: {
@@ -99,6 +99,7 @@ module.exports = async function handler(req, res) {
       status: 'ok',
       service: 'mcp-proxy',
       endpoint: '/api/mcp-proxy',
+      hasOrangeCreds: Boolean(ORANGE_CLIENT_ID && ORANGE_CLIENT_SECRET),
       usage: 'Use ?path=number-verification/v0.3/verify-with-code/send-code for verification'
     });
     return;
