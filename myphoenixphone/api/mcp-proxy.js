@@ -87,6 +87,24 @@ async function makeCAMARARequest(endpoint, options = {}) {
   return response;
 }
 
+async function postWithFallback(res, primaryEndpoint, fallbackEndpoint, bodyObj) {
+  const targetUrl = `${API_BASE_URL}${CAMARA_RESOURCE_PREFIX}${primaryEndpoint}`;
+  res.setHeader('X-Proxy-Target-Url', targetUrl);
+  let response = await makeCAMARARequest(primaryEndpoint, {
+    method: 'POST',
+    body: JSON.stringify(bodyObj),
+  });
+  if (response.status === 404 && fallbackEndpoint) {
+    const fallbackUrl = `${API_BASE_URL}${CAMARA_RESOURCE_PREFIX}${fallbackEndpoint}`;
+    res.setHeader('X-Proxy-Target-Url-Fallback', fallbackUrl);
+    response = await makeCAMARARequest(fallbackEndpoint, {
+      method: 'POST',
+      body: JSON.stringify(bodyObj),
+    });
+  }
+  return response;
+}
+
 module.exports = async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -127,10 +145,12 @@ module.exports = async function handler(req, res) {
   if (path === 'number-verification/v0.3/verify-with-code/send-code' && req.method === 'POST') {
     try {
       const requestData = req.body;
-      const response = await makeCAMARARequest('/number-verification/v0.3/verify-with-code/send-code', {
-        method: 'POST',
-        body: JSON.stringify(requestData)
-      });
+      const response = await postWithFallback(
+        res,
+        '/number-verification/v0.3/verify-with-code/send-code',
+        '/number-verification/v0.3/verify-with-code/sms/send-code',
+        requestData,
+      );
 
       const verificationCode = response.headers.get('X-Verification-Code');
 
@@ -159,10 +179,12 @@ module.exports = async function handler(req, res) {
   if (path === 'number-verification/v0.3/verify-with-code/verify' && req.method === 'POST') {
     try {
       const requestData = req.body;
-      const response = await makeCAMARARequest('/number-verification/v0.3/verify-with-code/verify', {
-        method: 'POST',
-        body: JSON.stringify(requestData)
-      });
+      const response = await postWithFallback(
+        res,
+        '/number-verification/v0.3/verify-with-code/verify',
+        '/number-verification/v0.3/verify-with-code/sms/verify',
+        requestData,
+      );
 
       const responseText = await response.text();
       res.status(response.status).send(responseText);
