@@ -10,6 +10,6 @@ npm install --include=dev 2>&1
 
 # Ensure prisma client is generated for the backend workspace
 echo "Generating Prisma client..."
-npm --prefix myphoenixphone --workspace apps/backend exec prisma generate --schema ./prisma/schema.prisma 2>&1 || true
+npm --workspace apps/backend exec prisma generate --schema ./prisma/schema.prisma 2>&1 || true
 
 echo "Install script complete"
