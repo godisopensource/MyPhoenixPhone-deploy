@@ -78,8 +78,10 @@ async function createNestServer() {
 
   app.enableCors({
     origin: (origin, callback) => {
+      // Allow server-to-server or same-origin requests without an Origin header
       if (!origin) return callback(null, true);
 
+      // Permit localhost in non-production for DX
       if (
         process.env.NODE_ENV !== 'production' &&
         origin.startsWith('http://localhost:')
@@ -87,8 +89,18 @@ async function createNestServer() {
         return callback(null, true);
       }
 
+      // Explicit allow-list check
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
+      }
+
+      // Broadly allow any vercel.app origin (preview/production aliases)
+      try {
+        if (origin.endsWith('.vercel.app')) {
+          return callback(null, true);
+        }
+      } catch (_) {
+        // ignore parsing issues and fall through
       }
 
       return callback(new Error('Not allowed by CORS'));
