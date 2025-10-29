@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Build backend and web apps from myphoenixphone directory
+# Build backend and web apps from myphoenixphone directory with absolute paths
 echo "Building backend..."
 cd /vercel/path0/myphoenixphone
 npm run -w apps/backend build 2>&1
