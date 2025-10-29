@@ -4,6 +4,11 @@
   "builds": [
     { "src": "apps/web/package.json", "use": "@vercel/next" },
     {
+      "src": "api/mcp-proxy.js",
+      "use": "@vercel/node",
+      "config": { "runtime": "nodejs20.x", "memory": 128, "maxDuration": 10 }
+    },
+    {
       "src": "apps/backend/api/**/*.ts",
       "use": "@vercel/node",
       "config": {
@@ -23,6 +28,8 @@
     }
   ],
   "routes": [
+    { "src": "/mcp-proxy", "dest": "api/mcp-proxy.js" },
+    { "src": "/api/mcp-proxy", "dest": "api/mcp-proxy.js" },
     { "src": "/docs", "dest": "apps/backend/api/index.ts" },
     { "src": "/docs/(.*)", "dest": "apps/backend/api/index.ts" },
     { "src": "/docs-json", "dest": "apps/backend/api/index.ts" },
