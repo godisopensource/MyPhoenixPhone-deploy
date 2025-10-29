@@ -18,12 +18,14 @@ export class CaptchaGuard implements CanActivate {
   constructor() {
     this.captchaVerifyUrl =
       process.env.CAPTCHA_VERIFY_URL ||
+      process.env.TURNSTILE_VERIFY_URL ||
       'https://challenges.cloudflare.com/turnstile/v0/siteverify';
-    this.captchaSecretKey = process.env.CAPTCHA_SECRET_KEY || '';
+    this.captchaSecretKey =
+      process.env.CAPTCHA_SECRET_KEY || process.env.TURNSTILE_SECRET_KEY || '';
 
     if (!this.captchaSecretKey) {
       console.warn(
-        '[CaptchaGuard] CAPTCHA_SECRET_KEY not configured - validation will fail',
+        '[CaptchaGuard] CAPTCHA secret key not configured (set CAPTCHA_SECRET_KEY or TURNSTILE_SECRET_KEY) - validation will fail',
       );
     }
   }

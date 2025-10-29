@@ -40,7 +40,6 @@ async function bootstrap() {
   const openApiYaml = yaml.stringify(document);
   fs.writeFileSync('./openapi.yaml', openApiYaml);
 
-
   // Allow CORS for local development and configurable production origins
 
   // Support multiple origins when running with Turbo (backend on 3000, frontend on 3001, etc.)
@@ -67,7 +66,6 @@ async function bootstrap() {
     vercelOrigin,
     ...extraOrigins,
   ].filter(Boolean);
-
 
   app.enableCors({
     origin: (origin, callback) => {

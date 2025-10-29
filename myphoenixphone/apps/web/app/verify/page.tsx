@@ -24,7 +24,10 @@ export default function VerifyPage() {
   const [widgetReady, setWidgetReady] = useState(false);
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
-  const SITE_KEY = typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY : undefined;
+  const SITE_KEY =
+    typeof process !== 'undefined'
+      ? (process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY || process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)
+      : undefined;
 
   // Pre-fill phone number when demo mode is active
   useEffect(() => {
@@ -181,7 +184,12 @@ export default function VerifyPage() {
       // If we are awaiting a code, include it to verify; otherwise this call requests a code
       if (awaitingCode) payload.code = code;
 
-      const res = await fetch("http://localhost:3003/verify/number", {
+      const apiUrl =
+        typeof window !== 'undefined' && window.location.origin.includes('localhost')
+          ? 'http://localhost:3003'
+          : (process.env.NEXT_PUBLIC_API_URL || '/api');
+
+      const res = await fetch(`${apiUrl}/verify/number`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

@@ -88,7 +88,9 @@ export default function EstimationPage() {
     setError(null);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003';
+      const apiUrl = (typeof window !== 'undefined' && window.location.origin.includes('localhost'))
+        ? 'http://localhost:3003'
+        : (process.env.NEXT_PUBLIC_API_URL || '/api');
       
       const response = await fetch(`${apiUrl}/pricing/estimate`, {
         method: 'POST',
