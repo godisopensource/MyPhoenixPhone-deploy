@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "postinstall": "npm --workspace apps/backend exec prisma generate --schema ./prisma/schema.prisma",
     "mcp:start": "npm --workspace packages/mcp run start",
     "dev:with-mcp": "bash -lc 'set -a; [ -f apps/backend/.env ] && source apps/backend/.env; ORANGE_CLIENT_ID=$CAMARA_CLIENT_ID ORANGE_CLIENT_SECRET=$CAMARA_CLIENT_SECRET npx turbo run dev'",
     "dev": "turbo run dev",
