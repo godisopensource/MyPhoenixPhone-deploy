@@ -7,6 +7,7 @@
  */
 
 const API_BASE_URL = process.env.API_BASE_URL || 'https://api.orange.com/camara/playground';
+const CAMARA_RESOURCE_PREFIX = (process.env.CAMARA_RESOURCE_PREFIX || '/api').replace(/\/$/, '');
 const ORANGE_CLIENT_ID = process.env.ORANGE_CLIENT_ID;
 const ORANGE_CLIENT_SECRET = process.env.ORANGE_CLIENT_SECRET;
 
@@ -56,7 +57,7 @@ async function getAccessToken() {
 
 async function makeCAMARARequest(endpoint, options = {}) {
   const accessToken = await getAccessToken();
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = `${API_BASE_URL}${CAMARA_RESOURCE_PREFIX}${endpoint}`;
   const response = await fetch(url, {
     ...options,
     headers: {
@@ -66,6 +67,14 @@ async function makeCAMARARequest(endpoint, options = {}) {
       ...options.headers
     }
   });
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    console.error('[MCP Proxy] CAMARA request failed', {
+      url,
+      status: response.status,
+      body: text?.slice(0, 500),
+    });
+  }
   return response;
 }
 
