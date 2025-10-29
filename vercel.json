@@ -2,6 +2,7 @@
   "version": 2,
   "installCommand": "npm install --include=dev && npm --prefix myphoenixphone install --include=dev",
   "buildCommand": "cd myphoenixphone && npm run -w apps/backend build && npm run -w apps/web build",
+  "outputDirectory": "myphoenixphone/apps/web/.next",
   "rewrites": [
     {
       "source": "/api/:path*",
