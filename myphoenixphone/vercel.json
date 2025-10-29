@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "installCommand": "bash -lc 'npm install --include=dev && npm --workspace apps/backend exec prisma generate --schema ./prisma/schema.prisma'",
   "builds": [
     { "src": "apps/web/package.json", "use": "@vercel/next" },
     {
