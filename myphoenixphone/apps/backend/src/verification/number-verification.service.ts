@@ -17,6 +17,8 @@ export interface NumberVerificationResult {
 @Injectable()
 export class NumberVerificationService {
   private readonly baseUrl: string;
+  // Simple in-memory store for demo/playground fallback codes (per Lambda/container)
+  private static fallbackCodes: Map<string, { code: string; expiresAt: number }> = new Map();
 
   constructor(private readonly oauth2Client: OAuth2ClientService) {
     const env = process.env.CAMARA_ENV || 'playground';
@@ -46,14 +48,27 @@ export class NumberVerificationService {
    * @returns Promise with the generated code (in playground/demo mode)
    */
   async sendVerificationCode(phoneNumber: string): Promise<string | undefined> {
+    const env = process.env.CAMARA_ENV || 'playground';
     const useProxy =
       process.env.USE_MCP_PROXY === 'true' ||
       !!process.env.MCP_PROXY_URL ||
-      process.env.CAMARA_ENV === 'playground' ||
+      env === 'playground' ||
       (process.env.CAMARA_BASE_URL || '').includes('playground');
     const proxyUrl = process.env.MCP_PROXY_URL || 'http://localhost:3001';
 
     const requestBody = { phoneNumber };
+
+    // DEMO/PLAYGROUND FALLBACK: If in playground and no proxy configured (common on Vercel),
+    // generate a one-time code and store it in-memory. This avoids external dependencies.
+    if (env === 'playground' && !(process.env.USE_MCP_PROXY === 'true' || !!process.env.MCP_PROXY_URL)) {
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      const ttlMs = 10 * 60 * 1000; // 10 minutes
+      NumberVerificationService.fallbackCodes.set(phoneNumber, {
+        code,
+        expiresAt: Date.now() + ttlMs,
+      });
+      return code;
+    }
 
     if (useProxy) {
       const url = `${proxyUrl.replace(/\/$/, '')}/number-verification/v0.3/verify-with-code/send-code`;
@@ -126,14 +141,29 @@ export class NumberVerificationService {
     phoneNumber: string,
     code: string,
   ): Promise<NumberVerificationResult> {
+    const env = process.env.CAMARA_ENV || 'playground';
     const useProxy =
       process.env.USE_MCP_PROXY === 'true' ||
       !!process.env.MCP_PROXY_URL ||
-      process.env.CAMARA_ENV === 'playground' ||
+      env === 'playground' ||
       (process.env.CAMARA_BASE_URL || '').includes('playground');
     const proxyUrl = process.env.MCP_PROXY_URL || 'http://localhost:3001';
 
     const requestBody = { phoneNumber, code };
+
+    // DEMO/PLAYGROUND FALLBACK verification path
+    if (env === 'playground' && !(process.env.USE_MCP_PROXY === 'true' || !!process.env.MCP_PROXY_URL)) {
+      const entry = NumberVerificationService.fallbackCodes.get(phoneNumber);
+      if (!entry || entry.expiresAt < Date.now()) {
+        return { devicePhoneNumberVerified: false };
+      }
+      const ok = entry.code === code;
+      if (ok) {
+        // Invalidate after successful verification
+        NumberVerificationService.fallbackCodes.delete(phoneNumber);
+      }
+      return { devicePhoneNumberVerified: ok };
+    }
 
     if (useProxy) {
       const url = `${proxyUrl.replace(/\/$/, '')}/number-verification/v0.3/verify-with-code/verify`;

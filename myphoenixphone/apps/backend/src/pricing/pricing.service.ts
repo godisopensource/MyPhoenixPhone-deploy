@@ -171,7 +171,7 @@ export class PricingService {
       phone.avg_price_tier >= 4 &&
       condition.screen === 'perfect' &&
       condition.battery === 'excellent' &&
-      condition.damage.length === 0 &&
+      (condition.damage?.length ?? 0) === 0 &&
       condition.unlocked
     ) {
       bonus = Math.round(basePrice * 0.1); // 10% bonus
