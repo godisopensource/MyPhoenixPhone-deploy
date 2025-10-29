@@ -1,5 +1,5 @@
 {
-  "installCommand": "bash scripts/vercel-install.sh",
+  "installCommand": "bash myphoenixphone/scripts/vercel-install.sh",
   "buildCommand": "bash myphoenixphone/scripts/vercel-build.sh",
   "outputDirectory": "myphoenixphone/apps/web/.next"
 }
