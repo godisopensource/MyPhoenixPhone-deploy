@@ -1,3 +1,1 @@
-{
-  "buildCommand": "cd myphoenixphone && npm run -w apps/backend build && npm run -w apps/web build"
-}
+{}
