@@ -1,5 +1,5 @@
 {
-  "installCommand": "bash myphoenixphone/scripts/vercel-install.sh",
-  "buildCommand": "bash myphoenixphone/scripts/vercel-build.sh",
+  "installCommand": "npm --prefix myphoenixphone install --include=dev && npm --workspace myphoenixphone:apps/backend exec prisma generate --schema ./prisma/schema.prisma",
+  "buildCommand": "npm --prefix myphoenixphone run -w apps/backend build && npm --prefix myphoenixphone run -w apps/web build",
   "outputDirectory": "myphoenixphone/apps/web/.next"
 }
