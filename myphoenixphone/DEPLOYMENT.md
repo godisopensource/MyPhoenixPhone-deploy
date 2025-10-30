@@ -1,6 +1,9 @@
-# Deploying MyPhoenixPhone to Vercel (Frontend + Backend)
+# Deploying MyPhoenixPhone
 
-This document explains how to deploy the entire monorepo (Next.js frontend and NestJS backend) to Vercel from the `myphoenixphone` workspace root. It also covers environment variables, routing, Prisma on serverless, and common pitfalls.
+This guide covers deployment to:
+
+- Render (recommended for a simple three-service setup: backend, frontend, and optional MCP proxy)
+- Vercel (single project with both frontend and backend under `/api`)
 
 ---
 
@@ -16,6 +19,109 @@ This document explains how to deploy the entire monorepo (Next.js frontend and N
   - vercel.json            Vercel config that builds web and mounts backend under /api
   - turbo.json             Turborepo pipelines
   - package.json           Workspace root (engines pinned to Node 20.x)
+
+---
+
+## Render (Backend + Frontend + optional MCP Proxy)
+
+Render runs each service separately. You’ll typically create:
+
+1) Backend (NestJS) – Web Service
+2) Frontend (Next.js) – Web Service
+3) MCP Proxy (network-apis-mcp) – Web Service (optional)
+
+Monorepo root: `myphoenixphone`
+
+### 1) Backend service (NestJS)
+
+- Root Directory: `myphoenixphone`
+- Build Command:
+  `npm ci && npm run -w apps/backend build`
+- Start Command:
+  `npm run -w apps/backend start:prod`
+- Instance Type: Start small; bump up if you need more memory
+- Auto-Deploy: On
+
+Environment variables (server-side only; sensitive):
+
+- NODE_ENV=production
+- SESSION_SECRET=generate-a-strong-secret
+- ALLOWED_ORIGINS=https://your-frontend.onrender.com
+- PUBLIC_ORIGIN=https://your-backend.onrender.com (optional; used in some links)
+- DATABASE_URL=postgres://... (optional; if omitted the API uses a fallback in-memory phone catalog)
+- CAMARA_ENV=playground (default)
+- CAMARA_BASE_URL=https://api.orange.com (only needed if you use non-playground)
+- CAMARA_TOKEN_URL=https://api.orange.com/oauth/v3/token (for direct CAMARA usage)
+- CAMARA_CLIENT_ID=... (for direct CAMARA usage)
+- CAMARA_CLIENT_SECRET=... (for direct CAMARA usage)
+- TURNSTILE_SECRET_KEY=... (if enforcing CAPTCHA)
+- TURNSTILE_VERIFY_URL=https://challenges.cloudflare.com/turnstile/v0/siteverify (default)
+- CAPTCHA_BYPASS=true (optional, demo only – bypasses Turnstile on the backend)
+- USE_MCP_PROXY=true (optional, if you’ll use the MCP HTTP proxy)
+- MCP_PROXY_URL=https://your-mcp-proxy.onrender.com (when using the proxy)
+
+CORS: The backend reads `ALLOWED_ORIGINS` (comma-separated) and also allows localhost in non-production. Make sure to include your frontend origin here to avoid CORS errors.
+
+Database initialization (only if you set DATABASE_URL): open a one-off shell on the backend service and run:
+
+- `npm run -w apps/backend prisma:db:push`
+- `npm run -w apps/backend seed:phone-models`
+
+If Render doesn’t allow interactive shell on your plan, add a temporary “Migration” job with the command above, run it once, then delete it.
+
+Health/Docs:
+
+- Health: `GET /health`
+- Swagger: `GET /api`
+
+### 2) Frontend service (Next.js)
+
+- Root Directory: `myphoenixphone`
+- Build Command:
+  `corepack enable || true && npm ci && npm run -w apps/web build`
+- Start Command:
+  `npm run -w apps/web start`
+- Instance Type: Default is fine for SSR
+
+Environment variables (public; baked at build):
+
+- NEXT_PUBLIC_API_BASE_URL=https://your-backend.onrender.com
+- NEXT_PUBLIC_TURNSTILE_SITE_KEY=... (if you’re enforcing CAPTCHA)
+
+Notes:
+
+- Any change to NEXT_PUBLIC_* requires a redeploy (rebuild) of the frontend service.
+- The app routes `/ship` and `/store` are implemented as server route handlers and redirect to `/lead/{id}/ship|store`.
+
+### 3) MCP Proxy service (optional)
+
+This is only needed if you want the backend to call Orange CAMARA Playground via a simple HTTP proxy instead of direct OAuth calls.
+
+- Root Directory: `network-apis-mcp`
+- Build Command: `npm install`
+- Start Command: `node http-server.js`
+
+Environment variables:
+
+- ORANGE_CLIENT_ID=...
+- ORANGE_CLIENT_SECRET=...
+- API_BASE_URL=https://api.orange.com/camara/playground (default)
+
+Health:
+
+- `GET /health` returns `{ status: "ok" }`
+
+Backend config to use the proxy:
+
+- Set `USE_MCP_PROXY=true` and `MCP_PROXY_URL=https://your-mcp-proxy.onrender.com` on the backend.
+
+### Quick verification checklist on Render
+
+- Frontend → Network panel shows requests to `https://your-backend.onrender.com/...` (not `/api` nor `localhost`).
+- If you see CORS errors, add the frontend origin to `ALLOWED_ORIGINS` on the backend and redeploy.
+- Visit backend `https://your-backend.onrender.com/api` (Swagger) to confirm routes like `POST /pricing/estimate` and `POST /verify/number`.
+- If using CAPTCHA: set both `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (frontend) and `TURNSTILE_SECRET_KEY` (backend). For demo, you can set `CAPTCHA_BYPASS=true` on the backend.
+- For number verification in playground without MCP, the backend returns a test code in the JSON response and the UI shows it in the demo banner.
 
 ---
 

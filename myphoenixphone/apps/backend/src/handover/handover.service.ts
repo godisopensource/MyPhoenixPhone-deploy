@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
-import { v4 as uuidv4 } from 'uuid';
 import * as QRCode from 'qrcode';
 import PDFDocument from 'pdfkit';
 
