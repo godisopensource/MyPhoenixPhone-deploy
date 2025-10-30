@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useDemoData } from "../hooks/useDemoData";
+import { getApiBase } from "../utils/api";
 import { DemoBanner } from "../components/DemoBanner";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
@@ -164,10 +165,7 @@ export default function VerifyPage() {
       // If we are awaiting a code, include it to verify; otherwise this call requests a code
       if (awaitingCode) payload.code = code;
 
-      const apiUrl =
-        typeof window !== 'undefined' && window.location.origin.includes('localhost')
-          ? 'http://localhost:3003'
-          : (process.env.NEXT_PUBLIC_API_URL || '/api');
+      const apiUrl = getApiBase();
 
       const doRequest = async (body: any) =>
         fetch(`${apiUrl}/verify/number`, {

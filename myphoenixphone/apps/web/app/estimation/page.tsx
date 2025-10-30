@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { getApiBase } from '../utils/api';
 import { useDemoData } from '../hooks/useDemoData';
 import { DemoBanner } from '../components/DemoBanner';
 import { Header } from '../components/Header';
@@ -88,11 +89,9 @@ export default function EstimationPage() {
     setError(null);
 
     try {
-      const apiUrl = (typeof window !== 'undefined' && window.location.origin.includes('localhost'))
-        ? 'http://localhost:3003'
-        : (process.env.NEXT_PUBLIC_API_URL || '/api');
+      const apiUrl = getApiBase();
       
-      const response = await fetch(`${apiUrl}/pricing/estimate`, {
+  const response = await fetch(`${apiUrl}/pricing/estimate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
