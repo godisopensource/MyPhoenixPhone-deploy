@@ -96,7 +96,10 @@ const server = http.createServer(async (req, res) => {
     actualPath = '/' + actualPath;
   }
 
-  console.log(`[MCP Proxy] ${req.method} ${req.url} -> actualPath: ${actualPath}`);
+  console.log(`[MCP Proxy] ${req.method} ${req.url}`);
+  console.log(`[MCP Proxy] pathFromQuery: ${pathFromQuery}`);
+  console.log(`[MCP Proxy] url.pathname: ${url.pathname}`);
+  console.log(`[MCP Proxy] actualPath: ${actualPath}`);
 
   // Health check
   if (actualPath === '/health' && req.method === 'GET') {
@@ -174,8 +177,9 @@ const server = http.createServer(async (req, res) => {
   }
 
   // 404 for unknown routes
+  console.log(`[MCP Proxy] 404 - No route matched for: ${actualPath}`);
   res.writeHead(404, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ error: 'Not Found' }));
+  res.end(JSON.stringify({ error: 'Not Found', path: actualPath, method: req.method }));
 });
 
 server.listen(PORT, () => {
