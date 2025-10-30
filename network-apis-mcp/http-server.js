@@ -89,9 +89,14 @@ const server = http.createServer(async (req, res) => {
   // Parse URL to support both direct paths and query param format
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const pathFromQuery = url.searchParams.get('path');
-  const actualPath = pathFromQuery || url.pathname;
+  let actualPath = pathFromQuery || url.pathname;
+  
+  // Normalize path to always start with /
+  if (actualPath && !actualPath.startsWith('/')) {
+    actualPath = '/' + actualPath;
+  }
 
-  console.log(`[MCP Proxy] ${req.method} ${req.url} -> path: ${actualPath}`);
+  console.log(`[MCP Proxy] ${req.method} ${req.url} -> actualPath: ${actualPath}`);
 
   // Health check
   if (actualPath === '/health' && req.method === 'GET') {
