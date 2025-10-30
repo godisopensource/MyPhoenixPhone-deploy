@@ -81,10 +81,10 @@ export class ConsentGuard implements CanActivate {
 
   /**
    * Hash MSISDN using SHA-256 with salt
-   * Must match the hashing in EligibilityService
+   * Must match the hashing in VerificationController
    */
   private hashMsisdn(msisdn: string): string {
-    const salt = process.env.SALT_MSISDN_HASH || 'default-salt-change-me';
-    return createHash('sha256').update(salt).update(msisdn).digest('hex');
+    const salt = process.env.SALT_MSISDN_HASH || '';
+    return createHash('sha256').update(salt + msisdn).digest('hex');
   }
 }
