@@ -22,7 +22,8 @@ export interface StoreDepositCode {
 @Injectable()
 export class HandoverService {
   private readonly logger = new Logger(HandoverService.name);
-  private isDev = process.env.NODE_ENV !== 'production';
+  private isDev =
+    process.env.NODE_ENV !== 'production' || process.env.DEV_MODE === 'true';
 
   constructor(private prisma: PrismaService) {}
 
