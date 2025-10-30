@@ -32,6 +32,8 @@
     "prisma:generate": "prisma generate --schema ./prisma/schema.prisma",
     "prisma:migrate:dev": "prisma migrate dev --schema ./prisma/schema.prisma",
     "prisma:migrate:deploy": "prisma migrate deploy --schema ./prisma/schema.prisma",
+    "prisma:db:push": "prisma db push --schema ./prisma/schema.prisma",
+    "seed:phone-models": "npx tsx ./prisma/seed-phone-models.ts",
     "prisma:studio": "prisma studio --schema ./prisma/schema.prisma",
     "seed:demo": "tsx ../../scripts/seed-demo-data.ts"
   },
