@@ -7,7 +7,8 @@
 import http from 'http';
 
 const PORT = process.env.PORT || 3001;
-const API_BASE_URL = process.env.API_BASE_URL || 'https://api.orange.com/camara/playground';
+// Orange CAMARA playground base URL - typically https://api.orange.com/orange-lab/camara/playground
+const API_BASE_URL = process.env.API_BASE_URL || 'https://api.orange.com/orange-lab/camara/playground';
 const ORANGE_CLIENT_ID = process.env.ORANGE_CLIENT_ID;
 const ORANGE_CLIENT_SECRET = process.env.ORANGE_CLIENT_SECRET;
 
