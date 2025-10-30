@@ -71,20 +71,36 @@ async function proxy(req: Request, pathParams: string[]) {
   });
 }
 
-export async function GET(req: Request, ctx: { params: { path: string[] } }) {
-  return proxy(req, ctx.params.path);
+function getPathSegmentsFromRequest(req: Request): string[] {
+  const pathname = new URL(req.url).pathname; // e.g. /api/phone-models
+  const apiPrefix = '/api/';
+  let rest = '';
+  if (pathname === '/api' || pathname === '/api/') {
+    rest = '';
+  } else if (pathname.startsWith(apiPrefix)) {
+    rest = pathname.slice(apiPrefix.length);
+  } else {
+    rest = pathname.replace(/^\/+/, '');
+  }
+
+  if (!rest) return [];
+  return rest.split('/').map((s) => decodeURIComponent(s));
 }
-export async function POST(req: Request, ctx: { params: { path: string[] } }) {
-  return proxy(req, ctx.params.path);
+
+export async function GET(req: Request) {
+  return proxy(req, getPathSegmentsFromRequest(req));
 }
-export async function PUT(req: Request, ctx: { params: { path: string[] } }) {
-  return proxy(req, ctx.params.path);
+export async function POST(req: Request) {
+  return proxy(req, getPathSegmentsFromRequest(req));
 }
-export async function PATCH(req: Request, ctx: { params: { path: string[] } }) {
-  return proxy(req, ctx.params.path);
+export async function PUT(req: Request) {
+  return proxy(req, getPathSegmentsFromRequest(req));
 }
-export async function DELETE(req: Request, ctx: { params: { path: string[] } }) {
-  return proxy(req, ctx.params.path);
+export async function PATCH(req: Request) {
+  return proxy(req, getPathSegmentsFromRequest(req));
+}
+export async function DELETE(req: Request) {
+  return proxy(req, getPathSegmentsFromRequest(req));
 }
 export async function OPTIONS(_req: Request) {
   // Minimal preflight response (same-origin usually doesn't preflight)
