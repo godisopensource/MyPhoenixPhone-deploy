@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getApiBase } from '../../../utils/api';
 
 interface PhoneModel {
   id: string;
@@ -23,14 +24,12 @@ export default function ModelSelector({ onSelect }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load phone models from backend
-    const apiUrl = (typeof window !== 'undefined' && window.location.origin.includes('localhost'))
-      ? 'http://localhost:3003'
-      : (process.env.NEXT_PUBLIC_API_URL || '/api');
-    
+    // Load phone models from backend using centralized resolver
+    const apiUrl = getApiBase();
+
     setLoading(true);
     setError(null);
-    
+
     fetch(`${apiUrl}/phone-models`)
       .then(res => {
         if (!res.ok) {
@@ -110,7 +109,7 @@ export default function ModelSelector({ onSelect }: Props) {
             <div className="alert alert-danger">
               <strong>Erreur:</strong> {error}
               <br />
-              <small>Vérifiez que le backend est démarré sur le port 3003</small>
+              <small>Vérifiez que l'URL de l'API est correctement configurée (NEXT_PUBLIC_API_BASE_URL) et que le backend répond.</small>
             </div>
           ) : filteredPhones.length === 0 ? (
             <div className="alert alert-info">

@@ -11,11 +11,8 @@ export function getApiBase(): string {
     return 'http://localhost:3003';
   }
 
-  // Access env in a way that doesn't require Node types in the browser
-  const env = (typeof globalThis !== 'undefined' && (globalThis as any).process?.env) as
-    | Record<string, string>
-    | undefined;
-  const envBase = (env?.NEXT_PUBLIC_API_BASE_URL || env?.NEXT_PUBLIC_API_URL || '') as string;
+  // In Next.js, NEXT_PUBLIC_* are statically inlined at build time via process.env
+  const envBase = (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || '') as string;
 
   const trimmed = envBase.replace(/\/$/, '');
   return trimmed || '/api';
