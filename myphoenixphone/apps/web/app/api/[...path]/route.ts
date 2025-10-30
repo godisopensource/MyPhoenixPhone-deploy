@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // Server-side proxy to the backend API to avoid CORS and client env drift.
 // Configure the backend origin on the frontend service as BACKEND_BASE_URL.
@@ -15,9 +15,9 @@ function getBackendBase(): string {
   return 'http://localhost:3003';
 }
 
-async function proxy(req: NextRequest, ctx: { params: { path: string[] } }) {
+async function proxy(req: Request, pathParams: string[]) {
   const backend = getBackendBase();
-  const pathSegs = ctx.params.path || [];
+  const pathSegs = pathParams || [];
   const url = new URL(req.url);
   const targetUrl = `${backend}/${pathSegs.map(encodeURIComponent).join('/')}${url.search}`;
 
@@ -71,22 +71,22 @@ async function proxy(req: NextRequest, ctx: { params: { path: string[] } }) {
   });
 }
 
-export async function GET(req: NextRequest, ctx: { params: { path: string[] } }) {
-  return proxy(req, ctx);
+export async function GET(req: Request, ctx: { params: { path: string[] } }) {
+  return proxy(req, ctx.params.path);
 }
-export async function POST(req: NextRequest, ctx: { params: { path: string[] } }) {
-  return proxy(req, ctx);
+export async function POST(req: Request, ctx: { params: { path: string[] } }) {
+  return proxy(req, ctx.params.path);
 }
-export async function PUT(req: NextRequest, ctx: { params: { path: string[] } }) {
-  return proxy(req, ctx);
+export async function PUT(req: Request, ctx: { params: { path: string[] } }) {
+  return proxy(req, ctx.params.path);
 }
-export async function PATCH(req: NextRequest, ctx: { params: { path: string[] } }) {
-  return proxy(req, ctx);
+export async function PATCH(req: Request, ctx: { params: { path: string[] } }) {
+  return proxy(req, ctx.params.path);
 }
-export async function DELETE(req: NextRequest, ctx: { params: { path: string[] } }) {
-  return proxy(req, ctx);
+export async function DELETE(req: Request, ctx: { params: { path: string[] } }) {
+  return proxy(req, ctx.params.path);
 }
-export async function OPTIONS(_req: NextRequest) {
+export async function OPTIONS(_req: Request) {
   // Minimal preflight response (same-origin usually doesn't preflight)
   return new NextResponse(null, {
     status: 204,
