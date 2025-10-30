@@ -86,15 +86,22 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // Parse URL to support both direct paths and query param format
+  const url = new URL(req.url, `http://localhost:${PORT}`);
+  const pathFromQuery = url.searchParams.get('path');
+  const actualPath = pathFromQuery || url.pathname;
+
+  console.log(`[MCP Proxy] ${req.method} ${req.url} -> path: ${actualPath}`);
+
   // Health check
-  if (req.url === '/health' && req.method === 'GET') {
+  if (actualPath === '/health' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: 'ok', service: 'mcp-proxy' }));
     return;
   }
 
   // Number verification: send code
-  if (req.url === '/number-verification/v0.3/verify-with-code/send-code' && req.method === 'POST') {
+  if (actualPath === '/number-verification/v0.3/verify-with-code/send-code' && req.method === 'POST') {
     try {
       let body = '';
       for await (const chunk of req) {
@@ -137,7 +144,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Number verification: verify code
-  if (req.url === '/number-verification/v0.3/verify-with-code/verify' && req.method === 'POST') {
+  if (actualPath === '/number-verification/v0.3/verify-with-code/verify' && req.method === 'POST') {
     try {
       let body = '';
       for await (const chunk of req) {
