@@ -7,8 +7,12 @@
 import http from 'http';
 
 const PORT = process.env.PORT || 3001;
-// Orange CAMARA playground base URL - typically https://api.orange.com/orange-lab/camara/playground
+// Orange CAMARA playground base URL for legacy paths (if any)
 const API_BASE_URL = process.env.API_BASE_URL || 'https://api.orange.com/orange-lab/camara/playground';
+// Direct FR playground verify endpoint base (CAMARA OFR 1.0 style)
+const FR_VERIFY_BASE = process.env.FR_VERIFY_BASE || 'https://api.orange.com/camara/ofr/number-verification/v1';
+// When true, we bridge verify-with-code flow to FR verify endpoint (playground)
+const PLAYGROUND_BRIDGE = (process.env.PLAYGROUND_BRIDGE || 'true').toLowerCase() === 'true';
 const ORANGE_CLIENT_ID = process.env.ORANGE_CLIENT_ID;
 const ORANGE_CLIENT_SECRET = process.env.ORANGE_CLIENT_SECRET;
 
@@ -78,6 +82,23 @@ async function makeCAMARARequest(endpoint, options = {}) {
   return response;
 }
 
+async function callFRVerify(phoneNumber) {
+  const accessToken = await getAccessToken();
+  const url = `${FR_VERIFY_BASE}/verify`;
+  console.log(`[MCP Proxy] Calling FR playground verify: ${url} with phoneNumber ${phoneNumber}`);
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ phoneNumber }),
+  });
+  console.log(`[MCP Proxy] FR verify response: ${res.status} ${res.statusText}`);
+  return res;
+}
+
 // Create HTTP server
 const server = http.createServer(async (req, res) => {
   // CORS headers
@@ -122,6 +143,15 @@ const server = http.createServer(async (req, res) => {
       }
       const requestData = JSON.parse(body);
 
+      if (PLAYGROUND_BRIDGE) {
+        // Bridge mode: simulate send-code success and optionally provide a demo code header
+        const demoCode = '000000';
+        console.log(`[MCP Proxy] Bridge send-code (playground): returning 204 with X-Verification-Code=${demoCode}`);
+        res.writeHead(204, { 'X-Verification-Code': demoCode });
+        res.end();
+        return;
+      }
+
       const response = await makeCAMARARequest('/number-verification/v0.3/verify-with-code/send-code', {
         method: 'POST',
         body: JSON.stringify(requestData)
@@ -164,6 +194,21 @@ const server = http.createServer(async (req, res) => {
         body += chunk;
       }
       const requestData = JSON.parse(body);
+
+      if (PLAYGROUND_BRIDGE) {
+        // Ignore code and call FR playground verify endpoint with phoneNumber
+        const { phoneNumber } = requestData || {};
+        if (!phoneNumber) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'phoneNumber is required' }));
+          return;
+        }
+        const frRes = await callFRVerify(phoneNumber);
+        const txt = await frRes.text();
+        res.writeHead(frRes.status, { 'Content-Type': 'application/json' });
+        res.end(txt);
+        return;
+      }
 
       const response = await makeCAMARARequest('/number-verification/v0.3/verify-with-code/verify', {
         method: 'POST',
