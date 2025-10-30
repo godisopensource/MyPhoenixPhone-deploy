@@ -113,14 +113,14 @@ export const pageSEO = {
     title: 'Envoi gratuit de votre téléphone',
     description:
       'Téléchargez votre étiquette d\'envoi Colissimo prépayée. Déposez votre colis dans un point relais ou une boîte aux lettres.',
-    canonical: 'https://myphoenixphone.orange.fr/lead/ship',
+    canonical: 'https://myphoenixphone.orange.fr/ship',
   }),
 
   store: generateSEO({
     title: 'Dépôt en boutique Orange',
     description:
       'Remettez votre téléphone directement en boutique Orange. Générez votre code QR et présentez-le au conseiller.',
-    canonical: 'https://myphoenixphone.orange.fr/lead/store',
+    canonical: 'https://myphoenixphone.orange.fr/store',
   }),
 
   consent: generateSEO({

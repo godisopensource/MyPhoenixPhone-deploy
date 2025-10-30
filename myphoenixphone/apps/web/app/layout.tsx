@@ -6,8 +6,8 @@ import { DemoProvider } from "./contexts/DemoContext";
 import { DemoModeSelector } from "./components/DemoModeSelector";
 
 export const metadata: Metadata = {
-  title: "MyPhoenixPhone - Secure Number Verification",
-  description: "Verify your phone number with Orange for secure services",
+  title: "MyPhoenixPhone - Dormant to RE",
+  description: "Dormant phone revival application for customer and administrator use.",
 };
 
 export default function RootLayout({
