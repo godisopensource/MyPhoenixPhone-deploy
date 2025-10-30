@@ -58,7 +58,9 @@ async function getAccessToken() {
 
 async function makeCAMARARequest(endpoint, options = {}) {
   const accessToken = await getAccessToken();
-  const url = `${API_BASE_URL}/api${endpoint}`;
+  const url = `${API_BASE_URL}${endpoint}`;
+  
+  console.log(`[MCP Proxy] Calling CAMARA API: ${url}`);
   
   const response = await fetch(url, {
     ...options,
@@ -70,6 +72,8 @@ async function makeCAMARARequest(endpoint, options = {}) {
     }
   });
 
+  console.log(`[MCP Proxy] CAMARA response: ${response.status} ${response.statusText}`);
+  
   return response;
 }
 
