@@ -19,7 +19,11 @@ async function proxy(req: Request, pathParams: string[]) {
   const backend = getBackendBase();
   const pathSegs = pathParams || [];
   const url = new URL(req.url);
-  const targetUrl = `${backend}/${pathSegs.map(encodeURIComponent).join('/')}${url.search}`;
+  const targetUrl = `${backend}/${pathSegs.join('/')}${url.search}`;
+
+  console.log(`[Proxy] ${req.method} ${url.pathname} → ${targetUrl}`);
+  console.log(`[Proxy] BACKEND_BASE_URL=${process.env.BACKEND_BASE_URL}`);
+  console.log(`[Proxy] NEXT_PUBLIC_API_BASE_URL=${process.env.NEXT_PUBLIC_API_BASE_URL}`);
 
   // Clone request body if present
   const method = req.method || 'GET';
@@ -46,13 +50,16 @@ async function proxy(req: Request, pathParams: string[]) {
   try {
     upstream = await fetch(targetUrl, init);
   } catch (e) {
+    const err = e as Error;
+    console.error(`[Proxy] Network error: ${err.message}`, err);
     // Network error to backend
     return NextResponse.json(
       {
         ok: false,
         message: 'Proxy network error to backend',
-        detail: (e as Error)?.message || String(e),
+        detail: err?.message || String(e),
         target: targetUrl,
+        backend,
       },
       { status: 502 },
     );
