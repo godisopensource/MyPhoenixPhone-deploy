@@ -15,6 +15,7 @@
     "dev": "bash -lc 'export PORT=${PORT:-3003}; nest start --watch'",
     "start:debug": "nest start --debug --watch",
   "start:prod": "node dist/main.js",
+    "start:prod:render": "npm run prisma:db:push -- --accept-data-loss && npm run seed:phone-models && npm run start:prod",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "pretest": "prisma generate --schema ./prisma/schema.prisma",
     "test": "jest",
