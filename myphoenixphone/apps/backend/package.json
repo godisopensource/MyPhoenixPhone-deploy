@@ -14,7 +14,7 @@
     "prestart": "prisma generate --schema ./prisma/schema.prisma",
     "dev": "bash -lc 'export PORT=${PORT:-3003}; nest start --watch'",
     "start:debug": "nest start --debug --watch",
-  "start:prod": "node ../../dist/apps/backend/main.js",
+  "start:prod": "node dist/main.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "pretest": "prisma generate --schema ./prisma/schema.prisma",
     "test": "jest",
