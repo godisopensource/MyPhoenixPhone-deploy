@@ -162,8 +162,10 @@ export class EligibilityService {
    * @returns Hex-encoded hash
    */
   private hashMsisdn(msisdn: string): string {
-    const salt = process.env.SALT_MSISDN_HASH || 'default-salt-change-me';
-    return createHash('sha256').update(salt).update(msisdn).digest('hex');
+    // Use the same default and concatenation as VerificationController & ConsentGuard
+    // so that hashes are consistent when SALT_MSISDN_HASH is not configured.
+    const salt = process.env.SALT_MSISDN_HASH || '';
+    return createHash('sha256').update(salt + msisdn).digest('hex');
   }
 
   /**
