@@ -21,6 +21,9 @@ export class ConsentRepository {
     revoked_at?: Date | null;
   }) {
     try {
+      console.log(
+        `[ConsentRepository] Creating consent for msisdn_hash=${data.msisdn_hash}`,
+      );
       const created = await this.prisma.consent.create({ data });
       consentOps.inc({ op: 'create', result: 'ok' });
       return created;
@@ -35,6 +38,7 @@ export class ConsentRepository {
   }
 
   async findByMsisdnHash(msisdn_hash: string) {
+    console.log(`[ConsentRepository] findByMsisdnHash lookup: msisdn_hash=${msisdn_hash}`);
     return this.prisma.consent.findMany({ where: { msisdn_hash } });
   }
 
