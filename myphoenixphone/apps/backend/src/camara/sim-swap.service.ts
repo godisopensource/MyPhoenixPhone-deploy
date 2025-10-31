@@ -42,11 +42,21 @@ export class SimSwapService {
   private readonly useRealApi: boolean;
 
   constructor(private readonly oauth2Client: OAuth2ClientService) {
-    this.baseUrl = process.env.CAMARA_BASE_URL || 'http://localhost:9091';
+    let configuredBase = process.env.CAMARA_BASE_URL || 'http://localhost:9091';
     // Detect playground explicitly via CAMARA_ENV or fallback to baseUrl heuristic
     const camaraEnv = process.env.CAMARA_ENV;
-    this.isPlayground =
-      camaraEnv === 'playground' || this.baseUrl.includes('playground');
+    // If running against the Orange public host in playground mode, ensure we use the
+    // orange-lab playground prefix which hosts the CAMARA sandbox APIs. This prevents
+    // requests to https://api.orange.com/api/... which return 404 for playground routes.
+    if (
+      (camaraEnv === 'playground' || configuredBase.includes('playground')) &&
+      configuredBase.includes('api.orange.com') &&
+      !configuredBase.includes('orange-lab')
+    ) {
+      configuredBase = configuredBase.replace(/\/+$/,'') + '/orange-lab/camara/playground';
+    }
+    this.baseUrl = configuredBase;
+    this.isPlayground = camaraEnv === 'playground' || this.baseUrl.includes('playground');
     this.useRealApi =
       !!process.env.CAMARA_CLIENT_ID && !!process.env.CAMARA_CLIENT_SECRET;
 
@@ -59,6 +69,7 @@ export class SimSwapService {
 
     if (this.useRealApi) {
       this.logger.log('SimSwapService initialized with real API calls');
+      this.logger.log(`SimSwapService CAMARA base URL: ${this.baseUrl}`);
     } else {
       this.logger.warn(
         'SimSwapService using stub mode (missing CAMARA credentials)',
@@ -83,6 +94,15 @@ export class SimSwapService {
         'Phone number is required',
         HttpStatus.BAD_REQUEST,
       );
+    }
+
+    // Force stub mode for playground demos when explicitly enabled
+    if (process.env.ELIGIBILITY_USE_PLAYGROUND_STUB === 'true') {
+      this.logger.log('SimSwapService using PLAYGROUND stub (forced)');
+      return {
+        latestSimChange: new Date(Date.now() - 1000 * 60 * 60 * 24 * 45).toISOString(), // 45 days ago
+        monitoredPeriod: 120,
+      };
     }
 
     // Use real API if credentials are configured

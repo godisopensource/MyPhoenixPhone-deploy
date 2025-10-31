@@ -41,10 +41,20 @@ export class ReachabilityService {
   private readonly useRealApi: boolean;
 
   constructor(private readonly oauth2Client: OAuth2ClientService) {
-    this.baseUrl = process.env.CAMARA_BASE_URL || 'http://localhost:9091';
+    let configuredBase = process.env.CAMARA_BASE_URL || 'http://localhost:9091';
     const camaraEnv = process.env.CAMARA_ENV;
-    this.isPlayground =
-      camaraEnv === 'playground' || this.baseUrl.includes('playground');
+    // If running against the Orange public host in playground mode, ensure we use the
+    // orange-lab playground prefix which hosts the CAMARA sandbox APIs. This prevents
+    // requests to https://api.orange.com/api/... which return 404 for playground routes.
+    if (
+      (camaraEnv === 'playground' || configuredBase.includes('playground')) &&
+      configuredBase.includes('api.orange.com') &&
+      !configuredBase.includes('orange-lab')
+    ) {
+      configuredBase = configuredBase.replace(/\/+$/,'') + '/orange-lab/camara/playground';
+    }
+    this.baseUrl = configuredBase;
+    this.isPlayground = camaraEnv === 'playground' || this.baseUrl.includes('playground');
     this.useRealApi =
       !!process.env.CAMARA_CLIENT_ID && !!process.env.CAMARA_CLIENT_SECRET;
 
@@ -57,6 +67,7 @@ export class ReachabilityService {
 
     if (this.useRealApi) {
       this.logger.log('ReachabilityService initialized with real API calls');
+      this.logger.log(`ReachabilityService CAMARA base URL: ${this.baseUrl}`);
     } else {
       this.logger.warn(
         'ReachabilityService using stub mode (missing CAMARA credentials)',
@@ -81,6 +92,16 @@ export class ReachabilityService {
         'Phone number is required',
         HttpStatus.BAD_REQUEST,
       );
+    }
+
+    // Force stub mode for playground demos when explicitly enabled
+    if (process.env.ELIGIBILITY_USE_PLAYGROUND_STUB === 'true') {
+      this.logger.log('ReachabilityService using PLAYGROUND stub (forced)');
+      return {
+        reachable: true,
+        connectivity: ['DATA'],
+        lastStatusTime: new Date().toISOString(),
+      };
     }
 
     // Use real API if credentials are configured
